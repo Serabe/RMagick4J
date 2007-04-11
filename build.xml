@@ -1,0 +1,32 @@
+<project name="rmagick4j" default="runSample">
+
+	<target name="clean">
+		<delete file="rmagick4j.zip"/>
+		<delete file="lib/magick4j.jar"/>
+		<delete file="lib/rmagick4j.jar"/>
+		<delete dir="ext/rmagick4j/classes"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="ext/rmagick4j/classes"/>
+		<javac srcdir="ext/rmagick4j/src" destdir="ext/rmagick4j/classes" classpath="jruby/jruby.jar" debug="true"/>
+	</target>
+
+	<target name="dist">
+		<zip basedir="." destfile="rmagick4j.zip" excludes="temp/**, **/classes/**, **rmagick.jar, rmagick4j.zip"/>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar basedir="ext/rmagick4j/classes" destfile="lib/magick4j.jar" includes="magick4j/**"/>
+		<jar basedir="ext/rmagick4j/classes" destfile="lib/RMagick.jar" includes="*, rmagick4j/**"/>
+	</target>
+
+	<target name="runSample" depends="jar">
+		<java dir="test" classname="org.jruby.Main" classpath="jruby/asm-2.2.3.jar;jruby/jruby.jar" fork="true">
+			<arg value="-I../jruby"/>
+			<arg value="-I../lib"/>
+			<arg value="RMagickTestSuite.rb"/>
+		</java>
+	</target>
+
+</project>

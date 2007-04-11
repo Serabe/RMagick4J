@@ -1,0 +1,9 @@
+The file observer.rb comes from JRuby's distribution of standard Ruby libraries. The file jruby.jar also comes from the JRuby project.
+
+RMagick.rb, clown.jpg, most of rmagick.gemspec, and the contents of rvg come from the RMagick project. Much of the content of the test demos (currently in "RMagickTestSuite.rb") come from the RMagick web site.
+
+See these respective projects for the licenses and ownership of these files.
+
+Other files in RMagickJr are hereby placed in the public domain.
+
+- Thomas Palmer

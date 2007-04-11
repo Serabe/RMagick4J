@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="ext/rmagick4j/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="jruby/jruby.jar"/>
+	<classpathentry kind="lib" path="jruby/asm-2.2.3.jar"/>
+	<classpathentry kind="output" path="temp/classes"/>
+</classpath>
