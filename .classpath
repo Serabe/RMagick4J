@@ -4,5 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="jruby/jruby.jar"/>
 	<classpathentry kind="lib" path="jruby/asm-2.2.3.jar"/>
-	<classpathentry kind="output" path="temp/classes"/>
+	<classpathentry kind="lib" path="lib/svgsalamander.jar"/>
+	<classpathentry kind="lib" path="lib/jhlabs-filters.jar"/>
+	<classpathentry kind="output" path="ext/rmagick4j/classes"/>
 </classpath>
