@@ -13,6 +13,8 @@ import javax.imageio.*;
 import javax.imageio.stream.*;
 import javax.swing.*;
 
+import com.jhlabs.image.*;
+
 public class MagickImage implements Cloneable {
 
 	public static MagickImage fromBlob(byte[] blob) {
@@ -25,7 +27,9 @@ public class MagickImage implements Cloneable {
 	}
 
 	private static double gaussian2d(double deviation, double x, double y) {
-		return (1.0 / sqrt(2.0 * PI)) * exp(-0.5 * (x * x + y * y) / (deviation * deviation)) / deviation;
+		return (1.0 / sqrt(2.0 * PI))
+				* exp(-0.5 * (x * x + y * y) / (deviation * deviation))
+				/ deviation;
 	}
 
 	private PixelPacket backgroundColor = new PixelPacket(1, 1, 1, 1);
@@ -76,18 +80,18 @@ public class MagickImage implements Cloneable {
 	}
 
 	public MagickImage blurred(double deviation, double radius) {
-		// TODO ImageMagick apparently can carry the convolutions to the image edge. Do they extrapolate the image in some fashion or just use the background color? May need to experiment.
 		// -- Not knowing exactly what it did, I reviewed the ImageMagick source for this, but I didn't copy exactly verbatim. Might be why it still has quirks. --
 		// GetOptimalKernelWidth() computes the optimal kernel radius for a convolution
 		// filter. Start with the minimum value of 3 pixels and walk out until we drop
 		// below the threshold of one pixel numerical accuracy.
 		// TODO Remove default value.
-		int size;
+		// int size;
+		// TODO For nonmatching radius/deviation values, we may need to compute the kernel manually again. JHLabs only takes radius.
 		if (radius > 0.0) {
-			size = max(3, 2 * (int)ceil(radius) + 1);
+			// size = max(3, 2 * (int)ceil(radius) + 1);
 		} else {
 			// "walk out until we drop/ below the threshold of one pixel numerical accuracy"
-			int QUANTUM_RANGE = 0x1F; // Should be based on color depth - Why isn't this working for getting good values? - I've hacked it here until I got okay results. Might also be an issue of
+			int QUANTUM_RANGE = 0xFF; // Should be based on color depth - Why isn't this working for getting good values? - I've hacked it here until I got okay results. Might also be an issue of
 			// that image edge thing. They at least make a larger kernel than I'm making right now.
 			for (int r = 2;; r++) {
 				// TODO This total seems too much to need to do every time.
@@ -99,30 +103,33 @@ public class MagickImage implements Cloneable {
 				if ((int)(QUANTUM_RANGE * value) == 0) {
 					// If this is zero, we could have stopped at the previous point.
 					// TODO Is this not always some simple function of deviation (so as to avoid the loop)?
-					size = 2 * (r - 1) + 1;
+					// size = 2 * (r - 1) + 1;
+					radius = r;
 					break;
 				}
 			}
 		}
-		int mean = size / 2;
-		float[] data = new float[size * size];
-		double total = 0;
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
-				double value = gaussian2d(deviation, x - mean, y - mean);
-				total += value;
-				data[size * y + x] = (float)value;
-			}
-		}
-		// Normalize to total of 1.
-		for (int d = 0; d < data.length; d++) {
-			data[d] /= total;
-		}
-		Kernel kernel = new Kernel(size, size, data);
-		ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+		// int mean = size / 2;
+		// float[] data = new float[size * size];
+		// double total = 0;
+		// for (int y = 0; y < size; y++) {
+		// for (int x = 0; x < size; x++) {
+		// double value = gaussian2d(deviation, x - mean, y - mean);
+		// total += value;
+		// data[size * y + x] = (float)value;
+		// }
+		// }
+		// // Normalize to total of 1.
+		// for (int d = 0; d < data.length; d++) {
+		// data[d] /= total;
+		// }
+		// Kernel kernel = new Kernel(size, size, data);
+		// ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+		GaussianFilter filter = new GaussianFilter((float)radius);
 		MagickImage result = new MagickImage();
 		result.format = format;
-		result.image = op.filter(image, null);
+		// result.image = op.filter(image, null);
+		result.image = filter.filter(image, null);
 		return result;
 	}
 
@@ -150,8 +157,14 @@ public class MagickImage implements Cloneable {
 				if (!image.matte) {
 					// Create a new src with opacity defined by intensity.
 					BufferedImage mask;
-					mask = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
-					float[][] matrix = new float[][] { {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0.299f, 0.587f, 0.114f, 0}};
+					mask =
+							new BufferedImage(
+									src.getWidth(),
+									src.getHeight(),
+									BufferedImage.TYPE_INT_ARGB);
+					float[][] matrix =
+							new float[][] { {0, 0, 0, 0}, {0, 0, 0, 0},
+									{0, 0, 0, 0}, {0.299f, 0.587f, 0.114f, 0}};
 					BandCombineOp bandOp = new BandCombineOp(matrix, null);
 					bandOp.filter(src.getRaster(), mask.getRaster());
 					src = mask;
@@ -166,7 +179,10 @@ public class MagickImage implements Cloneable {
 		}
 	}
 
-	public MagickImage composited(MagickImage image, Gravity gravity, CompositeOperator op) {
+	public MagickImage composited(
+			MagickImage image,
+			Gravity gravity,
+			CompositeOperator op) {
 		int x, y;
 		switch (gravity) {
 			case CENTER:
@@ -179,11 +195,20 @@ public class MagickImage implements Cloneable {
 		return composited(image, x, y, op);
 	}
 
-	public MagickImage composited(MagickImage image, Gravity gravity, int x, int y, CompositeOperator op) {
+	public MagickImage composited(
+			MagickImage image,
+			Gravity gravity,
+			int x,
+			int y,
+			CompositeOperator op) {
 		return null;
 	}
 
-	public MagickImage composited(MagickImage image, int x, int y, CompositeOperator op) {
+	public MagickImage composited(
+			MagickImage image,
+			int x,
+			int y,
+			CompositeOperator op) {
 		MagickImage result = clone();
 		result.composite(image, x, y, op);
 		return result;
@@ -193,7 +218,12 @@ public class MagickImage implements Cloneable {
 		return null;
 	}
 
-	public MagickImage cropped(Gravity gravity, int x, int y, int width, int height) {
+	public MagickImage cropped(
+			Gravity gravity,
+			int x,
+			int y,
+			int width,
+			int height) {
 		return null;
 	}
 
@@ -201,7 +231,17 @@ public class MagickImage implements Cloneable {
 		MagickImage result = new MagickImage(width, height);
 		Graphics2D graphics = result.image.createGraphics();
 		try {
-			graphics.drawImage(image, 0, 0, width, height, x, y, (x + width - 1), (y + height - 1), null);
+			graphics.drawImage(
+					image,
+					0,
+					0,
+					width,
+					height,
+					x,
+					y,
+					(x + width - 1),
+					(y + height - 1),
+					null);
 		} finally {
 			graphics.dispose();
 		}
@@ -214,7 +254,8 @@ public class MagickImage implements Cloneable {
 			Runnable runnable = new Runnable() {
 				public void run() {
 					JFrame frame = new JFrame("Untitled Image");
-					frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+					frame
+							.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					frame.setResizable(false);
 					frame.setLayout(new BorderLayout());
 					JComponent picture = new JComponent() {
@@ -223,7 +264,8 @@ public class MagickImage implements Cloneable {
 							g.drawImage(image, 0, 0, null);
 						}
 					};
-					Dimension size = new Dimension(image.getWidth(), image.getHeight());
+					Dimension size =
+							new Dimension(image.getWidth(), image.getHeight());
 					picture.setPreferredSize(size);
 					frame.add(picture, BorderLayout.CENTER);
 					frame.pack();
@@ -282,14 +324,25 @@ public class MagickImage implements Cloneable {
 		return image.getWidth();
 	}
 
-	public MagickImage quantized(int numberColors, Colorspace colorspace, boolean dither, int treeDepth, boolean measureError) {
+	public MagickImage quantized(
+			int numberColors,
+			Colorspace colorspace,
+			boolean dither,
+			int treeDepth,
+			boolean measureError) {
 		MagickImage result = new MagickImage(getWidth(), getHeight());
 		if (colorspace == Colorspace.GRAY) {
 			// Mostly just a hack. Ignores numberColors and more.
 			// TODO What should the alpha be? And even for this, why does 255 work? Shouldn't it be 1?
-			float[][] matrix = new float[][] { {0.299f, 0.587f, 0.114f, 0}, {0.299f, 0.587f, 0.114f, 0}, {0.299f, 0.587f, 0.114f, 0}, {0, 0, 0, 255}};
+			float[][] matrix =
+					new float[][] { {0.299f, 0.587f, 0.114f, 0},
+							{0.299f, 0.587f, 0.114f, 0},
+							{0.299f, 0.587f, 0.114f, 0}, {0, 0, 0, 255}};
 			BandCombineOp bandOp = new BandCombineOp(matrix, null);
-			bandOp.filter(getImage().getRaster(), result.getImage().getRaster());
+			bandOp
+					.filter(getImage().getRaster(), result
+							.getImage()
+							.getRaster());
 		} else {
 			// Um, obviously wrong here.
 			result.composite(this, 0, 0, CompositeOperator.OVER);
@@ -304,15 +357,30 @@ public class MagickImage implements Cloneable {
 			// I tried antialiased with simple coordinates. Didn't look ideal that way either.
 			// Also, I'm not sure what this will look like outside Mac. Some rendering might be slightly different.
 			// Current problem is that it leaves a pixel or two uncovered.
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+			g.setComposite(AlphaComposite.getInstance(
+					AlphaComposite.SRC_OVER,
+					0.5f));
 			g.setColor(raised ? Color.WHITE : Color.BLACK);
-			g.fillPolygon(new int[] {0, getWidth() - 1, getWidth() - 1 - width, width}, new int[] {0, 0, height, height}, 4);
+			g.fillPolygon(new int[] {0, getWidth() - 1, getWidth() - 1 - width,
+					width}, new int[] {0, 0, height, height}, 4);
 			g.setColor(raised ? new Color(0xC0C0C0) : new Color(0x404040));
-			g.fillPolygon(new int[] {0, width, width, 0}, new int[] {1, height + 1, getHeight() - 1 - height, getHeight() - 1}, 4);
+			g.fillPolygon(new int[] {0, width, width, 0}, new int[] {1,
+					height + 1, getHeight() - 1 - height, getHeight() - 1}, 4);
 			g.setColor(raised ? new Color(0x404040) : new Color(0xC0C0C0));
-			g.fillPolygon(new int[] {getWidth() - width - 1, getWidth() - 1, getWidth() - 1, getWidth() - width - 1}, new int[] {height + 1, 1, getHeight() - 1, getHeight() - 1 - height}, 4);
+			g.fillPolygon(
+					new int[] {getWidth() - width - 1, getWidth() - 1,
+							getWidth() - 1, getWidth() - width - 1},
+					new int[] {height + 1, 1, getHeight() - 1,
+							getHeight() - 1 - height},
+					4);
 			g.setColor(raised ? Color.BLACK : Color.WHITE);
-			g.fillPolygon(new int[] {width + 1, getWidth() - width - 2, getWidth() - 2, 1}, new int[] {getHeight() - height - 1, getHeight() - height - 1, getHeight() - 1, getHeight() - 1}, 4);
+			g.fillPolygon(
+					new int[] {width + 1, getWidth() - width - 2,
+							getWidth() - 2, 1},
+					new int[] {getHeight() - height - 1,
+							getHeight() - height - 1, getHeight() - 1,
+							getHeight() - 1},
+					4);
 		} finally {
 			g.dispose();
 		}
@@ -326,7 +394,8 @@ public class MagickImage implements Cloneable {
 				throw new RuntimeException("failed to open " + input);
 			}
 			try {
-				for (Iterator<ImageReader> readers = ImageIO.getImageReaders(stream); readers.hasNext();) {
+				for (Iterator<ImageReader> readers =
+						ImageIO.getImageReaders(stream); readers.hasNext();) {
 					ImageReader reader = readers.next();
 					try {
 						reader.setInput(stream);
@@ -355,7 +424,8 @@ public class MagickImage implements Cloneable {
 	}
 
 	public MagickImage rotated(double degrees) {
-		return transformed(AffineTransform.getRotateInstance(toRadians(degrees)));
+		return transformed(AffineTransform
+				.getRotateInstance(toRadians(degrees)));
 	}
 
 	public void setFormat(String format) {
@@ -374,11 +444,17 @@ public class MagickImage implements Cloneable {
 
 	public void transform(AffineTransform transform) {
 		// TODO Fill the back!
-		Rectangle2D bounds = new Rectangle2D.Double(0, 0, getWidth(), getHeight());
+		Rectangle2D bounds =
+				new Rectangle2D.Double(0, 0, getWidth(), getHeight());
 		bounds = transform.createTransformedShape(bounds).getBounds2D();
-		AffineTransform translatedTransform = AffineTransform.getTranslateInstance(-bounds.getX(), -bounds.getY());
+		AffineTransform translatedTransform =
+				AffineTransform.getTranslateInstance(-bounds.getX(), -bounds
+						.getY());
 		translatedTransform.concatenate(transform);
-		AffineTransformOp op = new AffineTransformOp(translatedTransform, AffineTransformOp.TYPE_BICUBIC);
+		AffineTransformOp op =
+				new AffineTransformOp(
+						translatedTransform,
+						AffineTransformOp.TYPE_BICUBIC);
 		BufferedImage newImage = op.createCompatibleDestImage(image, null);
 		op.filter(image, newImage);
 		image = newImage;
@@ -394,7 +470,8 @@ public class MagickImage implements Cloneable {
 	public void write(String fileName) {
 		try {
 			// TODO More robust type handling.
-			String type = fileName.replaceFirst("^.*[.]([^.]+)", "$1").toUpperCase();
+			String type =
+					fileName.replaceFirst("^.*[.]([^.]+)", "$1").toUpperCase();
 			if (type.equals("JPG")) {
 				type = "JPEG";
 			}
@@ -414,7 +491,11 @@ public class MagickImage implements Cloneable {
 			BufferedImage image = this.image;
 			if (type.equals("JPEG")) {
 				// JPEGs apparently need alpha-less images, or else ImageIO generates bad images.
-				image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+				image =
+						new BufferedImage(
+								getWidth(),
+								getHeight(),
+								BufferedImage.TYPE_INT_RGB);
 				Graphics graphics = image.createGraphics();
 				try {
 					graphics.drawImage(this.image, 0, 0, null);

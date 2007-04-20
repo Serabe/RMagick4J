@@ -17,8 +17,7 @@ def main
     ARGV.each {|arg| send(arg).display}
   else
     image = addTransparencyWithAMask.raise
-    image = openClown.blur_image(0, 5)
-    # TODO Support to_blob block.
+    # image = openClown.blur_image(0, 5)
     open('test.jpg', 'w') do |file|
       file.write(image.to_blob {self.format = 'JPEG'})
     end

@@ -1,5 +1,8 @@
 require 'java'
+# TODO See about using Raven to get gems of jhlabs and svgsalamander?
+require 'jhlabs-filters.jar'
 require 'magick4j.jar'
+require 'svgsalamander.jar'
 require 'observer'
 
 module Magick
