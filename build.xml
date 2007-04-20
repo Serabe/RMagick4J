@@ -7,9 +7,9 @@
 		<delete dir="ext/rmagick4j/classes"/>
 	</target>
 
-	<target name="compile">
+	<target name="compile" depends="clean">
 		<mkdir dir="ext/rmagick4j/classes"/>
-		<javac srcdir="ext/rmagick4j/src" destdir="ext/rmagick4j/classes" classpath="jruby/jruby.jar" debug="true"/>
+		<javac srcdir="ext/rmagick4j/src" destdir="ext/rmagick4j/classes" classpath="jruby/jruby.jar;lib/jhlabs-filters.jar;lib/svgsalamander.jar" debug="true"/>
 	</target>
 
 	<target name="dist">
