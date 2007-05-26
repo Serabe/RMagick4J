@@ -11,7 +11,7 @@ and some RMagick native functionality.
 DESCRIPTION
   s.author = %q{Tom Palmer}
   s.email = %q{jruby-extras-devel@rubyforge.org}
-  s.homepage = %q{http://rubyforge.org/projects/jruby-extras/}
+  s.homepage = %q{http://code.google.com/p/rmagick4j/}
   s.files = Dir['lib/**']
   s.platform = 'java'
   s.rubyforge_project = %q{jruby-extras}
