@@ -129,7 +129,7 @@ class Image
 		# TODO Use info somehow
 		info = Info.new(&add)
 		# TODO multiple images in file
-		[Image.new(Magick4J.MagickImage.fromBlob(RMagick4J.JRubyUtil.toByteArray(blob)))]
+		[Image.new(Magick4J.MagickImage.fromBlob(blob.to_java_bytes))]
 	end
 
 	def self.read(file, &add)
@@ -226,7 +226,7 @@ class Image
 		# TODO Use info.
 		info = Info.new(&add)
 		@image.setFormat(info.format) if info.format
-		RMagick4J.JRubyUtil.toString(@image.toBlob)
+		String.from_java_bytes(@image.toBlob)
 	end
 
 	def write(file, &add)

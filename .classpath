@@ -10,5 +10,6 @@
 			<attribute name="javadoc_location" value="http://www.blogofbug.com/swing-bug/javadoc/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="jruby/backport-util-concurrent.jar"/>
 	<classpathentry kind="output" path="ext/rmagick4j/classes"/>
 </classpath>

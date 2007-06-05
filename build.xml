@@ -22,7 +22,7 @@
 	</target>
 
 	<target name="runSample" depends="jar">
-		<java dir="test" classname="org.jruby.Main" classpath="jruby/asm-2.2.3.jar;jruby/jruby.jar" fork="true">
+		<java dir="test" classname="org.jruby.Main" classpath="jruby/asm-2.2.3.jar;jruby/backport-util-concurrent.jar;jruby/jruby.jar" fork="true">
 			<arg value="-I../jruby"/>
 			<arg value="-I../lib"/>
 			<arg value="RMagickTestSuite.rb"/>
