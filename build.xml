@@ -3,7 +3,7 @@
 	<target name="clean">
 		<delete file="rmagick4j.zip"/>
 		<delete file="lib/magick4j.jar"/>
-		<delete file="lib/rmagick4j.jar"/>
+		<delete file="lib/RMagick.jar"/>
 		<delete dir="ext/rmagick4j/classes"/>
 	</target>
 
@@ -13,12 +13,12 @@
 	</target>
 
 	<target name="dist">
-		<zip basedir="." destfile="rmagick4j.zip" excludes="temp/**, **/classes/**, **rmagick.jar, rmagick4j.zip"/>
+		<zip basedir="." destfile="rmagick4j.zip" excludes="temp/**, **/classes/**, **agick.jar, rmagick4j.zip"/>
 	</target>
 
 	<target name="jar" depends="compile">
 		<jar basedir="ext/rmagick4j/classes" destfile="lib/magick4j.jar" includes="magick4j/**"/>
-		<jar basedir="ext/rmagick4j/classes" destfile="lib/RMagick.jar" includes="*, rmagick4j/**"/>
+		<jar basedir="ext/rmagick4j/classes" destfile="lib/RMagick.jar" includes="*"/>
 	</target>
 
 	<target name="runSample" depends="jar">
