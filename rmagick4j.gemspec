@@ -1,7 +1,7 @@
 require 'date'
 Gem::Specification.new do |s|
   s.name = %q{rmagick4j}
-  s.version = '0.3.2'
+  s.version = '0.3.3'
   s.date = Date.today.to_s
   s.summary = %q{RMagick4J is a JRuby back end for RMagick.}
   s.description =<<DESCRIPTION
