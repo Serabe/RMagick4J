@@ -71,6 +71,24 @@ def addTransparencyWithAMask
   bg.composite(clown, Magick::CenterGravity, Magick::OverCompositeOp)
 end
 
+def addWatermark
+  mark = Magick::Image.new(300, 50) do
+    self.background_color = 'none'
+  end
+  gc = Magick::Draw.new
+    gc.annotate(mark, 0, 0, 0, 0, "Image by RMagick") do
+    self.gravity = Magick::CenterGravity
+    self.pointsize = 32
+    self.font_family = "Times"
+    self.fill = "white"
+    self.stroke = "none"
+  end
+  mark.rotate!(-90)
+  clown = openClown.first
+  clown = clown.watermark(mark, 0.15, 0, Magick::EastGravity)
+  clown
+end
+
 def cropToANewSize
   clown = openClown
   face = clown.crop(50, 15, 150, 165)

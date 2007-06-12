@@ -24,13 +24,18 @@ class Draw
 	end
 
 	def fill= fill
-		@draw.setFill(Magick4J.ColorDatabase.queryDefault(fill))
+		@draw.fill = Magick4J.ColorDatabase.query_default(fill)
+		self
+	end
+
+	def font_family= font_family
+		@draw.font_family = font_family
 		self
 	end
 
 	def font_weight= font_weight
 		font_weight = {BoldWeight => 700, NormalWeight => 400}[font_weight]
-		@draw.setFontWeight(font_weight)
+		@draw.font_weight = font_weight
 	end
 
 	def get_type_metrics(*args)
@@ -129,7 +134,7 @@ class Image
 		# TODO Use info somehow
 		info = Info.new(&add)
 		# TODO multiple images in file
-		[Image.new(Magick4J.MagickImage.fromBlob(blob.to_java_bytes))]
+		[Image.new(Magick4J.MagickImage.from_blob(blob.to_java_bytes))]
 	end
 
 	def self.read(file, &add)
@@ -214,8 +219,13 @@ class Image
 		Image.new(@image.resized(scale_factor))
 	end
 
-	def rotate(scale_factor)
-		Image.new(@image.rotated(scale_factor))
+	def rotate(amount)
+		Image.new(@image.rotated(amount))
+	end
+
+	def rotate!(amount)
+		@image.rotate(amount)
+		self
 	end
 
 	def rows
@@ -223,11 +233,21 @@ class Image
 	end
 
 	def to_blob(&add)
-		# TODO Use info.
 		info = Info.new(&add)
 		@image.setFormat(info.format) if info.format
 		String.from_java_bytes(@image.toBlob)
 	end
+
+    def watermark(mark, lightness=1.0, saturation=1.0, gravity=nil, x_offset=0, y_offset=0)
+      if gravity.is_a? Numeric
+        # gravity is technically an optional argument in the middle.
+        gravity = nil
+        y_offset = x_offset
+        x_offset = gravity
+      end
+      # TODO Perform watermark.
+      self
+    end
 
 	def write(file, &add)
 		# TODO I'm having trouble finding out how this info is used, so I'll skip using it for now.

@@ -1,8 +1,8 @@
 package magick4j;
 
-import java.awt.*;
 import static java.lang.Math.*;
-import java.util.*;
+
+import java.awt.*;
 import java.util.List;
 
 public class DrawInfo implements Cloneable {
@@ -10,6 +10,8 @@ public class DrawInfo implements Cloneable {
 	private PixelPacket fill = new PixelPacket(0, 0, 0);
 
 	private double fillOpacity = 1.0;
+
+	private String fontFamily = "SansSerif";
 
 	private int fontWeight;
 
@@ -27,7 +29,13 @@ public class DrawInfo implements Cloneable {
 
 	private double strokeWidth = 1.0;
 
-	public void annotate(MagickImage image, double width, double height, double x, double y, String text) {
+	public void annotate(
+			MagickImage image,
+			double width,
+			double height,
+			double x,
+			double y,
+			String text) {
 		text = new TextFormatter(image).format(text);
 		if (width == 0 && height == 0) {
 			width = image.getWidth();
@@ -35,7 +43,9 @@ public class DrawInfo implements Cloneable {
 		}
 		Graphics2D graphics = createGraphics(image);
 		try {
-			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			graphics.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_ON);
 			updateFont(graphics);
 			FontMetrics metrics = graphics.getFontMetrics();
 			// x gravity
@@ -123,12 +133,16 @@ public class DrawInfo implements Cloneable {
 		return fillOpacity;
 	}
 
-	public double[] getStrokeDashArray() {
-		return strokeDashArray;
+	public String getFontFamily() {
+		return fontFamily;
 	}
 
 	public PixelPacket getStroke() {
 		return stroke;
+	}
+
+	public double[] getStrokeDashArray() {
+		return strokeDashArray;
 	}
 
 	public double getStrokeWidth() {
@@ -159,6 +173,10 @@ public class DrawInfo implements Cloneable {
 		return strokeAntialias;
 	}
 
+	public void rotate(double rotation) {
+		this.rotation += rotation;
+	}
+
 	public void setFill(PixelPacket fill) {
 		// TODO Clone?
 		this.fill = fill;
@@ -166,6 +184,10 @@ public class DrawInfo implements Cloneable {
 
 	public void setFillOpacity(double fillOpacity) {
 		this.fillOpacity = fillOpacity;
+	}
+
+	public void setFontFamily(String fontFamily) {
+		this.fontFamily = fontFamily;
 	}
 
 	public void setFontWeight(int fontWeight) {
@@ -178,10 +200,6 @@ public class DrawInfo implements Cloneable {
 
 	public void setPointSize(double pointSize) {
 		this.pointSize = pointSize;
-	}
-
-	public void rotate(double rotation) {
-		this.rotation += rotation;
 	}
 
 	public void setStroke(PixelPacket stroke) {
@@ -202,7 +220,11 @@ public class DrawInfo implements Cloneable {
 	}
 
 	private void updateFont(Graphics2D graphics) {
-		Font font = graphics.getFont().deriveFont(fontWeight >= 700 ? Font.BOLD : Font.PLAIN, (float)pointSize);
+		Font font =
+				new Font(
+						fontFamily,
+						fontWeight >= 700 ? Font.BOLD : Font.PLAIN,
+						(int)pointSize).deriveFont((float)pointSize);
 		graphics.setFont(font);
 	}
 

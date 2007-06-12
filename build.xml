@@ -26,6 +26,7 @@
 			<arg value="-I../jruby"/>
 			<arg value="-I../lib"/>
 			<arg value="RMagickTestSuite.rb"/>
+			<arg value="addWatermark"/>
 		</java>
 	</target>
 
