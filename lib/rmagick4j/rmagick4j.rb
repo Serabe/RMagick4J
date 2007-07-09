@@ -147,7 +147,7 @@ class Image
 	end
 
 	def columns
-		@image.getWidth
+		@image.width
 	end
 
 	def composite(*args)
@@ -157,9 +157,36 @@ class Image
 		Image.new(@image.composited(*args))
 	end
 
-	def crop(x, y, width, height)
-		Image.new(@image.cropped(x, y, width, height))
+  def copy
+    Image.new(@image.clone)
+  end
+
+	def crop(*args)
+    copy.crop!(*args)
 	end
+
+  def crop!(*args)
+    # gravity, x, y, width, height, reset_offset
+    # Defaults.
+    gravity = nil
+    x = y = 0
+    reset_offset = false
+    # Find available args.
+    if args.first.is_a? Gravity
+      gravity = args.shift
+    end
+    if [FalseClass, TrueClass].member? args.last.class
+      reset = args.pop
+    end
+    if args.length == 4
+      x, y = args[0..1]
+    end
+    width, height = args[-2..-1]
+    # Call Java.
+    # TODO Why wouldn't we reset offset information? Do we need to use that?
+    @image.crop(gravity, x, y, width, height)
+    self
+  end
 
 	def display
 		@image.display
@@ -218,6 +245,11 @@ class Image
 	def resize(scale_factor)
 		Image.new(@image.resized(scale_factor))
 	end
+
+  def resize!(scale_factor)
+    @image.resize(scale_factor)
+    self
+  end
 
 	def rotate(amount)
 		Image.new(@image.rotated(amount))

@@ -17,7 +17,7 @@ def main
     ARGV.each {|arg| send(arg).display}
   else
     image = addTransparencyWithAMask.raise
-    # image = openClown.blur_image(0, 5)
+    # image = open_clown.blur_image(0, 5)
     open('test.jpg', 'w') do |file|
       file.write(image.to_blob {self.format = 'JPEG'})
     end
@@ -26,11 +26,11 @@ def main
 end
 
 def addRaisedEdges
-  openClown.raise
+  open_clown.raise
 end
 
 def addText
-  clown = openClown
+  clown = open_clown
   text = Magick::Draw.new
   text.annotate(clown, 0, 0, 0, 60, "My friend!") {
     self.gravity = Magick::SouthGravity
@@ -43,7 +43,7 @@ def addText
 end
 
 def addTransparencyWithAMask
-  clown = openClown.first
+  clown = open_clown.first
   mask = Magick::Image.new(clown.columns, clown.rows) {
     self.background_color = 'black'
   }
@@ -84,36 +84,40 @@ def addWatermark
     self.stroke = "none"
   end
   mark.rotate!(-90)
-  clown = openClown.first
+  clown = open_clown.first
   clown = clown.watermark(mark, 0.15, 0, Magick::EastGravity)
   clown
 end
 
+def crop_resized
+  open_clown.crop_resized(50, 50)
+end
+
 def cropToANewSize
-  clown = openClown
+  clown = open_clown
   face = clown.crop(50, 15, 150, 165)
   white_bg = Magick::Image.new(clown.columns, clown.rows)
   white_bg.composite(face, 50, 15, Magick::OverCompositeOp)
 end
 
 def flipIt
-  openClown.flip!
+  open_clown.flip!
 end
 
 def makeAThumbnail
-  clown = openClown
+  clown = open_clown
   tiny = clown.resize(0.25)
   white_bg = Magick::Image.new(clown.columns, clown.rows)
   white_bg.composite(tiny, Magick::CenterGravity, Magick::OverCompositeOp)
 end
 
-def openClown
+def open_clown
   #Magick::ImageList.new("clown.jpg")
   open("clown.jpg") {|file| Magick::ImageList.new.from_blob(file.read)}
 end
 
 def rotateToAnyAngle
-  clown = openClown
+  clown = open_clown
   clown.rotate(130)
 end
 
