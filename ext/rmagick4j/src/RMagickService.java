@@ -6,7 +6,7 @@ import org.jruby.runtime.load.*;
 public class RMagickService implements BasicLibraryService {
 
 	public boolean basicLoad(Ruby runtime) throws IOException {
-		runtime.evalScript("require 'rmagick4j/rmagick4j.rb'");
+		runtime.evalScriptlet("require 'rmagick4j/rmagick4j.rb'");
 		return true;
 	}
 

@@ -8,8 +8,8 @@
 #               to the classes.
 #==============================================================================
 
-require 'RMagick.so'
-
+#require 'RMagick.so'
+require "rmagick4j/rmagick4j"
 module Magick
     @@formats = nil
 

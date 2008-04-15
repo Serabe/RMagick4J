@@ -55,7 +55,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
                 <package-root>ext/rmagick4j/src</package-root>
-                <classpath mode="compile">jruby/jruby.jar</classpath>
+                <classpath mode="compile">jruby/jruby.jar:lib/jhlabs-filters.jar:lib/svgsalamander.jar</classpath>
                 <built-to>ext/rmagick4j/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
