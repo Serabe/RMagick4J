@@ -1,6 +1,6 @@
 package magick4j;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * TODO Or is Color good enough? Do we support depth of 16 or 32??? Probably not
@@ -8,63 +8,59 @@ import java.awt.*;
  */
 public class PixelPacket {
 
-	private double blue;
+    private double blue;
+    private double green;
+    private double opacity;
+    private double red;
 
-	private double green;
+    public PixelPacket() {
+        this(0, 0, 0, 0);
+    }
 
-	private double opacity;
+    public PixelPacket(double red, double green, double blue) {
+        this(red, green, blue, 1);
+    }
 
-	private double red;
+    public PixelPacket(double red, double green, double blue, double opacity) {
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+        this.opacity = opacity;
+    }
 
-	public PixelPacket() {
-		this(0, 0, 0, 0);
-	}
+    public double getBlue() {
+        return blue;
+    }
 
-	public PixelPacket(double red, double green, double blue) {
-		this(red, green, blue, 1);
-	}
+    public double getGreen() {
+        return green;
+    }
 
-	public PixelPacket(double red, double green, double blue, double opacity) {
-		this.red = red;
-		this.green = green;
-		this.blue = blue;
-		this.opacity = opacity;
-	}
+    public double getOpacity() {
+        return opacity;
+    }
 
-	public double getBlue() {
-		return blue;
-	}
+    public double getRed() {
+        return red;
+    }
 
-	public double getGreen() {
-		return green;
-	}
+    public void setBlue(double blue) {
+        this.blue = blue;
+    }
 
-	public double getOpacity() {
-		return opacity;
-	}
+    public void setGreen(double green) {
+        this.green = green;
+    }
 
-	public double getRed() {
-		return red;
-	}
+    public void setOpacity(double opacity) {
+        this.opacity = opacity;
+    }
 
-	public void setBlue(double blue) {
-		this.blue = blue;
-	}
+    public void setRed(double red) {
+        this.red = red;
+    }
 
-	public void setGreen(double green) {
-		this.green = green;
-	}
-
-	public void setOpacity(double opacity) {
-		this.opacity = opacity;
-	}
-
-	public void setRed(double red) {
-		this.red = red;
-	}
-
-	public Color toColor() {
-		return new Color((float)red, (float)green, (float)blue, (float)opacity);
-	}
-
+    public Color toColor() {
+        return new Color((float) red, (float) green, (float) blue, (float) opacity);
+    }
 }

@@ -76,7 +76,7 @@ def addWatermark
     self.background_color = 'none'
   end
   gc = Magick::Draw.new
-    gc.annotate(mark, 0, 0, 0, 0, "Image by RMagick") do
+  gc.annotate(mark, 0, 0, 0, 0, "Image by RMagick") do
     self.gravity = Magick::CenterGravity
     self.pointsize = 32
     self.font_family = "Times"

@@ -1,55 +1,49 @@
 package magick4j;
 
 public class TypeMetrics {
+    private double ascent;
+    private double descent;
+    private double height;
+    private double maxAdvance;
+    private double width;
 
-	private double ascent;
+    public double getAscent() {
+        return ascent;
+    }
 
-	private double descent;
+    public double getDescent() {
+        return descent;
+    }
 
-	private double height;
+    public double getHeight() {
+        return height;
+    }
 
-	private double maxAdvance;
+    public double getMaxAdvance() {
+        return maxAdvance;
+    }
 
-	private double width;
+    public double getWidth() {
+        return width;
+    }
 
-	public double getAscent() {
-		return ascent;
-	}
+    public void setAscent(double ascent) {
+        this.ascent = ascent;
+    }
 
-	public double getDescent() {
-		return descent;
-	}
+    public void setDescent(double descent) {
+        this.descent = descent;
+    }
 
-	public double getHeight() {
-		return height;
-	}
+    public void setHeight(double height) {
+        this.height = height;
+    }
 
-	public double getMaxAdvance() {
-		return maxAdvance;
-	}
+    public void setMaxAdvance(double maxAdvance) {
+        this.maxAdvance = maxAdvance;
+    }
 
-	public double getWidth() {
-		return width;
-	}
-
-	public void setAscent(double ascent) {
-		this.ascent = ascent;
-	}
-
-	public void setDescent(double descent) {
-		this.descent = descent;
-	}
-
-	public void setHeight(double height) {
-		this.height = height;
-	}
-
-	public void setMaxAdvance(double maxAdvance) {
-		this.maxAdvance = maxAdvance;
-	}
-
-	public void setWidth(double width) {
-		this.width = width;
-	}
-
+    public void setWidth(double width) {
+        this.width = width;
+    }
 }

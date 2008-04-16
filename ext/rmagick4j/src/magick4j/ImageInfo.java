@@ -1,25 +1,22 @@
 package magick4j;
 
 public class ImageInfo {
+    private PixelPacket backgroundColor;
+    private Geometry size;
 
-	private PixelPacket backgroundColor;
+    public PixelPacket getBackgroundColor() {
+        return backgroundColor;
+    }
 
-	private Geometry size;
+    public Geometry getSize() {
+        return size;
+    }
 
-	public PixelPacket getBackgroundColor() {
-		return backgroundColor;
-	}
+    public void setBackgroundColor(PixelPacket backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
 
-	public Geometry getSize() {
-		return size;
-	}
-
-	public void setBackgroundColor(PixelPacket backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	public void setSize(Geometry size) {
-		this.size = size;
-	}
-
+    public void setSize(Geometry size) {
+        this.size = size;
+    }
 }
