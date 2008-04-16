@@ -161,9 +161,9 @@ class Image
     Image.new(@image.clone)
   end
 
-	def crop(*args)
+  def crop(*args)
     copy.crop!(*args)
-	end
+  end
 
   def crop!(*args)
     # gravity, x, y, width, height, reset_offset
@@ -172,7 +172,7 @@ class Image
     x = y = 0
     reset_offset = false
     # Find available args.
-    if args.first.is_a? Gravity
+    if args.first.is_a? Magick4J::Gravity
       gravity = args.shift
     end
     if [FalseClass, TrueClass].member? args.last.class
@@ -184,7 +184,7 @@ class Image
     width, height = args[-2..-1]
     # Call Java.
     # TODO Why wouldn't we reset offset information? Do we need to use that?
-    @image.crop(gravity, x, y, width, height)
+    @image.cropped(gravity, x, y, width, height)
     self
   end
 
