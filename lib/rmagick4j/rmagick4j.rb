@@ -172,7 +172,7 @@ module Magick
       x = y = 0
       reset_offset = false
       # Find available args.
-      if args.first.is_a? Gravity
+      if args.first.is_a? Magick4J::Gravity
         gravity = args.shift
       end
       if [FalseClass, TrueClass].member? args.last.class
