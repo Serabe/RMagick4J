@@ -169,7 +169,7 @@ module Magick
       # gravity, x, y, width, height, reset_offset
       # Defaults.
       gravity = nil
-      x = y = 0
+      x = y = -1
       reset_offset = false
       # Find available args.
       if args.first.is_a? GravityType
@@ -185,7 +185,11 @@ module Magick
       # Call Java.
       # TODO Why wouldn't we reset offset information? Do we need to use that?
       @image =  unless gravity.nil?
-                  @image.crop(gravity, x, y, width, height)
+                  if x == -1 || y == -1
+                    @image.crop(gravity, width, height)
+                  else
+                    @image.crop(gravity, x, y, width, height)
+                  end
                 else
                   @image.crop(x,y,width,height)
                 end

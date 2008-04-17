@@ -208,11 +208,29 @@ public class MagickImage implements Cloneable {
     }
 
     public MagickImage crop(Gravity gravity, int width, int height) {
-        return null;
+        return crop(gravity.getX(this, width),gravity.getY(this, height),width,height);
     }
 
     public MagickImage crop(Gravity gravity, int x, int y, int width, int height) {
-        return null;
+        
+        /*
+         * If the argument is NorthEastGravity, EastGravity, or SouthEastGravity,
+         * the x-offset is measured from the right side of the image. If the 
+         * argument is SouthEastGravity, SouthGravity, or SouthWestGravity, the 
+         * y-offset is measured from the bottom of the image.
+         * All other values are ignored and the x-  and y-offsets are measured 
+         * from the upper-left corner of the image.
+         * 
+         * RMagick Doc.
+         */
+        int xOffset = 0, yOffset = 0;
+        if(gravity == Gravity.NORTH_EAST || gravity == Gravity.EAST || gravity == Gravity.SOUTH_EAST){
+            xOffset = this.getWidth();
+        }
+        if(gravity == Gravity.SOUTH || gravity == Gravity.SOUTH_EAST || gravity == Gravity.SOUTH_WEST){
+            yOffset = this.getHeight();
+        }
+        return crop(xOffset+x,yOffset + y,width,height);
     }
 
     public MagickImage crop(int x, int y, int width, int height) {
@@ -320,7 +338,7 @@ public class MagickImage implements Cloneable {
         return result;
     }
 
-    public MagickImage raised(int width, int height, boolean raised) {
+    public MagickImage raised(int borderWidth, int borderHeight, boolean raised) {
         MagickImage result = clone();
         Graphics2D g = result.getImage().createGraphics();
         try {
@@ -329,17 +347,17 @@ public class MagickImage implements Cloneable {
             // Current problem is that it leaves a pixel or two uncovered.
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
             g.setColor(raised ? Color.WHITE : Color.BLACK);
-            g.fillPolygon(new int[]{0, getWidth() - 1, getWidth() - 1 - width, width}, 
-                    new int[]{0, 0, height, height}, 4);
+            g.fillPolygon(new int[]{0, getWidth() - 1, getWidth() - 1 - borderWidth, borderWidth}, 
+                    new int[]{0, 0, borderHeight, borderHeight}, 4);
             g.setColor(raised ? new Color(0xC0C0C0) : new Color(0x404040));
-            g.fillPolygon(new int[]{0, width, width, 0}, 
-                    new int[]{1, height + 1, getHeight() - 1 - height, getHeight() - 1}, 4);
+            g.fillPolygon(new int[]{0, borderWidth, borderWidth, 0}, 
+                    new int[]{1, borderHeight + 1, getHeight() - 1 - borderHeight, getHeight() - 1}, 4);
             g.setColor(raised ? new Color(0x404040) : new Color(0xC0C0C0));
-            g.fillPolygon(new int[]{getWidth() - width - 1, getWidth() - 1, getWidth() - 1, getWidth() - width - 1},
-                    new int[]{height + 1, 1, getHeight() - 1, getHeight() - 1 - height}, 4);
+            g.fillPolygon(new int[]{getWidth() - borderWidth - 1, getWidth() - 1, getWidth() - 1, getWidth() - borderWidth - 1},
+                    new int[]{borderHeight + 1, 1, getHeight() - 1, getHeight() - 1 - borderHeight}, 4);
             g.setColor(raised ? Color.BLACK : Color.WHITE);
-            g.fillPolygon(new int[]{width + 1, getWidth() - width - 2, getWidth() - 2, 1},
-                    new int[]{getHeight() - height - 1, getHeight() - height - 1, getHeight() - 1, getHeight() - 1
+            g.fillPolygon(new int[]{borderWidth + 1, getWidth() - borderWidth - 2, getWidth() - 2, 1},
+                    new int[]{getHeight() - borderHeight - 1, getHeight() - borderHeight - 1, getHeight() - 1, getHeight() - 1
             },
                     4);
         } finally {
@@ -375,8 +393,12 @@ public class MagickImage implements Cloneable {
         }
     }
 
+    public MagickImage resized(double newWidth, double newHeight){
+        return transformed(AffineTransform.getScaleInstance(newWidth, newHeight));
+    }
+    
     public MagickImage resized(double ratio) {
-        return transformed(AffineTransform.getScaleInstance(ratio, ratio));
+        return resized(ratio*this.getWidth(), ratio*this.getHeight());
     }
 
     public void rotate(double degrees) {
