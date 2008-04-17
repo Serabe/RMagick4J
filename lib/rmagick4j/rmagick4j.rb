@@ -172,7 +172,7 @@ module Magick
       x = y = 0
       reset_offset = false
       # Find available args.
-      if args.first.is_a? Magick4J::Gravity
+      if args.first.is_a? GravityType
         gravity = args.shift
       end
       if [FalseClass, TrueClass].member? args.last.class
@@ -184,7 +184,11 @@ module Magick
       width, height = args[-2..-1]
       # Call Java.
       # TODO Why wouldn't we reset offset information? Do we need to use that?
-      @image.crop(gravity, x, y, width, height)
+      @image =  unless gravity.nil?
+                  @image.crop(gravity, x, y, width, height)
+                else
+                  @image.crop(x,y,width,height)
+                end
       self
     end
 

@@ -207,21 +207,21 @@ public class MagickImage implements Cloneable {
         return result;
     }
 
-    public MagickImage cropped(Gravity gravity, int width, int height) {
+    public MagickImage crop(Gravity gravity, int width, int height) {
         return null;
     }
 
-    public MagickImage cropped(Gravity gravity, int x, int y, int width, int height) {
+    public MagickImage crop(Gravity gravity, int x, int y, int width, int height) {
         return null;
     }
 
-    public MagickImage cropped(int x, int y, int width, int height) {
+    public MagickImage crop(int x, int y, int width, int height) {
         MagickImage result = new MagickImage(width, height);
         Graphics2D graphics = result.image.createGraphics();
         try {
-            graphics.drawImage(image, 0, 0, width, height, x, y,
+            graphics.drawImage(this.image, 0, 0, width, height, x, y,
                     (x + width - 1), (y + height - 1), null);
-        } finally {
+        }finally {
             graphics.dispose();
         }
         return result;
