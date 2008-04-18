@@ -9,6 +9,7 @@ import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
@@ -393,12 +394,30 @@ public class MagickImage implements Cloneable {
         }
     }
 
-    public MagickImage resized(double newWidth, double newHeight){
-        return transformed(AffineTransform.getScaleInstance(newWidth, newHeight));
+    public MagickImage resized(int newWidth, int newHeight){
+        // Copied from image_voodoo
+        
+        BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = img.createGraphics();
+        
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        
+        double widthRatio = ((float) newWidth)/this.getWidth();
+        double heightRatio = ((float) newHeight)/this.getHeight();
+        
+        graphics.drawRenderedImage(this.getImage(), AffineTransform.getScaleInstance(widthRatio, heightRatio));
+        
+        graphics.dispose();
+        
+        MagickImage result = new MagickImage();
+        result.image = img;
+        result.format = format;
+        
+        return result;
     }
     
     public MagickImage resized(double ratio) {
-        return resized(ratio*this.getWidth(), ratio*this.getHeight());
+        return resized((int) Math.ceil(ratio*this.getWidth()),(int) Math.ceil(ratio*this.getHeight()));
     }
 
     public void rotate(double degrees) {

@@ -147,7 +147,7 @@ module Magick
     end
 
     def columns
-      @image.width
+      @image.getWidth
     end
 
     def composite(*args)
@@ -173,7 +173,7 @@ module Magick
       reset_offset = false
       # Find available args.
       if args.first.is_a? GravityType
-        gravity = args.shift
+        gravity = args.shift._val
       end
       if [FalseClass, TrueClass].member? args.last.class
         reset = args.pop
@@ -195,7 +195,7 @@ module Magick
                 end
       self
     end
-
+    
     def display
       @image.display
       self
@@ -250,12 +250,23 @@ module Magick
       Image.new(@image.raised(width, height, raise))
     end
 
-    def resize(scale_factor)
-      Image.new(@image.resized(scale_factor))
+    def resize(*args)
+      copy.resize!(*args)
     end
 
-    def resize!(scale_factor)
-      @image.resize(scale_factor)
+    def resize!(*args)
+      @image =  if args.length == 1
+                  @image.resized(args[0])
+                elsif args.length == 2 # It must be 4 nor 2, but two of them are not yet implemented
+                  # TODO  Implement the other two arguments.
+                  # arg[0] --> new_width
+                  # arg[1] --> new_height
+                  # arg[2] --> filter=LanczosFilter
+                  # arg[3] --> support=1.0
+                  @image.resized(args[0],args[1])
+                else
+                  Kernel.raise ArgumentError, "wrong number of parameters(#{args.length} for 1 or 4)"
+                end
       self
     end
 
