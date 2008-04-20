@@ -424,10 +424,6 @@ public class MagickImage implements Cloneable {
         transform(AffineTransform.getRotateInstance(Math.toRadians(degrees)));
     }
 
-    public MagickImage rotated(double degrees) {
-        return transformed(AffineTransform.getRotateInstance(Math.toRadians(degrees)));
-    }
-
     public void setFormat(String format) {
         this.format = format;
     }

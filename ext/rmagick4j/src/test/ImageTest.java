@@ -32,12 +32,6 @@ public class ImageTest {
         return new MagickImage(getClass().getResource("clown.jpg"));
     }
 
-    private void rotateToAnyAngle() {
-        MagickImage clown = openClown();
-        clown = clown.rotated(-130);
-        clown.display();
-    }
-
     public void run() {
         switch (1) {
             case 1:
@@ -47,9 +41,6 @@ public class ImageTest {
                 makeAThumbnail();
                 break;
             case 3:
-                rotateToAnyAngle();
-                break;
-            case 4:
                 flipIt();
                 break;
         }

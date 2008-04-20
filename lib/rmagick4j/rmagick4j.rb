@@ -209,6 +209,10 @@ module Magick
       @image.setFormat(format)
       self
     end
+    
+    def flip
+      copy.flip
+    end
 
     def flip!
       @image.flip
@@ -270,13 +274,23 @@ module Magick
       self
     end
 
-    def rotate(amount)
-      Image.new(@image.rotated(amount))
+    def rotate(amount, qualifier=nil)
+      copy.rotate!(amount,qualifier)
     end
 
-    def rotate!(amount)
-      @image.rotate(amount)
-      self
+    def rotate!(amount, qualifier=nil)
+      if qualifier == '<' && columns < rows
+        @image.rotate(amount)
+        self
+      elsif qualifier == '>' && columns > rows
+        @image.rotate(amount)
+        self
+      elsif qualifier.nil?
+        @image.rotate(amount)
+        self
+      else
+        nil
+      end
     end
 
     def rows
