@@ -1,6 +1,6 @@
 #--
-# $Id: stretchable.rb,v 1.4 2007/01/20 17:39:50 rmagick Exp $
-# Copyright (C) 2007 Timothy P. Hunter
+# $Id: stretchable.rb,v 1.6 2008/02/24 21:52:32 rmagick Exp $
+# Copyright (C) 2008 Timothy P. Hunter
 #++
 
 module Magick
@@ -36,7 +36,7 @@ module Magick
 
 
         # The methods in this module describe the user-coordinate space.
-        # Only RVG objects are stretchable.
+        # RVG and Pattern objects are stretchable.
         module Stretchable
 
           private
@@ -145,6 +145,18 @@ module Magick
                 end
                 raise(ArgumentError, "viewbox width must be > 0 (#{width} given)") unless width >= 0
                 raise(ArgumentError, "viewbox height must be > 0 (#{height} given)") unless height >= 0
+
+                # return the user-coordinate space attributes if defined
+                class << self
+                  if not defined? @redefined then
+                    @redefined = true
+                    define_method(:x) { @vbx_x }
+                    define_method(:y) { @vbx_y }
+                    define_method(:width) { @vbx_width}
+                    define_method(:height) { @vbx_height }
+                  end
+                end
+
                 yield(self) if block_given?
                 self
             end
