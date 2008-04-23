@@ -1,0 +1,69 @@
+require 'rake'
+require 'rake/testtask'
+
+task :default => [:compile]
+
+jar_file = File.join(%w(lib magick4j.jar))
+src_files = FileList['ext/rmagick4j/src/**/*.java'].join(' ')
+classes_dir = File.join(%w(pkg classes))
+
+desc "Compile the native Java code."
+task :compile do
+  mkdir_p classes_dir
+  sh "javac -target 1.5 -source 1.5 -d #{classes_dir} #{classpath} #{src_files}"
+  sh "jar cf #{jar_file} -C #{classes_dir} ."
+end
+file jar_file => :compile
+
+desc "Clean up any generated file."
+task :clean do
+  rm_rf 'pkg'
+  rm_rf jar_file
+end
+
+desc "Run a live sample using RMagick4j."
+task :sample do
+  load_paths = '-Ijruby -Ilib -Ipkg'
+  sh "java #{classpath(jar_file)} org.jruby.Main #{load_paths} test/RMagickTestSuite.rb addWatermark"
+end
+
+MANIFEST = FileList["History.txt", "Manifest.txt", "README.txt", 
+  "Rakefile", "LICENSE.txt", "lib/**/*.rb", "lib/**/*.jar",
+  "test/**/*.rb", "test/**/*.jpg", "ext/rmagick4j/src/**/*.java"]
+
+file "Manifest.txt" => :manifest
+task :manifest do
+  File.open("Manifest.txt", "w") {|f| MANIFEST.each {|n| f << "#{n}\n"} }
+end
+Rake::Task['manifest'].invoke # Always regen manifest, so Hoe has up-to-date list of files
+
+require File.dirname(__FILE__) + "/lib/rmagick4j/version"
+begin
+  require 'hoe'
+  Hoe.new("rmagick4j", RMagick4J::Version::VERSION) do |p|
+    p.rubyforge_name = "jruby-extras"
+    p.url = "http://jruby-extras.rubyforge.org/rmagick4j"
+    p.author = "Thomas Palmer, Sergio Rodríguez Arbeo and Thomas Enebo"
+    p.email = "serabe@gmail.com, tom.enebo@gmail.com"
+    p.summary = "RMagick for Java"
+    p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
+    p.description = p.paragraphs_of('README.txt', 0...1).join("\n\n")
+  end.spec.dependencies.delete_if { |dep| dep.name == "hoe" }
+rescue LoadError
+  puts "You really need Hoe installed to be able to package this gem"
+rescue => e
+  puts "ignoring error while loading hoe: #{e.to_s}"
+end
+
+%w(package install_gem debug_gem gem).each { |t| task t => :compile }
+
+# helper methods below
+
+def classpath(extra_jars=nil)
+  jruby_cpath = Java::java.lang.System.getProperty 'java.class.path'
+  path = jruby_cpath ? jruby_cpath.split(File::PATH_SEPARATOR) : []
+  path << FileList['lib/*.jar']
+  path << extra_jars.split(File::PATH_SEPARATOR) if extra_jars
+  "-cp #{path.flatten.join(File::PATH_SEPARATOR)}"
+end
+
