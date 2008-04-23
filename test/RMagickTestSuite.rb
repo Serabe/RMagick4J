@@ -3,7 +3,7 @@ begin
   require 'rubygems'
   gem PLATFORM == 'java' ? 'rmagick4j' : 'rmagick'
 rescue Exception
-  puts 'No gems!'
+  puts "No gems! #{$!}"
 end
 puts Time.new
 require 'RMagick'
@@ -113,7 +113,7 @@ end
 
 def open_clown
   #Magick::ImageList.new("clown.jpg")
-  open("clown.jpg") {|file| Magick::ImageList.new.from_blob(file.read)}
+  open(File.dirname(__FILE__) + "/clown.jpg") {|file| Magick::ImageList.new.from_blob(file.read)}
 end
 
 def rotateToAnyAngle
