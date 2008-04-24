@@ -27,6 +27,11 @@ task :sample do
   sh "java #{classpath(jar_file)} org.jruby.Main #{load_paths} test/RMagickTestSuite.rb addWatermark"
 end
 
+# MANIFEST does not see this file, so touch it so it always appears
+# to be there (this is a hack and someone more knowledgable can hopefully
+# figure this out.
+File.open('lib/magick4j.jar', 'a') {}
+
 MANIFEST = FileList["History.txt", "Manifest.txt", "README.txt", 
   "Rakefile", "LICENSE.txt", "lib/**/*.rb", "lib/**/*.jar",
   "test/**/*.rb", "test/**/*.jpg", "ext/rmagick4j/src/**/*.java"]
