@@ -4,7 +4,14 @@ README.txt
 Rakefile
 LICENSE.txt
 lib/RMagick.rb
+lib/rmagick4j/constants.rb
+lib/rmagick4j/draw.rb
+lib/rmagick4j/enum.rb
+lib/rmagick4j/gradient_fill.rb
+lib/rmagick4j/image.rb
+lib/rmagick4j/image_list.rb
 lib/rmagick4j/rmagick4j.rb
+lib/rmagick4j/type_metric.rb
 lib/rmagick4j/version.rb
 lib/rvg/clippath.rb
 lib/rvg/container.rb
@@ -22,7 +29,6 @@ lib/rvg/transformable.rb
 lib/rvg/units.rb
 lib/jhlabs-filters.jar
 lib/magick4j.jar
-lib/RMagick.jar
 lib/svgsalamander.jar
 test/RMagickTestSuite.rb
 test/clown.jpg

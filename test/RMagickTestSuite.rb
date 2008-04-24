@@ -18,7 +18,7 @@ def main
   else
     image = addTransparencyWithAMask.raise
     # image = open_clown.blur_image(0, 5)
-    open('test.jpg', 'w') do |file|
+    open(File.dirname(__FILE__) +'/test.jpg', 'w') do |file|
       file.write(image.to_blob {self.format = 'JPEG'})
     end
   end

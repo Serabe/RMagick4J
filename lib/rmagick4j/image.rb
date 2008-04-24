@@ -1,0 +1,230 @@
+
+module Magick
+  class Image
+    def self.from_blob(blob, &add)
+      # TODO Use info somehow
+      info = Info.new(&add)
+      # TODO multiple images in file
+      [Image.new(Magick4J.MagickImage.from_blob(blob.to_java_bytes))]
+    end
+
+    def self.read(file, &add)
+      [Image.new(file, &add)]
+    end
+
+    def blur_image(radius=0.0, sigma=1.0)
+      # Swap order on purpose. I wanted them the other way around in Magick4J.
+      Image.new(@image.blurred(sigma, radius))
+    end
+
+    def columns
+      @image.getWidth
+    end
+
+    def composite(*args)
+      # image, x, y, composite_op
+      args[0] = args[0]._image
+      args.map! {|arg| arg.is_a?(Enum) ? arg._val : arg}
+      Image.new(@image.composited(*args))
+    end
+
+    def copy
+      Image.new(@image.clone)
+    end
+
+    def crop(*args)
+      copy.crop!(*args)
+    end
+
+    def crop!(*args)
+      # gravity, x, y, width, height, reset_offset
+      # Defaults.
+      gravity = nil
+      x = y = -1
+      reset_offset = false
+      # Find available args.
+      if args.first.is_a? GravityType
+        gravity = args.shift._val
+      end
+      if [FalseClass, TrueClass].member? args.last.class
+        reset = args.pop
+      end
+      if args.length == 4
+        x, y = args[0..1]
+      end
+      width, height = args[-2..-1]
+      # Call Java.
+      # TODO Why wouldn't we reset offset information? Do we need to use that?
+      @image =  unless gravity.nil?
+                  if x == -1 || y == -1
+                    @image.crop(gravity, width, height)
+                  else
+                    @image.crop(gravity, x, y, width, height)
+                  end
+                else
+                  @image.crop(x,y,width,height)
+                end
+      self
+    end
+
+    def display
+      @image.display
+      self
+    end
+
+    def format
+      @image.getFormat
+    end
+
+    def format= format
+      @image.setFormat(format)
+      self
+    end
+
+    def flip
+      copy.flip
+    end
+
+    def flip!
+      @image.flip
+      self
+    end
+
+    def _image
+      @image
+    end
+
+    def initialize(*args, &add)
+      # TODO Only use new as defined in the RMagick docs. Use allocate and other methods otherwise?
+      info = Info.new(&add)
+      if args.length == 1
+        case args[0]
+        when String:
+          # TODO Respect Dir.getwd
+          name = args[0]
+          @image = Magick4J.ImageDatabase.createDefault(name, info._info) || Magick4J.MagickImage.new(java.io.File.new(name))
+        when Magick4J.MagickImage:
+          @image = args[0]
+        when Image:
+          @image = args[0]._image
+        else
+          raise ArgumentException, "The argument just can be a String, a MagickImage or an Image instance."
+        end
+      else
+        @image = Magick4J.MagickImage.new(args[0], args[1], info._info)
+        if args.length == 3
+          args[2].fill(self)
+        end
+      end
+    end
+
+    def matte= matte
+      @image.setMatte(matte)
+    end
+
+    def quantize(number_colors=256, colorspace=RGBColorspace, dither=true, tree_depth=0, measure_error=false)
+      Image.new(@image.quantized(number_colors, colorspace._val, dither, tree_depth, measure_error))
+    end
+
+    def raise(width=6, height=6, raise=true)
+      Image.new(@image.raised(width, height, raise))
+    end
+
+    def resize(*args)
+      copy.resize!(*args)
+    end
+
+    def resize!(*args)
+      @image =  if args.length == 1
+                  @image.resized(args[0])
+                elsif args.length == 2 # It must be 4 nor 2, but two of them are not yet implemented
+                  # TODO  Implement the other two arguments.
+                  # arg[0] --> new_width
+                  # arg[1] --> new_height
+                  # arg[2] --> filter=LanczosFilter
+                  # arg[3] --> support=1.0
+                  @image.resized(args[0],args[1])
+                else
+                  Kernel.raise ArgumentError, "wrong number of parameters(#{args.length} for 1 or 4)"
+                end
+      self
+    end
+
+    def rotate(amount, qualifier=nil)
+      copy.rotate!(amount,qualifier)
+    end
+
+    def rotate!(amount, qualifier=nil)
+      if qualifier == '<' && columns < rows
+        @image.rotate(amount)
+        self
+      elsif qualifier == '>' && columns > rows
+        @image.rotate(amount)
+        self
+      elsif qualifier.nil?
+        @image.rotate(amount)
+        self
+      else
+        nil
+      end
+    end
+
+    def rows
+      @image.getHeight
+    end
+
+    def to_blob(&add)
+      info = Info.new(&add)
+      @image.setFormat(info.format) if info.format
+      String.from_java_bytes(@image.toBlob)
+    end
+
+    def watermark(mark, lightness=1.0, saturation=1.0, gravity=nil, x_offset=0, y_offset=0)
+      if gravity.is_a? Numeric
+        # gravity is technically an optional argument in the middle.
+        gravity = nil
+        y_offset = x_offset
+        x_offset = gravity
+      end
+      # TODO Perform watermark.
+      self
+    end
+
+    def write(file, &add)
+      # TODO I'm having trouble finding out how this info is used, so I'll skip using it for now.
+      info = Info.new(&add)
+      # TODO Resolve pwd as needed
+      @image.write(file)
+      self
+    end
+
+    class Info
+
+      # TODO Replace with call to Java, or is this the better way? Should it be converted to the Java version only later?
+      def background_color= background_color
+        @info.setBackgroundColor(Magick4J.ColorDatabase.queryDefault(background_color))
+      end
+
+      attr_accessor :format
+
+      def _info
+        @info
+      end
+
+      def initialize(&add)
+        @info = Magick4J.ImageInfo.new
+        instance_eval &add if add
+      end
+
+      def size= size
+        size = Geometry.from_s(size) if size.is_a? String
+        geometry = Magick4J.Geometry.new
+        geometry.setWidth(size.width)
+        geometry.setHeight(size.height)
+        @info.setSize(geometry)
+      end
+
+    end
+
+  end
+end
