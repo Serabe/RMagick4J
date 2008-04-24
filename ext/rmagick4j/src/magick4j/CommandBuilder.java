@@ -67,7 +67,8 @@ public class CommandBuilder {
                             fillGraphics.dispose();
                         }
                     }
-                    if (info.getStroke().getOpacity() > 0.0) {
+                    // FIXME: null pattern stroke (or have correct default if there is one) [enebo]
+                    if (info.getStroke() != null && info.getStroke().getOpacity() > 0.0) {
                         double[] dashArray = info.getStrokeDashArray();
                         if (dashArray != null) {
                             float[] floatDashArray = new float[dashArray.length];
