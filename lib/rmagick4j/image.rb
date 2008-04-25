@@ -1,20 +1,52 @@
 
 module Magick
   class Image
+    
     def self.from_blob(blob, &add)
-      # TODO Use info somehow
-      info = Info.new(&add)
       # TODO multiple images in file
-      [Image.new(Magick4J.MagickImage.from_blob(blob.to_java_bytes))]
+      [Image.from_image(Magick4J.MagickImage.from_blob(blob.to_java_bytes), &add)]
     end
 
     def self.read(file, &add)
-      [Image.new(file, &add)]
+      info = Info.new(&add)
+      image = Magick4J.ImageDatabase.createDefault(file.to_s, info._info) || Magick4J.MagickImage.new(java.io.File.new(file.to_s))
+      [Image.from_image(image,&add)]
+    end
+    
+    def self.from_image(image, &add)
+      raise ArgumentError, 'First parameter must be a MagickImage instance.' unless image.is_a? Magick4J.MagickImage
+      magick_image = Image.new(image.getWidth(), image.getHeight(), &add)
+      magick_image._image = image
+      magick_image
+    end
+    
+    def self.allocate(*args, &add)
+      # TODO Only use new as defined in the RMagick docs. Use allocate and other methods otherwise?
+      info = Info.new(&add)
+      if args.length == 1
+        case args[0]
+        when String then
+          # TODO Respect Dir.getwd
+          name = args[0]
+          @image = Magick4J.ImageDatabase.createDefault(name, info._info) || Magick4J.MagickImage.new(java.io.File.new(name))
+        when Magick4J.MagickImage then
+          @image = args[0]
+        when Image then
+          @image = args[0]._image
+        else
+          raise ArgumentError, "The argument just can be a String, a MagickImage or an Image instance."
+        end
+      else
+        @image = Magick4J.MagickImage.new(args[0], args[1], info._info)
+        if args.length == 3
+          args[2].fill(self)
+        end
+      end
     end
 
     def blur_image(radius=0.0, sigma=1.0)
       # Swap order on purpose. I wanted them the other way around in Magick4J.
-      Image.new(@image.blurred(sigma, radius))
+      Image.from_image(@image.blurred(sigma, radius))
     end
 
     def columns
@@ -25,11 +57,11 @@ module Magick
       # image, x, y, composite_op
       args[0] = args[0]._image
       args.map! {|arg| arg.is_a?(Enum) ? arg._val : arg}
-      Image.new(@image.composited(*args))
+      Image.from_image(@image.composited(*args))
     end
 
     def copy
-      Image.new(@image.clone)
+      Image.from_image(@image.clone)
     end
 
     def crop(*args)
@@ -93,29 +125,23 @@ module Magick
     def _image
       @image
     end
+    
+    def _image=(new_image)
+      @image = new_image
+    end
+    
+    def _info
+      @info
+    end
+    
+    def _info=(new_info)
+      @info = new_info
+    end
 
-    def initialize(*args, &add)
-      # TODO Only use new as defined in the RMagick docs. Use allocate and other methods otherwise?
-      info = Info.new(&add)
-      if args.length == 1
-        case args[0]
-        when String:
-          # TODO Respect Dir.getwd
-          name = args[0]
-          @image = Magick4J.ImageDatabase.createDefault(name, info._info) || Magick4J.MagickImage.new(java.io.File.new(name))
-        when Magick4J.MagickImage:
-          @image = args[0]
-        when Image:
-          @image = args[0]._image
-        else
-          raise ArgumentException, "The argument just can be a String, a MagickImage or an Image instance."
-        end
-      else
-        @image = Magick4J.MagickImage.new(args[0], args[1], info._info)
-        if args.length == 3
-          args[2].fill(self)
-        end
-      end
+    def initialize(columns, rows, fill=nil, &info_block)
+      info = Info.new(&info_block)
+      @image = Magick4J.MagickImage.new(columns, rows, info._info)
+      fill.fill(self) if fill.respond_to? :fill
     end
 
     def matte= matte
@@ -123,11 +149,11 @@ module Magick
     end
 
     def quantize(number_colors=256, colorspace=RGBColorspace, dither=true, tree_depth=0, measure_error=false)
-      Image.new(@image.quantized(number_colors, colorspace._val, dither, tree_depth, measure_error))
+      Image.from_image(@image.quantized(number_colors, colorspace._val, dither, tree_depth, measure_error))
     end
 
     def raise(width=6, height=6, raise=true)
-      Image.new(@image.raised(width, height, raise))
+      Image.from_image(@image.raised(width, height, raise))
     end
 
     def resize(*args)
