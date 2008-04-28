@@ -5,10 +5,10 @@ require File.join(File.dirname(__FILE__), '..', 'magick4j.jar')
 require File.join(File.dirname(__FILE__), '..', 'svgsalamander.jar')
 
 #RMagick classes, keep in alphabetical order, please.
-require 'rmagick4j/constants'
-require 'rmagick4j/draw'
-require 'rmagick4j/enum'
-require 'rmagick4j/gradient_fill'
-require 'rmagick4j/image'
-require 'rmagick4j/image_list'
-require 'rmagick4j/type_metric'
+require File.join(File.dirname(__FILE__), 'constants')
+require File.join(File.dirname(__FILE__), 'draw')
+require File.join(File.dirname(__FILE__), 'enum')
+require File.join(File.dirname(__FILE__), 'gradient_fill')
+require File.join(File.dirname(__FILE__), 'image')
+require File.join(File.dirname(__FILE__), 'image_list')
+require File.join(File.dirname(__FILE__), 'type_metric')

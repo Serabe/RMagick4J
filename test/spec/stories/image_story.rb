@@ -4,6 +4,6 @@ Story: filling a background
   So that I can have a beautiful gradient in it.
   
   Scenario: the starting line is the left border
-    Given a new Gradient fill with starting line (0 0 0 100) with start color: #900 and end color: #000
+    Given a new Gradient fill with starting line 0 0 0 100 with start color: 900 and end color: 000
     When filling a new image sized 300 100 with the GradientFill
-    Then the image should not be null
+    Then the new image should not be nil

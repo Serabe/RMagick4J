@@ -2,6 +2,9 @@ require 'rubygems'
 require 'spec/story'
 
 require File.join(File.dirname(__FILE__), '..', '..', '..','lib','rmagick4j','rmagick4j')
+
+include Magick
+
 require File.join(File.dirname(__FILE__), 'image_steps.rb')
 
 
