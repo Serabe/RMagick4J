@@ -1,6 +1,4 @@
-require File.join(File.dirname(__FILE__),'..','..','lib','magick4j')
-require File.join(File.dirname(__FILE__),'..','..','lib','rmagick4j','constants')
-require File.join(File.dirname(__FILE__),'..','..','lib','rmagick4j','image')
+require File.join(File.dirname(__FILE__),'..','..','lib','rmagick4j','rmagick4j')
 require File.join(File.dirname(__FILE__),"image_constants.rb")
 
 include Magick
