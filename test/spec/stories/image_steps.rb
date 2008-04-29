@@ -2,6 +2,10 @@ steps_for(:image) do
   Given("a new Gradient fill with starting line $x1 $y1 $x2 $y2 with start color: $start_color and end color: $end_color") do |x1, y1, x2, y2, start_color, end_color|
     @fill = GradientFill.new(x1.to_i, y1.to_i, x2.to_i, y2.to_i, '#'+start_color, '#'+end_color)
   end
+  
+  Given("a new Gradient fill with starting point $x $y with start color: $start_color and end color: $end_color") do |x, y, start_color, end_color|
+    @fill = GradientFill.new(x.to_i, y.to_i, x.to_i, y.to_i, '#'+start_color, '#'+end_color)
+  end
 
   When("filling a new image sized $columns $rows with the GradientFill") do |columns, rows|
     begin
@@ -11,7 +15,23 @@ steps_for(:image) do
     end
   end
 
-  Then("the new image should not be nil") do
-    @image.should_not be nil
+  Then("the new image should not be $value") do |value|
+    @image.should_not be parse_value(value)
+  end
+  
+  Then("the new image should be $value") do |value|
+    @image.should be parse_value(value)
+  end
+  
+  def parse_value(value)
+    case value
+    when 'nil': nil
+    when 'false': false
+    when 'true': true
+    when value.to_i.to_s: value.to_i
+    when value.to_f.to_s: value.to_f
+    else
+      value
+    end
   end
 end

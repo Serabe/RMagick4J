@@ -7,3 +7,8 @@ Story: filling a background
     Given a new Gradient fill with starting line 0 0 0 100 with start color: 900 and end color: 000
     When filling a new image sized 300 100 with the GradientFill
     Then the new image should not be nil
+
+  Scenario: the starting point is the 0 0
+    Given a new Gradient fill with starting point 0 0 with start color: 900 and end color: 000
+    When filling a new image sized 300 100 with the GradientFill
+    Then the new image should not be nil

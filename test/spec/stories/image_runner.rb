@@ -9,5 +9,5 @@ require File.join(File.dirname(__FILE__), 'image_steps.rb')
 
 
 with_steps_for(:image) do
-  run File.join(File.dirname(__FILE__), 'image_story.rb')
+  run File.join(File.dirname(__FILE__), 'image_filling.story')
 end
