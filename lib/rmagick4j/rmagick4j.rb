@@ -3,6 +3,7 @@ require 'java'
 require File.join(File.dirname(__FILE__), '..', 'jhlabs-filters.jar')
 require File.join(File.dirname(__FILE__), '..', 'magick4j.jar')
 require File.join(File.dirname(__FILE__), '..', 'svgsalamander.jar')
+require File.join(File.dirname(__FILE__), '..', 'observer')
 
 #RMagick classes, keep in alphabetical order, please.
 require File.join(File.dirname(__FILE__), 'constants')

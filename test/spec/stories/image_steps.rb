@@ -16,13 +16,32 @@ steps_for(:image) do
   end
 
   Then("the new image should not be $value") do |value|
-    @image.should_not be parse_value(value)
+    expected_value =  case value
+                      when 'nil': nil
+                      when 'false': false
+                      when 'true': true
+                      when value.to_i.to_s: value.to_i
+                      when value.to_f.to_s: value.to_f
+                      else
+                        value
+                      end
+    @image.should_not be expected_value
   end
   
   Then("the new image should be $value") do |value|
-    @image.should be parse_value(value)
+    expected_value =  case value
+                      when 'nil': nil
+                      when 'false': false
+                      when 'true': true
+                      when value.to_i.to_s: value.to_i
+                      when value.to_f.to_s: value.to_f
+                      else
+                        value
+                      end
+    @image.should be expected_value
   end
   
+  # TODO: Refactor... but how?
   def parse_value(value)
     case value
     when 'nil': nil

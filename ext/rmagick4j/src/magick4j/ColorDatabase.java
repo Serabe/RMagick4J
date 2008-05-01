@@ -40,6 +40,7 @@ public class ColorDatabase {
     }
 
     private PixelPacket parseRgb(String rgb) {
+        // TODO Fix it
         if (rgb.length() == 6) {
             // If NumberFormatException, that's okay. Crazy input.
             // Just need to be able to say this in Ruby:
@@ -47,6 +48,11 @@ public class ColorDatabase {
             double red = Integer.parseInt(rgb.substring(0, 2), 16);
             double green = Integer.parseInt(rgb.substring(2, 4), 16);
             double blue = Integer.parseInt(rgb.substring(4, 6), 16);
+            return new PixelPacket(red / 255, green / 255, blue / 255);
+        } else if(rgb.length() == 3){
+            double red = Integer.parseInt(rgb.substring(0, 1)+rgb.substring(0, 1), 16);
+            double green = Integer.parseInt(rgb.substring(1, 2)+rgb.substring(1, 2), 16);
+            double blue = Integer.parseInt(rgb.substring(2, 3)+rgb.substring(2, 3), 16);
             return new PixelPacket(red / 255, green / 255, blue / 255);
         }
         return null;
