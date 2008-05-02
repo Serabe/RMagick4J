@@ -59,12 +59,71 @@ public class GradientFill {
             horizontalFill(image);
         } else {
             // TODO: diagonal
-            throw new UnsupportedOperationException("Not yet implemented diagonal gradient filling.");
+            double m = (this.y2-this.y1) / (this.x2-this.x1);
+            double mainDiagonal = image.getHeight()/image.getWidth();
+            double b = this.y1 - (m*this.x1);
+            
+            if(Math.abs(m) <= mainDiagonal){
+                // Why is this called vertical, when the line more horizontal
+                // than vertical? If verticalFill is called verticalFill then
+                // this must be called horizontalDiagonalFill.
+                verticalDiagonalFill(image, m, b);
+            }else{
+                horizontalDiagonalFill(image, m, b);
+            }
+            
         }
         
         image.getImage().createGraphics().dispose();
         
         
+    }
+
+    private void horizontalDiagonalFill(MagickImage image, double m, double b) {
+        int columns = image.getWidth(), rows = image.getHeight();
+        
+        double steps = 0.0;
+        
+        double distance1 = -b/m;
+        double distance2 = (rows - b)/m;
+        
+        if( distance1 < 0 && distance2 < 0){
+            steps += Math.max(  Math.abs(distance1),
+                                Math.abs(distance2)
+                             );
+        }else if(distance1 > columns && distance2 > columns){
+            steps += Math.max(  Math.abs(distance1 - columns),
+                                Math.abs(distance2 - columns)
+                             );
+        }
+        
+        steps += Math.max(  Math.max(distance1, columns-distance1),
+                            Math.max(distance2, columns-distance2)
+                         );
+        
+        // TODO: Is this if necessary?
+        if(steps < 0){
+            PixelPacket ppAux = this.startColor;
+            this.startColor = this.endColor;
+            this.endColor = ppAux;
+            steps = -steps;
+        }
+        
+        this.calculateSteps(steps);
+        
+        WritableRaster raster = image.getImage().getRaster();
+        
+        for(int y = 0; y < rows; y++){
+            
+            for(int x = 0; x < columns; x++){
+                double distance = Math.abs(x - ((y-b)/m));
+                
+                double[] data = this.calculatePixel(distance);
+                
+                raster.setPixel(x, y, data);
+            }
+            
+        }
     }
 
     private void horizontalFill(MagickImage image) {
@@ -126,6 +185,57 @@ public class GradientFill {
 
         }
 
+    }
+
+    private void verticalDiagonalFill(MagickImage image, double m, double b) {
+        // Renaming for convenience.
+        int columns = image.getWidth(), rows = image.getHeight();
+        
+        double steps = 0.0;
+        
+        double distance1 = b;
+        double distance2 = m*columns + b;
+        
+        if( distance1 < 0 && distance2 < 0){
+            steps += Math.max(  Math.abs(distance1),
+                                Math.abs(distance2)
+                             );
+        }else if(distance1 > rows && distance2 > rows){
+            steps += Math.max(  Math.abs(distance1 - rows),
+                                Math.abs(distance2 - rows)
+                             );
+        }
+        
+        steps += Math.max(  Math.max(distance1, rows-distance1),
+                            Math.max(distance2, rows-distance2)
+                         );
+        
+        // Fix the steps value.
+        
+        // TODO: Is this if necessary?
+        if(steps < 0){
+            PixelPacket ppAux = this.startColor;
+            this.startColor = this.endColor;
+            this.endColor = ppAux;
+            steps = -steps;
+        }
+        
+        this.calculateSteps(steps);
+        
+        WritableRaster raster = image.getImage().getRaster();
+        
+        for(int y = 0; y < rows; y++){
+            
+            for(int x = 0; x < columns; x++){
+                
+                double distance = Math.abs(y - (m*x + b));
+                
+                double[] data = this.calculatePixel(distance);
+                
+                raster.setPixel(x, y, data);
+            }
+            
+        }
     }
 
     private void verticalFill(MagickImage image){

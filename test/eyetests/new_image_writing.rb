@@ -1,4 +1,9 @@
-require File.join(File.dirname(__FILE__), '..', '..','lib','rmagick4j','rmagick4j')
+if PLATFORM == 'java'
+  require File.join(File.dirname(__FILE__), '..', '..','lib','rmagick4j','rmagick4j')
+else
+  require "rubygems"
+  require "RMagick"
+end
 
 class Magick::Image
   alias_method :old_write, :write
