@@ -1,13 +1,21 @@
 steps_for(:image) do
-  Given("a new Gradient fill with starting line $x1 $y1 $x2 $y2 with start color: $start_color and end color: $end_color") do |x1, y1, x2, y2, start_color, end_color|
+  Given("a new GradientFill with starting line $x1 $y1 $x2 $y2 with start color: $start_color and end color: $end_color") do |x1, y1, x2, y2, start_color, end_color|
     @fill = GradientFill.new(x1.to_i, y1.to_i, x2.to_i, y2.to_i, '#'+start_color, '#'+end_color)
   end
   
-  Given("a new Gradient fill with starting point $x $y with start color: $start_color and end color: $end_color") do |x, y, start_color, end_color|
+  Given("a new GradientFill with starting point $x $y with start color: $start_color and end color: $end_color") do |x, y, start_color, end_color|
     @fill = GradientFill.new(x.to_i, y.to_i, x.to_i, y.to_i, '#'+start_color, '#'+end_color)
   end
+  
+  Given("a new Image $image_name with extension $extension") do |image_name, extension|
+    @image = Image.read(File.join(File.dirname(__FILE__), '..', '..', 'images', image_name+'.'+extension))
+  end
+  
+  Given("a new TextureFill from image") do
+    @fill = TextureFill.new(@image.first)
+  end
 
-  When("filling a new image sized $columns $rows with the GradientFill") do |columns, rows|
+  When("filling a new image sized $columns $rows with the Fill object") do |columns, rows|
     begin
       @image = Image.new(columns.to_i, rows.to_i, @fill)
     rescue

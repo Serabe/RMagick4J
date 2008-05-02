@@ -1,9 +1,5 @@
 package magick4j;
 
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.geom.Point2D;
 import java.awt.image.WritableRaster;
 
 public class GradientFill {

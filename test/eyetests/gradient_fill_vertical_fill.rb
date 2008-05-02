@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'new_image_writing.rb')
+require File.join(File.dirname(__FILE__), 'new_image.rb')
 
 include Magick
 

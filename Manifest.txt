@@ -12,6 +12,7 @@ lib/rmagick4j/gradient_fill.rb
 lib/rmagick4j/image.rb
 lib/rmagick4j/image_list.rb
 lib/rmagick4j/rmagick4j.rb
+lib/rmagick4j/texture_fill.rb
 lib/rmagick4j/type_metric.rb
 lib/rmagick4j/version.rb
 lib/rvg/clippath.rb
@@ -71,6 +72,7 @@ ext/rmagick4j/src/magick4j/ImageList.java
 ext/rmagick4j/src/magick4j/MagickImage.java
 ext/rmagick4j/src/magick4j/PixelPacket.java
 ext/rmagick4j/src/magick4j/TextFormatter.java
+ext/rmagick4j/src/magick4j/TextureFill.java
 ext/rmagick4j/src/magick4j/Thrower.java
 ext/rmagick4j/src/magick4j/TypeMetrics.java
 ext/rmagick4j/src/test/ImageTest.java

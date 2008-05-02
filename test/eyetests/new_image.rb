@@ -7,6 +7,11 @@ end
 
 class Magick::Image
   alias_method :old_write, :write
+  alias_method :old_read, :read
+  
+  def read(filename)
+    old_read File.join(File.dirname(__FILE__), '..', 'images', filename)
+  end
   
   def write(filename)
     index = filename.index('.',-5)

@@ -5,7 +5,7 @@ require File.join(File.dirname(__FILE__), '..', '..', '..','lib','rmagick4j','rm
 
 include Magick
 
-require File.join(File.dirname(__FILE__), 'image_steps.rb')
+require File.join(File.dirname(__FILE__), 'image_filling_steps.rb')
 
 
 with_steps_for(:image) do
