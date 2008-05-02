@@ -1,13 +1,10 @@
 #!/bin/bash
 
-echo "******** Building Jar **********"
-ant jar
-
 echo "******** Uninstalling RMagick4J **********"
 jgem uninstall rmagick4j
 
 echo "******** Building RMagick4J Gem **********"
-jgem build rmagick4j.gemspec
+jruby -S rake gem
 
 echo "******** Installing RMagick4J Gem **********"
-jgem install rmagick4j-0.3.4-java.gem
+jgem install pkg/*.gem

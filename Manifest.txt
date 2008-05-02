@@ -36,6 +36,7 @@ test/RMagickTestSuite.rb
 test/spec/draw_spec.rb
 test/spec/image_constants.rb
 test/spec/image_spec.rb
+test/spec/stories/image_filling_story.rb
 test/spec/stories/image_runner.rb
 test/spec/stories/image_steps.rb
 test/unit/DrawTest.rb
