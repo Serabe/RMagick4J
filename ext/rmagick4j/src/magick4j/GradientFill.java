@@ -78,6 +78,8 @@ public class GradientFill {
     private void horizontalDiagonalFill(MagickImage image, double m, double b) {
         int columns = image.getWidth(), rows = image.getHeight();
         
+        
+        // Calculate steps value.
         double steps = 0.0;
         
         double distance1 = -b/m;
@@ -97,18 +99,12 @@ public class GradientFill {
                             Math.max(distance2, columns-distance2)
                          );
         
-        // TODO: Is this if necessary?
-        if(steps < 0){
-            PixelPacket ppAux = this.startColor;
-            this.startColor = this.endColor;
-            this.endColor = ppAux;
-            steps = -steps;
-        }
-        
+        // Things to do before entering the for loops.
         this.calculateSteps(steps);
         
         WritableRaster raster = image.getImage().getRaster();
         
+        // For each pixel
         for(int y = 0; y < rows; y++){
             
             for(int x = 0; x < columns; x++){
@@ -125,20 +121,14 @@ public class GradientFill {
     private void horizontalFill(MagickImage image) {
         int columns = image.getWidth(), rows = image.getHeight();
         
+        // Calculate the steps value.
         double steps = Math.max(this.y1, rows - this.y1);
-        
-        // TODO: Is this if necessary?
-        if(steps < 0){
-            PixelPacket ppAux = this.startColor;
-            this.startColor = this.endColor;
-            this.endColor = ppAux;
-            steps = -steps;
-        }
         
         if(this.y1 < 0){
             steps -= this.y1;
         }
         
+        // Things to do before entering the for loops.
         this.calculateSteps(steps);
         
         WritableRaster raster = image.getImage().getRaster();
@@ -168,7 +158,7 @@ public class GradientFill {
 
         WritableRaster raster = image.getImage().getRaster();
 
-        // Nested fors mean for each point. 
+        // For each pixel. 
         for(int y=0; y<rows; y++){
 
             for(int x=0; x<columns; x++){
@@ -208,14 +198,6 @@ public class GradientFill {
         
         // Fix the steps value.
         
-        // TODO: Is this if necessary?
-        if(steps < 0){
-            PixelPacket ppAux = this.startColor;
-            this.startColor = this.endColor;
-            this.endColor = ppAux;
-            steps = -steps;
-        }
-        
         this.calculateSteps(steps);
         
         WritableRaster raster = image.getImage().getRaster();
@@ -243,14 +225,6 @@ public class GradientFill {
         double steps = Math.max(this.x1, columns - this.x1);
         
         // Fix the steps value.
-        
-        // TODO: Is this if necessary?
-        if(steps < 0){
-            PixelPacket ppAux = this.startColor;
-            this.startColor = this.endColor;
-            this.endColor = ppAux;
-            steps = -steps;
-        }
         
         if(this.x1 < 0){
             steps -= this.x1;
