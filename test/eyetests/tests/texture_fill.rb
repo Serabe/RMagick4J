@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), 'new_image.rb')
 
 include Magick
 
-texture_image = ImageList.new 'textura2.jpg'
+texture_image = Image.load('texture.jpg').first
 
 texture = TextureFill.new(texture_image)
 
