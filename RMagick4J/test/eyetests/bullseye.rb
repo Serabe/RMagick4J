@@ -36,6 +36,14 @@ module Bullseye
   class ScriptRunner
     include Singleton
     
+    def running()
+      @running
+    end
+    
+    def running=(value)
+      @running = value
+    end
+    
     def output=(value)
       @output=value if value.respond_to?(:image_1) && value.respond_to?(:image_2)
     end
@@ -53,6 +61,7 @@ module Bullseye
     end
     
     def run_script()
+      running = true
       raise ArgumentError, 'source and output cannot be nil' if source.nil? || output.nil?
       selected_script = source.selected_value
       script_name = selected_script.downcase.gsub(' ','_')
@@ -72,6 +81,7 @@ module Bullseye
       else
         Notifier.instance.notificate 'Error'
       end
+      running = false
     end
   end
   
@@ -126,15 +136,16 @@ module Bullseye
     ScriptRunner.instance.output= c.image_panel
     ScriptRunner.instance.source= c.scripts_list
     
-    i.run_button = {:action => proc do|t,e|
-                                 # Make it works. Somehow, the button is still enabled.
-                                 c.run_button.setEnabled(false)
-                                 Thread.new do
-                                   Notifier.instance.notificate 'Running scripts'
-                                   ScriptRunner.instance.run_script
-                                 end
-                                 c.run_button.setEnabled(true)
-                               end}
+    i.run_button = {:action =>  proc do|t,e|
+                                  c.scripts_list.enabled = false
+                                  c.run_button.enabled=false  
+                                  Thread.new do
+                                    Notifier.instance.notificate 'Running scripts'
+                                    ScriptRunner.instance.run_script
+                                    c.run_button.enabled=true
+                                    c.scripts_list.enabled = true
+                                  end
+                                end}
   end.build :args => 'Bullseye'
  
   
