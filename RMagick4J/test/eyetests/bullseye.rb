@@ -1,4 +1,5 @@
 TEST_ROOT = File.expand_path(File.dirname(__FILE__))
+
 require 'java'
 require 'rubygems'
 require 'profligacy/swing'
@@ -90,6 +91,9 @@ module Bullseye
        JScrollPane::HORIZONTAL_SCROLLBAR_NEVER
   end
 
+  # Prepare the output directory.
+  Dir.mkdir(File.join(TEST_ROOT, 'images')) unless File.exists?(File.join(TEST_ROOT, 'images'))
+  
   lel = '[ <label_scripts | <label_results       ]
          [ <scripts_list  | (610,300)image_panel ]
          [ >run_button    | >status              ]'

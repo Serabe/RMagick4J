@@ -1,0 +1,66 @@
+== 0.3.4
+
+- No bugfixes nor new features, just added compatibility with JRuby 1.1. 
+
+== 0.3.3
+
+- This is a bug fix release to support updates to the string byte array conversion changes in recent versions of JRuby. This release was tested against JRuby 1.0.0RC3. 
+
+== 0.3.2 
+
+Full RMagick required for RMagick4J is included. The gem also includes JH Labs Filters and SVG Salamander, but they aren't much used yet.
+
+Use it like so for now:
+
+require 'rubygems'
+gem PLATFORM == 'java' ? 'rmagick4j' : 'rmagick'
+require 'RMagick'
+
+Also see the project home page at http://code.google.com/p/rmagick4j/
+
+== 0.3.1
+
+Functionally equivalent to 0.3 release, but it supports JRuby 0.9.8 now. Also, it's a gem. It works along with a standard rmagick gem already installed (for those who keep gems in one place for multiple Ruby installs). For instance, I've tested this as working under both ruby and jruby:
+
+require 'rubygems'
+gem 'rmagick4j'
+gem 'rmagick'
+require 'gruff'
+
+I hope to release a full rmagick gem in the near future for those who want to use apps unchanged and have a local GEM_HOME just for jruby.
+
+== 0.3.0 
+
+More complete Draw features. Supports most Gruff Graphs unit tests. 
+
+== 0.2
+
+More I/O support including basic handling of write, to_blob, and from_blob. Also upgraded RMagick libs to 1.14.0 and bundled JRuby to 0.9.1. Also reorganized the directory layout better. Moved JRuby files to its own folder. Moved draw support into magickjr package. 
+
+== 0.1
+
+Hello,
+
+I've tagged an "m1" release of RMagickJr. Here are the main good things to say about it:
+
+- At varying degrees of quality and hackishness, it runs all these samples: http://rmagick.rubyforge.org/portfolio.html
+- The build.xml works and by default shows a sample picture.
+
+Put together, this means that other people might be able to run it, and they might be able to put it to some simple use. Well, except that it doesn't support real data export yet. It just displays pictures.
+
+Here are some bad things to say about it:
+
+- I've tested only on a Mac so far.
+- Some things are super hacks, and some implementation is super shallow.
+- Some of the pictures don't look quite right.
+- Fixing some of what's off (especially the convolution/blurring) will be nontrivial for me.
+- Some project organization is less than ideal. Still need to understand RubyGems, extensions/ext concepts, and rake better.
+- Not much attention paid to super performance.
+- My progress is slow, but that was expected.
+- Probably a lot more.
+
+But it's still progress, and I'm actually reading the pick axe (v2 - I'd looked at v1 online a few years ago), so maybe I'll start grokking the Ruby world better soon.
+
+Maybe by m2 or m3 (or sometime), I could try to find a real app using RMagick and try to make it work with my version. For the next moment, though, I'll probably try tackling page 2 or 3 of the "portfolio" samples at the RMagick web site. And eventually go into class by class and method by method depth. Or something. I'm just trying to work with tracer bullets for now.
+
+And I might rename the project to "rmagick4j" or "rmagick-jruby" or something at some point. Not sure what's best, so I'm sticking with "jr" for now. And that's an accurate representation for now, anyway.
