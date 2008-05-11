@@ -14,13 +14,8 @@ class Magick::Image
   end
   
   def write(filename)
-    index = filename.index('.',-5)
-    
-    new_filename =  if PLATFORM == 'java'
-                      filename[0..index] + 'jruby' + filename[index..filename.size]
-                    else
-                      filename[0..index] + 'mri' + filename[index..filename.size]
-                    end
+    engine = (PLATFORM == 'java' ? 'jruby' : 'mri')
+    new_filename = filename.sub(/(\.[^\.]*)$/, '.' + engine + '\1')
     old_write File.join(File.expand_path(File.dirname(__FILE__)), '..', 'images',new_filename)
   end
 end

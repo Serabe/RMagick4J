@@ -1,13 +1,11 @@
+TEST_ROOT = File.expand_path(File.dirname(__FILE__))
 require 'java'
 require 'rubygems'
-require 'Singleton'
-
-require 'tests/new_image.rb'
 require 'profligacy/swing'
 require 'profligacy/lel'
+require  TEST_ROOT + '/tests/new_image.rb'
 
 module Bullseye
-  
   include Profligacy
   
   DefaultListModel = javax.swing.DefaultListModel
@@ -18,6 +16,7 @@ module Bullseye
   JLabel = javax.swing.JLabel
   JList = javax.swing.JList
   JPanel = javax.swing.JPanel
+  JScrollPane = javax.swing.JScrollPane
   JTextField = javax.swing.JTextField
   
   class ImagePanel < JPanel
@@ -25,134 +24,99 @@ module Bullseye
     
     def paint(graphics)
       unless image_1.nil? || image_2.nil?
-        pic1 = ImageIO.read(JFile.new(image_1))
-        pic2 = ImageIO.read(JFile.new(image_2))
+        pic1 = load_image(image_1)
         graphics.drawImage(pic1, 0, 0, nil)
-        graphics.drawImage(pic2, pic1.width + 10, 0, nil)
+        graphics.drawImage(load_image(image_2), pic1.width + 10, 0, nil)
       end
+    rescue
+      NOTIFIER.notify $!.message
+    end
+
+    def load_image(filename)
+      file = JFile.new(filename)
+      raise ArgumentError.new("File #{filename} does not exist") unless file.exists
+      ImageIO.read(file)
     end
   end
   
-  class ScriptRunner
-    include Singleton
-    
-    def running()
-      @running
+  class ScriptRunner < Struct.new(:picture_panel, :source)
+    def initialize(picture_panel, source)
+      super(picture_panel, source)
+      @running = false
     end
     
-    def running=(value)
-      @running = value
-    end
-    
-    def output=(value)
-      @output=value if value.respond_to?(:image_1) && value.respond_to?(:image_2)
-    end
-    
-    def output()
-      @output
-    end
-    
-    def source=(value)
-      @source=value if value.respond_to?(:selected_value)
-    end
-    
-    def source()
-      @source
-    end
-    
-    def run_script()
-      running = true
-      raise ArgumentError, 'source and output cannot be nil' if source.nil? || output.nil?
-      selected_script = source.selected_value
-      script_name = selected_script.downcase.gsub(' ','_')
-      selected_script = File.join(File.expand_path(File.dirname(__FILE__)),
-                                  'tests',
-                                  script_name+'.rb')
-      if `#{File.join(File.expand_path(File.dirname(__FILE__)), 'execute_test')} #{selected_script}` == ''
-        Notifier.instance.notificate 'Done'
-        output.image_1 = File.join( File.expand_path(File.dirname(__FILE__)),
-                                    'images',
-                                    script_name+'.jruby.jpg')
-        output.repaint
-        output.image_2 = File.join( File.expand_path(File.dirname(__FILE__)),
-                                    'images',
-                                    script_name+'.mri.jpg')
-        output.repaint
+    def run_script
+      @running = true
+      script_name = source.selected_value.downcase.gsub(' ','_')
+      selected_script = File.join(TEST_ROOT, 'tests', script_name + '.rb')
+      if `#{File.join(TEST_ROOT, 'execute_test')} #{selected_script}` == ''
+        NOTIFIER.notify 'Done'
+        picture_panel.image_1 = File.join(TEST_ROOT, 'images', script_name + '.jruby.jpg')
+        picture_panel.repaint
+        picture_panel.image_2 = File.join(TEST_ROOT, 'images', script_name + '.mri.jpg')
+        picture_panel.repaint
       else
-        Notifier.instance.notificate 'Error'
+        NOTIFIER.notify 'Error'
       end
-      running = false
+      @running = false
     end
   end
   
-  class Notifier
-    include Singleton
-    
-    def output=(value)
-      @output=value if value.respond_to?(:text=)
-    end
-    
-    def output()
-      @output
-    end
-    
-    def notificate(string)
+  class Notifier < Struct.new(:output)
+    def notify(string)
       output.text = string.to_s
     end
   end
   
   class ScriptList < JList
-    
-   def initialize()
-     @default_model = DefaultListModel.new
-     super(@default_model)
-     load
-   end
+    def initialize
+      @default_model = DefaultListModel.new
+      super(@default_model)
+      load_test_scripts
+      self.setSelectedIndex(0)
+    end
    
-   def load()
-     Dir['tests/*.rb'].each do |script|
-       script = script.gsub('tests/','').gsub('.rb', '').split('_').map{|x| x.capitalize}.join(' ')
-       @default_model.addElement(java.lang.String.new(script.to_java_bytes)) unless script == 'New Image'
-     end
-   end
+    def load_test_scripts
+      Dir[File.dirname(__FILE__) + '/tests/*.rb'].each do |script|
+        script = script.gsub(/(^.*tests\/|.rb$)/,'').split('_').map{|x| x.capitalize}.join(' ')
+        @default_model.addElement(script) unless script == 'New Image'
+      end
+    end
   end
   
-  lel = '
-          [ <label_scripts | <label_results       ]
-          [ (610)scripts_list   | (610,300)image_panel ]
-          [ >run_button    | text_field           ]
-        '
+  def self.scrollable(component)
+    JScrollPane.new component, 
+       JScrollPane::VERTICAL_SCROLLBAR_AS_NEEDED, 
+       JScrollPane::HORIZONTAL_SCROLLBAR_NEVER
+  end
+
+  lel = '[ <label_scripts | <label_results       ]
+         [ <scripts_list  | (610,300)image_panel ]
+         [ >run_button    | >status              ]'
+
   ui = Swing::LEL.new(JFrame, lel) do |c, i|
     c.label_scripts = JLabel.new('Scripts')
-    c.scripts_list = ScriptList.new
+    c.scripts_list = scrollable(scripts = ScriptList.new)
     c.run_button = JButton.new('Run')
     c.label_results = JLabel.new('Results')
     c.image_panel = ImagePanel.new
-    c.text_field = JTextField.new
-    
-    c.text_field.editable = false
-    
-    Notifier.instance.output = c.text_field
-    ScriptRunner.instance.output= c.image_panel
-    ScriptRunner.instance.source= c.scripts_list
-    
-    i.run_button = {:action =>  proc do|t,e|
-                                  c.scripts_list.enabled = false
-                                  c.run_button.enabled=false  
-                                  Thread.new do
-                                    Notifier.instance.notificate 'Running scripts'
-                                    ScriptRunner.instance.run_script
-                                    c.run_button.enabled=true
-                                    c.scripts_list.enabled = true
-                                  end
-                                end}
+    c.status = JLabel.new ""
+
+    Bullseye::NOTIFIER = Notifier.new(c.status)
+    script_runner = ScriptRunner.new(c.image_panel, scripts)
+    run_script = proc {
+        scripts.enabled = c.run_button.enabled = false
+        Thread.new do
+          NOTIFIER.notify 'Running scripts...'
+          script_runner.run_script
+          scripts.enabled = c.run_button.enabled = true
+        end
+    }
+
+    scripts.addMouseListener { |event| run_script.call if event.click_count == 2 }
+    i.run_button = {:action => proc { |t,e| run_script.call } }
   end.build :args => 'Bullseye'
- 
-  
+   
   ui.default_close_operation = JFrame::EXIT_ON_CLOSE
- 
-  def running_script
-    Notifier.instance.notificate 'Running scripts'
-    
-  end
+
 end
