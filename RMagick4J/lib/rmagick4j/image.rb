@@ -48,6 +48,20 @@ module Magick
       # Swap order on purpose. I wanted them the other way around in Magick4J.
       Image.from_image(@image.blurred(sigma, radius))
     end
+    
+    def change_geometry(geometry)
+      geometry = Geometry.from_s(geometry.to_s) unless geometry.is_a? Geometry
+      index = if geometry.flag.nil?
+                0
+              else
+                geometry.flag._val
+              end
+      geometry = JGeometries[index].new( geometry.width, geometry.height,
+                                         geometry.x, geometry.y)
+      yield geometry.calculate_width(self._image),
+            geometry.calculate_height(self._image),
+            self
+    end
 
     def columns
       @image.getWidth

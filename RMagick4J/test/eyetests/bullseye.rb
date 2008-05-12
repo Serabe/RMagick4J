@@ -50,7 +50,11 @@ module Bullseye
       @running = true
       script_name = source.selected_value.downcase.gsub(' ','_')
       selected_script = File.join(TEST_ROOT, 'tests', script_name + '.rb')
-      if `#{File.join(TEST_ROOT, 'execute_test')} #{selected_script}` == ''
+      NOTIFIER.notify 'Running script in MRI.'
+      output_commands = `sh -c 'ruby #{selected_script}'`
+      NOTIFIER.notify 'Running in JRuby.'
+      output_commands += `jruby #{selected_script}`
+      if output_commands == ''
         NOTIFIER.notify 'Done'
         picture_panel.image_1 = File.join(TEST_ROOT, 'images', script_name + '.jruby.jpg')
         picture_panel.repaint

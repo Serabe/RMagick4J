@@ -10,7 +10,7 @@
 
 #require 'RMagick2.so'
 
-require "rmagick4j/rmagick4j"
+require File.join(File.dirname(__FILE__), 'rmagick4j', 'rmagick4j')
 
 module Magick
     @@formats = nil
