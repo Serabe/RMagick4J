@@ -18,7 +18,7 @@ public class PixelPacket {
     }
 
     public PixelPacket(double red, double green, double blue) {
-        this(red, green, blue, 1);
+        this(red, green, blue, 0);
     }
 
     public PixelPacket(double red, double green, double blue, double opacity) {
