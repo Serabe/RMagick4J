@@ -12,17 +12,11 @@ public class PercentGeometry extends Geometry{
     
     @Override
     public double calculateHeight(MagickImage image){
-        return new Geometry( image.getWidth()*this.getWidth()/100,
-                             image.getHeight()*this.getHeight()/100,
-                             this.getX(),
-                             this.getY()).calculateHeight(image);
+        return image.getHeight()*this.getHeight()/100;
     }
 
     @Override
     public double calculateWidth(MagickImage image){
-        return new Geometry( image.getWidth()*this.getWidth()/100,
-                             image.getHeight()*this.getHeight()/100,
-                             this.getX(),
-                             this.getY()).calculateWidth(image);
+        return image.getWidth()*this.getWidth()/100;
     }
 }

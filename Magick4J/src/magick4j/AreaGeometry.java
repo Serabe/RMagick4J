@@ -13,12 +13,12 @@ public class AreaGeometry extends Geometry{
     
     @Override
     public double calculateHeight(MagickImage image){
-        return Math.sqrt(this.getWidth()*image.getWidth()/image.getHeight());
+        return Math.round(Math.sqrt(this.getWidth()*image.getHeight()/image.getWidth()));
     }
     
     @Override
     public double calculateWidth(MagickImage image){
-        return Math.sqrt(this.getWidth()*image.getHeight()/image.getWidth());
+        return Math.round(Math.sqrt(this.getWidth()*image.getWidth()/image.getHeight()));
     }
 
 }

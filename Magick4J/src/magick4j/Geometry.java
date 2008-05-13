@@ -18,12 +18,12 @@ public class Geometry {
     }
 
     public double calculateHeight(MagickImage image){
-        double newHeight = this.getWidth()*image.getHeight()/image.getWidth();
+        double newHeight = Math.round(this.getWidth()*image.getHeight()/image.getWidth());
         return Math.min(newHeight, this.getHeight());
     }
 
     public double calculateWidth(MagickImage image){
-        double newWidth = this.getHeight()*image.getWidth()/image.getHeight();
+        double newWidth = Math.round(this.getHeight()*image.getWidth()/image.getHeight());
         return Math.min(newWidth, this.getWidth());
     }
     
