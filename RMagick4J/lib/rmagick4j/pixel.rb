@@ -1,39 +1,35 @@
 
 module Magick
+  Pixel = Magick4J::PixelPacket
+  
+  class Pixel
+    def initialize(red, green, blue, opacity=0)
+      super(red, green, blue, opacity)
+    end
+    
+    def self.from_color
+       #...
+    end
+  end
+end
+
+module Magick
   class Pixel
     include Comparable
     include Observable
+    attr_accessor :pixel
     
-    def initialize(red, green, blue, opacity)
+    def initialize(red, green, blue, opacity=0)
       # TODO Add support to CMYKColorspace.
-      @_pixel = Magick4J::PixelPacket.new(red, green, blue, opacity)
+      @pixel = Magick4J::PixelPacket.new(red, green, blue, opacity)
     end
     
-    def _pixel
-      @_pixel
-    end
-    
-    def _pixel=(value)
-      @_pixel = value if value.is_a? Magick4J::PixelPacket
-    end
-    
-    # Add accessors to RGBA values.
-    [:red, :green, :blue, :opacity].each do |channel|
-      define_method(channel)do
-        @_pixel.send(channel).round.to_i
-      end
-      
-      define_method(channel.to_s+'=')do |value|
-        raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
-        @_pixel.send(channel.to_s+'=', value.to_i)
-      end
-    end
-    
+    #TODO: Find a good name for pixel_aux
     def Pixel.from_color(color_name)
-      pixel = Magick4J::ColorDatabase.lookup(color_name)
-      raise ArgumentError, "invalid color name: #{color_name}" if pixel.nil?
+      pixel_aux = Magick4J::ColorDatabase.lookup(color_name)
+      raise ArgumentError, "invalid color name: #{color_name}" if pixel.aux.nil?
       result = Pixel.new(0,0,0,0)
-      result._pixel = pixel
+      result.pixel = pixel_aux
       result
     end
     
@@ -60,27 +56,69 @@ module Magick
       end
     end
     
+    def blue
+      @pixel.blue.round.to_i
+    end
+    alias_method :yellow, :blue
+    
+    def blue=(value)
+      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
+      @pixel.blue=value
+    end
+    alias_method :yellow=, :blue=
+    
     # TODO: Add ColorSpace parameter.
     # Extracted from color.c:1698
-    def fcmp(pixel, fuzz=0.0)
+    def fcmp(pixel_aux, fuzz=0.0)
       fuzz = 3.0*([fuzz, 0.7071067811865475244008443621048490].max**2)
       
       # TODO: How does matte affect this algorithm?
       
-      distance = (red-pixel.red)**2
+      distance = (red-pixel_aux.red)**2
       return false if distance > fuzz
-      distance += (green-pixel.green)**2
+      distance += (green-pixel_aux.green)**2
       return false if distance > fuzz
-      distance += (blue-pixel.blue)**2
+      distance += (blue-pixel_aux.blue)**2
       return false if distance > fuzz
       true #The colors are similar!!!
     end
+    
+    def green
+      pixel.green.round.to_i
+    end
+    alias_method :magenta, :green
+    
+    def green=(value)
+      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
+      pixel.green=value
+    end
+    alias_method :magenta=, :green=
     
     # Thanks, FSM, for the RMagick documentation.
     def intensity
       0.299*red+0.587*green+0.114*blue
     end
     
-    protected :_pixel=
+    def opacity
+      pixel.opacity
+    end
+    alias_method :black, :opacity
+    
+    def opacity=(value)
+      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
+      pixel.opacity=value
+    end
+    alias_method :black=, :opacity=
+    
+    def red
+      pixel.red.round.to_i
+    end
+    alias_method :cyan, :red
+    
+    def red=(value)
+      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
+      pixel.red=value
+    end
+    alias_method :cyan=, :red=
   end
 end
