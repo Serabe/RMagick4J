@@ -697,6 +697,16 @@ public class ColorDatabase {
         return colors;
     }
 
+    static String getName(PixelPacket pixel) {
+        if(NAMED_COLORS.containsValue(pixel)){
+            for(String key : NAMED_COLORS.keySet()){
+                if(NAMED_COLORS.get(key).equals(pixel))
+                    return key;
+            }
+        }
+        return null;
+    }
+    
     public static PixelPacket queryDefault(String colorName) {
         return new ColorDatabase().query(colorName);
     }

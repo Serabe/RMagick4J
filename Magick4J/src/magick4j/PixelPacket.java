@@ -27,6 +27,19 @@ public class PixelPacket {
         this.blue = blue;
         this.opacity = opacity;
     }
+    
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof PixelPacket){
+            PixelPacket pixel = (PixelPacket) o;
+            return  this.getRed()     == pixel.getRed()   &&
+                    this.getGreen()   == pixel.getGreen() &&
+                    this.getBlue()    == pixel.getBlue()  &&
+                    this.getOpacity() == pixel.getOpacity();
+        }else{
+            return true;
+        }
+    }
 
     public double getBlue() {
         return blue;
@@ -62,5 +75,16 @@ public class PixelPacket {
 
     public Color toColor() {
         return new Color((float) red, (float) green, (float) blue, (float) opacity);
+    }
+    
+    @Override
+    public String toString(){
+        String name = ColorDatabase.getName(this);
+        if(name == null){
+            name = "rgb("+ this.getRed()   + ","+
+                           this.getGreen() + ","+
+                           this.getBlue()  + ")";
+        }
+        return name;
     }
 }
