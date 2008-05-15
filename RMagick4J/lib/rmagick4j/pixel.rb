@@ -3,95 +3,84 @@ module Magick
   Pixel = Magick4J::PixelPacket
   
   class Pixel
-    def initialize(red, green, blue, opacity=0)
-      super(red, green, blue, opacity)
-    end
-    
-    def self.from_color
-       #...
-    end
-  end
-end
-
-module Magick
-  class Pixel
     include Comparable
     include Observable
-    attr_accessor :pixel
     
     def initialize(red, green, blue, opacity=0)
       # TODO Add support to CMYKColorspace.
-      @pixel = Magick4J::PixelPacket.new(red, green, blue, opacity)
+      super(red, green, blue, opacity)
     end
     
-    #TODO: Find a good name for pixel_aux
-    def Pixel.from_color(color_name)
-      pixel_aux = Magick4J::ColorDatabase.lookup(color_name)
-      raise ArgumentError, "invalid color name: #{color_name}" if pixel.aux.nil?
-      result = Pixel.new(0,0,0,0)
-      result.pixel = pixel_aux
+    def self.from_color(color_name)
+      result = Magick4J::ColorDatabase.lookUp(color_name)
+      raise ArgumentError, "invalid color name: #{color_name}" if result.nil?
       result
     end
     
-    def Pixel.from_HSL(array)
-      raise ArgumentError, 'array argument must have at least 3 elements' if array.size != 3
-      color = Color.getHSBColor(array[0].to_f, array[1].to_f, array[2].to_f)
-      Pixel.new(color.red, color.green, color.blue, color.opacity)
+    def self.from_HSL(array)
+      raise ArgumentError, 'array argument must have at least 3 elements' if array.size < 3
+      # It can't be 'hue, saturation, lightness = array' because array length
+      # can be greater than 3.
+      hue, saturation, lightness = array[0], array[1], array[2]
+      r, g, b = if saturation == 0
+                  3*[[[0, QuantumRange*lightness].max, QuantumRange].min]
+                else
+                  m2 =  if lightness <= 0.5
+                          lightness*(saturation + 1.0)
+                        else
+                          lightness + saturation - (lightness*saturation)
+                        end
+                  m1 = 2.0*lightness - m2
+                  
+                  [
+                    [[0, QuantumRange*from_hue(m1, m2, hue+1.0/3.0)].max, QuantumRange].min,
+                    [[0, QuantumRange*from_hue(m1, m2, hue)].max, QuantumRange].min,
+                    [[0, QuantumRange*from_hue(m1, m2, hue-1.0/3.0)].max, QuantumRange].min
+                  ]
+                end
+      Pixel.new(r, g, b)
     end
     
-    def <=>(pixel2)
+    def <=>(pixel)
       # Alphabetical algorithm.
-      if red == pixel2.red
-        if green == pixel2.green
-          if blue == pixel2.blue
-            opacity <=> pixel2.opacity
-          else
-            blue <=> pixe2.blue
-          end
-        else
-          green <=> pixel2.green
-        end
-      else
-        red <=> pixel2.red
+      if red != pixel.red
+        red <=> pixel.red
+      elsif green != pixel.green
+        green <=> pixel.green
+      elsif blue == pixel.blue
+        blue <=> pixe2.blue
+      elsif opacity != pixel.opacity
+        opacity <=> pixel.opacity
       end
+      self.class <=> pixel.class
     end
     
     def blue
-      @pixel.blue.round.to_i
+      get_blue.round.to_i
     end
     alias_method :yellow, :blue
-    
-    def blue=(value)
-      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
-      @pixel.blue=value
-    end
     alias_method :yellow=, :blue=
     
     # TODO: Add ColorSpace parameter.
     # Extracted from color.c:1698
-    def fcmp(pixel_aux, fuzz=0.0)
+    def fcmp(pixel, fuzz=0.0)
       fuzz = 3.0*([fuzz, 0.7071067811865475244008443621048490].max**2)
       
       # TODO: How does matte affect this algorithm?
       
-      distance = (red-pixel_aux.red)**2
+      distance = (red-pixel.red)**2
       return false if distance > fuzz
-      distance += (green-pixel_aux.green)**2
+      distance += (green-pixel.green)**2
       return false if distance > fuzz
-      distance += (blue-pixel_aux.blue)**2
+      distance += (blue-pixel.blue)**2
       return false if distance > fuzz
       true #The colors are similar!!!
     end
     
     def green
-      pixel.green.round.to_i
+      get_green.round.to_i
     end
     alias_method :magenta, :green
-    
-    def green=(value)
-      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
-      pixel.green=value
-    end
     alias_method :magenta=, :green=
     
     # Thanks, FSM, for the RMagick documentation.
@@ -100,25 +89,62 @@ module Magick
     end
     
     def opacity
-      pixel.opacity
+      get_opacity.round.to_i
     end
     alias_method :black, :opacity
-    
-    def opacity=(value)
-      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
-      pixel.opacity=value
-    end
     alias_method :black=, :opacity=
     
     def red
-      pixel.red.round.to_i
+      get_red.round.to_i
     end
     alias_method :cyan, :red
-    
-    def red=(value)
-      raise TypeError, 'can\'t convert String into Integer' if value.to_i.to_s != value
-      pixel.red=value
-    end
     alias_method :cyan=, :red=
+    
+    # Extracted from gem.c:429
+    def to_HSL
+      r, g, b = QuantumScale*red, QuantumScale*green, QuantumScale*blue
+      max = [r, g, b].max
+      min = [r, g, b].min
+      lightness = (min+max)/2.0
+      delta = max - min
+      if(delta == 0.0)
+        hue, saturation = 0.0, 0.0
+      else
+        saturation =  if lightness <0.5
+                        delta /(min+max)
+                      else
+                        delta / (2.0-(min+max))
+                      end
+        hue = if r == max
+                calculate_hue(b, g, max, delta)
+              elsif g == max
+                (1.0/3.0) + calculate_hue(r, b, max, delta)
+              elsif b == max
+                (2.0/3.0)+calculate_hue(g, r, max, delta)
+              end
+        if hue < 0.0
+          hue += 1.0
+        elsif hue > 1.0
+          hue -= 1.0
+        end
+      end
+      [hue, saturation, lightness]
+    end
+    
+    private
+    
+    def calculate_hue(val1, val2, max, delta)
+      (( ((max-val1)/6.0)+ (delta/2.0))- (((max-val2)/6.0)+(delta/2.0)))/delta
+    end
+    
+    def from_hue(m1, m2, hue)
+      hue += 1.0 if hue < 0.0
+      hue -= 1.0 if hue > 1.0
+      
+      return m1+6.0*(m2-m1)*hue if (6.0*hue) < 1.0
+      return m2 if (2.0*hue) < 1.0
+      return m1+6.0*(m2-m1)*(2.0/3.0-hue) if (3.0*hue) < 2.0
+      m1
+    end
   end
 end
