@@ -6,6 +6,9 @@ module Magick
     include Comparable
     include Observable
     
+    alias_method :to_java_color, :to_color
+    alias_method :to_color, :to_string
+    
     def initialize(red, green, blue, opacity=0)
       # TODO Add support to CMYKColorspace.
       super(red, green, blue, opacity)

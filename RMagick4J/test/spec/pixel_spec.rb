@@ -40,5 +40,9 @@ describe Pixel do
     }.should_not raise_error(ArgumentError)
   end
   
+  it "should return the color name (#{Color[0]})" do
+    Color[1].to_color.should eql(Color[0])
+  end
+  
 end
 
