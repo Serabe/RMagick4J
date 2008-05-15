@@ -74,7 +74,7 @@ public class PixelPacket {
     }
 
     public Color toColor() {
-        return new Color((float) red, (float) green, (float) blue, (float) opacity);
+        return new Color((float) red/255, (float) green/255, (float) blue/255, (float) opacity/255);
     }
     
     @Override
