@@ -6,7 +6,7 @@ include Magick
 describe Image do
   
   before(:each) do
-    @image = Image.read(File.join(File.dirname(__FILE__),'..','clown.jpg'))
+    @image = Image.read(File.join(File.dirname(__FILE__),'..','images','clown.jpg'))
   end
   
   it "should have the same methods as the standard RMagick" do
