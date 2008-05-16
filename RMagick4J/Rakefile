@@ -34,6 +34,23 @@ end
 # figure this out.
 #File.open('lib/magick4j.jar', 'a') {}
 
+task :spec do
+  require 'spec/rake/spectask'
+  desc "Runs Java Integration Specs"
+
+  Spec::Rake::SpecTask.new do |t|
+    t.spec_opts ||= []
+    t.spec_files = FileList['test/spec/**']
+  end
+
+end
+
+task :stories do
+  FileList['test/spec/stories/**/*_runner.rb'].each do |runner|
+    require runner
+  end
+end
+
 MANIFEST = FileList["History.txt", "Manifest.txt", "README.txt", 
   "Rakefile", "LICENSE.txt", "lib/**/*.rb", "lib/**/*.jar",
   "test/**/*.rb", "test/**/execute_test", "test/images/*.jpg", "ext/rmagick4j/src/**/*.java"]
