@@ -27,7 +27,7 @@ module Magick
       opacity = type_check(opacity, :to_int, "Integer")
 
       # TODO: Add support to CMYKColorspace.
-      super(red.to_f, green.to_f, blue.to_f, opacity.to_f)
+      super(red, green, blue, opacity)
     end
     
     def self.from_color(color_name)
@@ -42,7 +42,7 @@ module Magick
       # can be greater than 3.
       hue, saturation, lightness = array[0], array[1], array[2]
       r, g, b = if saturation == 0
-                  3*[[[0, QuantumRange*lightness].max, QuantumRange].min]
+                  3*[[[0, QuantumRange*lightness].max, QuantumRange].min.floor.to_i]
                 else
                   m2 =  if lightness <= 0.5
                           lightness*(saturation + 1.0)
@@ -52,9 +52,9 @@ module Magick
                   m1 = 2.0*lightness - m2
                   
                   [
-                    [[0, QuantumRange*from_hue(m1, m2, hue+1.0/3.0)].max, QuantumRange].min,
-                    [[0, QuantumRange*from_hue(m1, m2, hue)].max, QuantumRange].min,
-                    [[0, QuantumRange*from_hue(m1, m2, hue-1.0/3.0)].max, QuantumRange].min
+                    [[0, QuantumRange*from_hue(m1, m2, hue+1.0/3.0)].max, QuantumRange].min.floor.to_i,
+                    [[0, QuantumRange*from_hue(m1, m2, hue)].max, QuantumRange].min.floor.to_i,
+                    [[0, QuantumRange*from_hue(m1, m2, hue-1.0/3.0)].max, QuantumRange].min.floor.to_i
                   ]
                 end
       Pixel.new(r, g, b)
@@ -76,13 +76,11 @@ module Magick
         opacity <=> pixel.opacity
       else
 # Enebo: I added as a last test in conditional (is this needed? test?)
+# Serabe: In fact, I don't know, but it is the way RMagick does it.
         self.class <=> pixel.class
       end
     end
     
-    def blue
-      get_blue.floor.to_i
-    end
     alias_method :yellow, :blue
     alias_method :yellow=, :blue=
 
@@ -108,9 +106,6 @@ module Magick
       true #The colors are similar!!!
     end
     
-    def green
-      get_green.floor.to_i
-    end
     alias_method :magenta, :green
     alias_method :magenta=, :green=
     
@@ -119,15 +114,9 @@ module Magick
       0.299*red+0.587*green+0.114*blue
     end
     
-    def opacity
-      get_opacity.floor.to_i
-    end
     alias_method :black, :opacity
     alias_method :black=, :opacity=
     
-    def red
-      get_red.floor.to_i
-    end
     alias_method :cyan, :red
     alias_method :cyan=, :red=
     
