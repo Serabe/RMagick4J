@@ -1,3 +1,4 @@
+require 'observer'
 
 module Magick
   Pixel = Magick4J::PixelPacket
@@ -8,10 +9,25 @@ module Magick
     
     alias_method :to_java_color, :to_color
     alias_method :to_color, :to_string
+
+    def type_check(value, conversion, typename)
+      unless value.respond_to? conversion
+        raise TypeError.new "can't convert #{value.class.name} into #{typename}" 
+      end
+      value.send(conversion)
+    end
     
-    def initialize(red, green, blue, opacity=0)
-      # TODO Add support to CMYKColorspace.
-      super(red, green, blue, opacity)
+    def initialize(red=0, green=0, blue=0, opacity=0)
+      # TODO: I think PixelPacket should be int-based (Pixel requires argument
+      # conversion, but PixelPacket requires us to reconvert to double (see
+      # to_f below).  This is a bunch of work.
+      red = type_check(red, :to_int, "Integer")
+      green = type_check(green, :to_int, "Integer")
+      blue = type_check(blue, :to_int, "Integer")
+      opacity = type_check(opacity, :to_int, "Integer")
+
+      # TODO: Add support to CMYKColorspace.
+      super(red.to_f, green.to_f, blue.to_f, opacity.to_f)
     end
     
     def self.from_color(color_name)
@@ -43,6 +59,10 @@ module Magick
                 end
       Pixel.new(r, g, b)
     end
+
+    def eql?(other)
+      (self <=> other) == 0
+    end
     
     def <=>(pixel)
       # Alphabetical algorithm.
@@ -51,23 +71,31 @@ module Magick
       elsif green != pixel.green
         green <=> pixel.green
       elsif blue == pixel.blue
-        blue <=> pixe2.blue
+        blue <=> pixel.blue
       elsif opacity != pixel.opacity
         opacity <=> pixel.opacity
+      else
+# Enebo: I added as a last test in conditional (is this needed? test?)
+        self.class <=> pixel.class
       end
-      self.class <=> pixel.class
     end
     
     def blue
-      get_blue.round.to_i
+      get_blue.floor.to_i
     end
     alias_method :yellow, :blue
     alias_method :yellow=, :blue=
-    
-    # TODO: Add ColorSpace parameter.
+
+    # TODO: Hook colorspace into this method
     # Extracted from color.c:1698
-    def fcmp(pixel, fuzz=0.0)
-      fuzz = 3.0*([fuzz, 0.7071067811865475244008443621048490].max**2)
+    def fcmp(pixel, fuzz=0.0, colorspace=nil)
+      raise TypeError.new("wrong argument type #{pixel.class.name} (expected Data)") unless pixel.kind_of? Pixel
+      raise TypeError.new("") unless fuzz.kind_of? Numeric
+      if colorspace and !colorspace.kind_of? ::Magick::ColorspaceType
+        raise TypeError.new("Not a colorspace") 
+      end
+      
+      fuzz = 3.0*([fuzz.to_f, 0.7071067811865475244008443621048490].max**2)
       
       # TODO: How does matte affect this algorithm?
       
@@ -81,7 +109,7 @@ module Magick
     end
     
     def green
-      get_green.round.to_i
+      get_green.floor.to_i
     end
     alias_method :magenta, :green
     alias_method :magenta=, :green=
@@ -92,13 +120,13 @@ module Magick
     end
     
     def opacity
-      get_opacity.round.to_i
+      get_opacity.floor.to_i
     end
     alias_method :black, :opacity
     alias_method :black=, :opacity=
     
     def red
-      get_red.round.to_i
+      get_red.floor.to_i
     end
     alias_method :cyan, :red
     alias_method :cyan=, :red=

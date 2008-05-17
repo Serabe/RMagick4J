@@ -6,7 +6,6 @@ rmagick4j_dir = File.dirname(__FILE__)
 require File.join(rmagick4j_dir, '..', 'jhlabs-filters.jar')
 require File.join(rmagick4j_dir, '..', 'magick4j.jar')
 require File.join(rmagick4j_dir, '..', 'svgsalamander.jar')
-require File.join(rmagick4j_dir, '..', 'observer')
 
 #RMagick classes, keep in alphabetical order, please.
 require File.join(rmagick4j_dir, 'constants')
