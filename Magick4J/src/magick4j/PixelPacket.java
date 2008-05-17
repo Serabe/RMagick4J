@@ -8,20 +8,20 @@ import java.awt.Color;
  */
 public class PixelPacket {
 
-    private double blue;
-    private double green;
-    private double opacity;
-    private double red;
+    private int blue;
+    private int green;
+    private int opacity;
+    private int red;
 
     public PixelPacket() {
         this(0, 0, 0, 0);
     }
 
-    public PixelPacket(double red, double green, double blue) {
+    public PixelPacket(int red, int green, int blue) {
         this(red, green, blue, 0);
     }
 
-    public PixelPacket(double red, double green, double blue, double opacity) {
+    public PixelPacket(int red, int green, int blue, int opacity) {
         this.red = red;
         this.green = green;
         this.blue = blue;
@@ -41,40 +41,40 @@ public class PixelPacket {
         }
     }
 
-    public double getBlue() {
+    public int getBlue() {
         return blue;
     }
 
-    public double getGreen() {
+    public int getGreen() {
         return green;
     }
 
-    public double getOpacity() {
+    public int getOpacity() {
         return opacity;
     }
 
-    public double getRed() {
+    public int getRed() {
         return red;
     }
 
-    public void setBlue(double blue) {
+    public void setBlue(int blue) {
         this.blue = blue;
     }
 
-    public void setGreen(double green) {
+    public void setGreen(int green) {
         this.green = green;
     }
 
-    public void setOpacity(double opacity) {
+    public void setOpacity(int opacity) {
         this.opacity = opacity;
     }
 
-    public void setRed(double red) {
+    public void setRed(int red) {
         this.red = red;
     }
 
     public Color toColor() {
-        return new Color((float) red/255, (float) green/255, (float) blue/255, (float) opacity/255);
+        return new Color( red, green, blue, opacity);
     }
     
     @Override

@@ -26,18 +26,18 @@ public class GradientFill {
     private double[] calculatePixel(double distance){
         double[] data = new double[4];
         
-        data[0] = (this.startColor.getRed()   +(this.stepRed   * distance)) * 255;
-        data[1] = (this.startColor.getGreen() +(this.stepGreen * distance)) * 255;
-        data[2] = (this.startColor.getBlue()  +(this.stepBlue  * distance)) * 255;
+        data[0] = ((double)this.startColor.getRed())   +(this.stepRed   * distance);
+        data[1] = ((double)this.startColor.getGreen()) +(this.stepGreen * distance);
+        data[2] = ((double)this.startColor.getBlue())  +(this.stepBlue  * distance);
         data[3] = 255.0; // Taken from the rmfill.c file.
         
         return data;
     }
     
     private void calculateSteps(double steps){
-        stepRed   = (this.endColor.getRed()     - this.startColor.getRed()  )/steps;
-        stepBlue  = (this.endColor.getBlue()    - this.startColor.getBlue() )/steps;
-        stepGreen = (this.endColor.getGreen()   - this.startColor.getGreen())/steps;
+        stepRed   = (((double)this.endColor.getRed()     - this.startColor.getRed()  ))/steps;
+        stepBlue  = (((double)this.endColor.getBlue()    - this.startColor.getBlue() ))/steps;
+        stepGreen = (((double)this.endColor.getGreen()   - this.startColor.getGreen()))/steps;
     }
 
     public void fill(MagickImage image) {

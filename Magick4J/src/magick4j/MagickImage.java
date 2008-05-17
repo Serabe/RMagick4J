@@ -46,7 +46,7 @@ public class MagickImage implements Cloneable {
         return (1.0 / Math.sqrt(2.0 * Math.PI)) * Math.exp(-0.5 * (x * x + y * y) / (deviation * deviation)) / deviation;
     }
     
-    private PixelPacket backgroundColor = new PixelPacket(1, 1, 1, 1);
+    private PixelPacket backgroundColor;
     private String format;
     private BufferedImage image;
     private boolean matte;
@@ -78,6 +78,8 @@ public class MagickImage implements Cloneable {
         // TODO Clone the background? Make things immutable?
         if (info.getBackgroundColor() != null) {
             backgroundColor = info.getBackgroundColor();
+        }else{
+            backgroundColor = ColorDatabase.lookUp("white");
         }
         erase();
     }

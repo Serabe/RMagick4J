@@ -731,15 +731,15 @@ public class ColorDatabase {
             // If NumberFormatException, that's okay. Crazy input.
             // Just need to be able to say this in Ruby:
             // ArgumentError: invalid color name: #eerr00
-            double red = Integer.parseInt(rgb.substring(0, 2), 16);
-            double green = Integer.parseInt(rgb.substring(2, 4), 16);
-            double blue = Integer.parseInt(rgb.substring(4, 6), 16);
-            return new PixelPacket(red / 255, green / 255, blue / 255);
+            int red = Integer.parseInt(rgb.substring(0, 2), 16);
+            int green = Integer.parseInt(rgb.substring(2, 4), 16);
+            int blue = Integer.parseInt(rgb.substring(4, 6), 16);
+            return new PixelPacket(red, green, blue);
         } else if(rgb.length() == 3){
-            double red = Integer.parseInt(rgb.substring(0, 1)+rgb.substring(0, 1), 16);
-            double green = Integer.parseInt(rgb.substring(1, 2)+rgb.substring(1, 2), 16);
-            double blue = Integer.parseInt(rgb.substring(2, 3)+rgb.substring(2, 3), 16);
-            return new PixelPacket(red / 255, green / 255, blue / 255);
+            int red = Integer.parseInt(rgb.substring(0, 1)+rgb.substring(0, 1), 16);
+            int green = Integer.parseInt(rgb.substring(1, 2)+rgb.substring(1, 2), 16);
+            int blue = Integer.parseInt(rgb.substring(2, 3)+rgb.substring(2, 3), 16);
+            return new PixelPacket(red, green, blue);
         }
         return null;
     }
