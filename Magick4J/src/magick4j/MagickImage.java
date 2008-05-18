@@ -283,11 +283,13 @@ public class MagickImage implements Cloneable {
     }
 
     public void erase() {
-        Graphics2D graphics = image.createGraphics();
+        Graphics2D graphics = (Graphics2D) image.getGraphics();
         try {
             // TODO Use correct background.
-            graphics.setBackground(backgroundColor.toColor());
-            graphics.clearRect(0, 0, getWidth(), getHeight());
+            // Serabe: I tried using the way it was, but didn't work,
+            // so I changed it.
+            graphics.setColor(this.getBackgroundColor().toColor());
+            graphics.fillRect(0, 0, getWidth(), getHeight());
         } finally {
             graphics.dispose();
         }
@@ -308,6 +310,10 @@ public class MagickImage implements Cloneable {
         transform(AffineTransform.getScaleInstance(1, -1));
     }
 
+    public PixelPacket getBackgroundColor(){
+        return this.backgroundColor;
+    }
+    
     public String getFormat() {
         return format;
     }
@@ -426,6 +432,10 @@ public class MagickImage implements Cloneable {
         transform(AffineTransform.getRotateInstance(Math.toRadians(degrees)));
     }
 
+    public void setBackgroundColor(PixelPacket bg){
+        this.backgroundColor = bg;
+    }
+    
     public void setFormat(String format) {
         this.format = format;
     }

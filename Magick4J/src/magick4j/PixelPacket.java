@@ -18,7 +18,7 @@ public class PixelPacket {
     }
 
     public PixelPacket(int red, int green, int blue) {
-        this(red, green, blue, 0);
+        this(red, green, blue, 255);
     }
 
     public PixelPacket(int red, int green, int blue, int opacity) {
@@ -58,19 +58,19 @@ public class PixelPacket {
     }
 
     public void setBlue(int blue) {
-        this.blue = blue;
+        this.blue = blue%256;
     }
 
     public void setGreen(int green) {
-        this.green = green;
+        this.green = green%256;
     }
 
     public void setOpacity(int opacity) {
-        this.opacity = opacity;
+        this.opacity = opacity%256;
     }
 
     public void setRed(int red) {
-        this.red = red;
+        this.red = red%256;
     }
 
     public Color toColor() {
