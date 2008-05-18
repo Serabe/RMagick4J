@@ -21,7 +21,6 @@ module Magick
     end
     
     def self.allocate(*args, &add)
-      # TODO Only use new as defined in the RMagick docs. Use allocate and other methods otherwise?
       info = Info.new(&add)
       if args.length == 1
         case args[0]
@@ -44,6 +43,16 @@ module Magick
       end
     end
 
+    def background_color
+      @image.getBackgroundColor
+    end
+    
+    def background_color=(value)
+      raise TypeError, "argument must be color name or pixel (#{value.class} given)" unless value.is_a?(String) || value.is_a?(Pixel)
+      value = Pixel.from_color(value) if value.is_a?(String)
+      @image.setBackgroundColor(value)
+    end
+    
     def blur_image(radius=0.0, sigma=1.0)
       # Swap order on purpose. I wanted them the other way around in Magick4J.
       Image.from_image(@image.blurred(sigma, radius))
@@ -116,6 +125,10 @@ module Magick
     def display
       @image.display
       self
+    end
+    
+    def erase!
+      @image.erase
     end
 
     def format
