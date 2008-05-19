@@ -6,6 +6,14 @@ import java.awt.Color;
  * TODO Or is Color good enough? Do we support depth of 16 or 32??? Probably not
  * at first.
  */
+
+/*
+ * WARNING: 
+ * In RMagick, an alpha value of 0 is OpaqueOpacity, and 255 is TransparentOpacity.
+ * In java.awt.Color 0 is transparent, and 255 opaque.
+ * 
+ */
+
 public class PixelPacket {
 
     private int blue;
@@ -18,7 +26,7 @@ public class PixelPacket {
     }
 
     public PixelPacket(int red, int green, int blue) {
-        this(red, green, blue, 255);
+        this(red, green, blue, 0);
     }
 
     public PixelPacket(int red, int green, int blue, int opacity) {
@@ -74,7 +82,16 @@ public class PixelPacket {
     }
 
     public Color toColor() {
-        return new Color( red, green, blue, opacity);
+        return new Color( red, green, blue, 255-opacity);// See warning above.
+    }
+    
+    public double[] toDoubleArray(){
+        double[] data = new double[4];
+        data[0] = this.getRed();
+        data[1] = this.getGreen();
+        data[2] = this.getBlue();
+        data[3] = 255-this.getOpacity(); // See warning above.
+        return data;
     }
     
     @Override

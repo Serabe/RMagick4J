@@ -15,6 +15,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -444,6 +445,23 @@ public class MagickImage implements Cloneable {
         this.matte = matte;
     }
 
+    public void storePixels(int x, int y, int width, int height, Object[] pixels){
+        
+        
+        double[] data = new double[pixels.length * 4];
+        
+        for(int i=0; i<pixels.length; i++){
+            double[] pixelData = ((PixelPacket) pixels[i]).toDoubleArray();
+            data[4*i] = pixelData[0];
+            data[4*i+1] = pixelData[1];
+            data[4*i+2] = pixelData[2];
+            data[4*i+3] = pixelData[3];
+        }
+        
+        this.getImage().getRaster().setPixels(x, y, width, height, data);
+        this.getImage().createGraphics().dispose();
+    }
+    
     public byte[] toBlob() {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         writeImage(format, stream);
