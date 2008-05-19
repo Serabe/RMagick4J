@@ -27,6 +27,13 @@ describe Pixel do
     Pixel.new(1.1).red.should == 1
     Pixel.new(1.9).red.should == 1
   end
+  
+  it "should accept values greater than 256 using the modulo operator on them" do
+    Pixel.new(256).red.should == 256%256
+    Pixel.new(233, 266).green.should == 266%256
+    Pixel.new(233, 233, 276).blue.should == 276%256
+    Pixel.new(233, 233, 233, -56).opacity.should == (-56)%256
+  end
 
   it "should call to_int on pixel values" do
     Pixel.new(IntConverter.new).red.should == 1

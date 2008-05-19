@@ -225,6 +225,12 @@ module Magick
     def rows
       @image.getHeight
     end
+    
+    def store_pixels(x, y, columns, rows, pixels)
+      ria_size = columns*rows
+      raise IndexError, "not enough elements in array - expecting #{ria_size}, got #{pixels.size}" if pixels.size < ria_size
+      @image.storePixels(x,y,columns,rows,pixels.to_java)
+    end
 
     def to_blob(&add)
       info = Info.new(&add)

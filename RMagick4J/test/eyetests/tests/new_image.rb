@@ -1,5 +1,5 @@
 if PLATFORM == 'java'
-  require File.join(File.dirname(__FILE__), '..', '..', '..','lib','rmagick4j','rmagick4j')
+  require File.join(File.dirname(__FILE__), '..', '..', '..','lib','RMagick')
 else
   require "rubygems"
   require "RMagick"
@@ -16,6 +16,9 @@ class Magick::Image
   def write(filename)
     engine = (PLATFORM == 'java' ? 'jruby' : 'mri')
     new_filename = filename.sub(/(\.[^\.]*)$/, '.' + engine + '\1')
+    change_geometry('300x300') do |columns, rows, image|
+      image.resize!(columns, rows)
+    end
     old_write File.join(File.expand_path(File.dirname(__FILE__)), '..', 'images',new_filename)
   end
 end
