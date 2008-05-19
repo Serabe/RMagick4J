@@ -63,6 +63,7 @@ module Bullseye
         picture_panel.image_2 = File.join(OUTPUT_DIR, script_name + '.mri.jpg')
         picture_panel.repaint
       else
+        puts output_commands
         NOTIFIER.notify 'Error'
       end
       @running = false
