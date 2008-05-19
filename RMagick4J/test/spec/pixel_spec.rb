@@ -33,6 +33,9 @@ describe Pixel do
     Pixel.new(233, 266).green.should == 266%256
     Pixel.new(233, 233, 276).blue.should == 276%256
     Pixel.new(233, 233, 233, -56).opacity.should == (-56)%256
+    [-290, -256, -100, 0, 23, 256, 380].each do |x|
+      Pixel.new(x).red.should == x%256
+    end
   end
 
   it "should call to_int on pixel values" do

@@ -5,6 +5,8 @@ require 'rubygems'
 require 'profligacy/swing'
 require 'profligacy/lel'
 require  TEST_ROOT + '/tests/new_image.rb'
+require 'tmpdir'
+OUTPUT_DIR = Dir.tmpdir
 
 module Bullseye
   include Profligacy
@@ -51,14 +53,14 @@ module Bullseye
       script_name = source.selected_value.downcase.gsub(' ','_')
       selected_script = File.join(TEST_ROOT, 'tests', script_name + '.rb')
       NOTIFIER.notify 'Running script in MRI.'
-      output_commands = `sh -c 'ruby #{selected_script}'`
+      output_commands = `sh -c 'ruby #{selected_script} #{OUTPUT_DIR}'`
       NOTIFIER.notify 'Running in JRuby.'
-      output_commands += `jruby #{selected_script}`
+      output_commands += `jruby #{selected_script} #{OUTPUT_DIR}`
       if output_commands == ''
         NOTIFIER.notify 'Done'
-        picture_panel.image_1 = File.join(TEST_ROOT, 'images', script_name + '.jruby.jpg')
+        picture_panel.image_1 = File.join(OUTPUT_DIR, script_name + '.jruby.jpg')
         picture_panel.repaint
-        picture_panel.image_2 = File.join(TEST_ROOT, 'images', script_name + '.mri.jpg')
+        picture_panel.image_2 = File.join(OUTPUT_DIR, script_name + '.mri.jpg')
         picture_panel.repaint
       else
         NOTIFIER.notify 'Error'
@@ -94,9 +96,6 @@ module Bullseye
        JScrollPane::VERTICAL_SCROLLBAR_AS_NEEDED, 
        JScrollPane::HORIZONTAL_SCROLLBAR_NEVER
   end
-
-  # Prepare the output directory.
-  Dir.mkdir(File.join(TEST_ROOT, 'images')) unless File.exists?(File.join(TEST_ROOT, 'images'))
   
   lel = '[ <label_scripts | <label_results       ]
          [ <scripts_list  | (610,300)image_panel ]

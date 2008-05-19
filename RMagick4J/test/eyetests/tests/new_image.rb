@@ -19,6 +19,6 @@ class Magick::Image
     change_geometry('300x300') do |columns, rows, image|
       image.resize!(columns, rows)
     end
-    old_write File.join(File.expand_path(File.dirname(__FILE__)), '..', 'images',new_filename)
+    old_write File.join(ARGV[0],new_filename)
   end
 end
