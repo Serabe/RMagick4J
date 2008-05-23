@@ -30,10 +30,10 @@ public class PixelPacket {
     }
 
     public PixelPacket(int red, int green, int blue, int opacity) {
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
-        this.opacity = opacity;
+        this.setRed(red);
+        this.setGreen(green);
+        this.setBlue(blue);
+        this.setOpacity(opacity);
     }
     
     @Override
@@ -67,18 +67,26 @@ public class PixelPacket {
 
     public void setBlue(int blue) {
         this.blue = blue%256;
+        // Serabe: Don't touch. Java defined -56%256 as 
+        if(this.blue < 0) this.blue += 256;
     }
 
     public void setGreen(int green) {
         this.green = green%256;
+        // Serabe: Don't touch. Java defined -56%256 as 
+        if(this.green < 0) this.green += 256;
     }
 
     public void setOpacity(int opacity) {
         this.opacity = opacity%256;
+        // Serabe: Don't touch. Java defined -56%256 as 
+        if(this.opacity < 0) this.opacity += 256;
     }
 
     public void setRed(int red) {
         this.red = red%256;
+        // Serabe: Don't touch. Java defined -56%256 as 
+        if(this.red < 0) this.red += 256;
     }
 
     public Color toColor() {
