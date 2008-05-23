@@ -109,9 +109,9 @@ end
 n = 0
 SmileHeight.times do |y|                # Store pixels a row at a time
   SmileWidth.times do |x|             # Build a row of pixels
-    q[x].red   = 255 * SmileBits[n] # QuantumRange * SmileBits[n]
-    q[x].green = 255 * SmileBits[n] # QuantumRange * SmileBits[n]
-    q[x].blue  = 255 * SmileBits[n] # QuantumRange * SmileBits[n]
+    q[x].red   = QuantumRange * SmileBits[n]
+    q[x].green = QuantumRange * SmileBits[n]
+    q[x].blue  = QuantumRange * SmileBits[n]
     n += 1
   end
                                       # Store the row of pixels

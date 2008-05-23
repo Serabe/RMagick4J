@@ -37,10 +37,14 @@ end
 task :spec do
   require 'spec/rake/spectask'
   desc "Runs Java Integration Specs"
-
+  
   Spec::Rake::SpecTask.new do |t|
     t.spec_opts ||= []
-    t.spec_files = FileList['test/spec/**']
+    t.spec_files =  if ENV['class'].nil?
+                      FileList['test/spec/**']
+                    else
+                      File.join('test', 'spec', ENV['class']+'_spec.rb')
+                    end
   end
 
 end
