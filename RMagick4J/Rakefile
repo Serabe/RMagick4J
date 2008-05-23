@@ -50,8 +50,12 @@ task :spec do
 end
 
 task :stories do
-  FileList['test/spec/stories/**/*_runner.rb'].each do |runner|
-    require runner
+  if ENV['file'].nil?
+    FileList['test/spec/stories/**/*_runner.rb'].each do |runner|
+      require runner
+    end
+  else
+    require File.join('test', 'spec', 'stories', ENV['file']+'_runner.rb')
   end
 end
 
