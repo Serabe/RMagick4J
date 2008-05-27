@@ -15,11 +15,11 @@ public class CommandBuilder {
     // Hidden
     }
 
-    public static Command affine(double sx, double rx, double ry, double sy, double tx, double ty) {
+    public static Command affine(final double sx, final double rx, final double ry, final double sy, final double tx, final double ty) {
         return new Command(){
             public void perform(DrawContext context){
-                // TODO Finish. Create SpaceCoordinates class.
-                //context.getSpaceCoordinates().composite(sx, rx, ry, sy, tx, ty);
+                // TODO Finish. Create SpaceTransformation class.
+                context.getSpaceTransformation().compose(sx, rx, ry, sy, tx, ty);
             }
         };
     }

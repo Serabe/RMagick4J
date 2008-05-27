@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO Apply transformation to the primitives.
+
 /**
  * See http://studio.imagemagick.org/script/magick-vector-graphics.php for specs.
  */

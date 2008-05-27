@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 public class DrawContext {
     private List<Graphics2D> graphicsStack = new ArrayList<Graphics2D>();
     private List<DrawInfo> infoStack = new ArrayList<DrawInfo>();
+    private SpaceTransformation spaceTransformation = new SpaceTransformation();
 
     public DrawContext(DrawInfo info, Graphics2D graphics) {
         graphicsStack.add(graphics);
@@ -38,6 +39,10 @@ public class DrawContext {
 
     public DrawInfo getInfo() {
         return infoStack.get(infoStack.size() - 1);
+    }
+
+    public SpaceTransformation getSpaceTransformation() {
+        return this.spaceTransformation;
     }
 
     public void pop() {
