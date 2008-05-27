@@ -105,7 +105,7 @@ class Geometry
 end
 
 
-class Draw
+  class Draw
 
     # Thse hashes are used to map Magick constant
     # values to the strings used in the primitives.

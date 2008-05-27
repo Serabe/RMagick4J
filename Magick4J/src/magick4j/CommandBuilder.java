@@ -15,6 +15,15 @@ public class CommandBuilder {
     // Hidden
     }
 
+    public static Command affine(double sx, double rx, double ry, double sy, double tx, double ty) {
+        return new Command(){
+            public void perform(DrawContext context){
+                // TODO Finish. Create SpaceCoordinates class.
+                //context.getSpaceCoordinates().composite(sx, rx, ry, sy, tx, ty);
+            }
+        };
+    }
+    
     public static Command fill(final PixelPacket color) {
         return new Command() {
             public void perform(DrawContext context) {

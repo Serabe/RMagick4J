@@ -27,6 +27,19 @@ public class CommandParser {
     private static Map<String, ParserBuilder> buildBuilders() {
         Map<String, ParserBuilder> builders = new HashMap<String, ParserBuilder>();
         
+        builders.put("affine", new ParserBuilder(){
+            public Command build( String... parts){
+                String[] args = parts[1].split(",");
+                double sx = Double.parseDouble(args[0]);
+                double rx = Double.parseDouble(args[1]);
+                double ry = Double.parseDouble(args[2]);
+                double sy = Double.parseDouble(args[3]);
+                double tx = Double.parseDouble(args[4]);
+                double ty = Double.parseDouble(args[5]);
+                return CommandBuilder.affine(sx, rx, ry, sy, tx, ty);
+            }
+        });
+        
         builders.put("circle", new ParserBuilder() {
             public Command build(String... parts) {
                 String[] args0 = parts[1].split(",");
