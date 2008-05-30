@@ -89,10 +89,10 @@ public class CommandBuilder {
                                 floatDashArray[d] = (float) dashArray[d];
                             }
                             
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10f, floatDashArray, 0f));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, floatDashArray, 0f));
                             
                         } else {
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
                         }
                         graphics.setColor(info.getStroke().toColor());
                         graphics.draw(shape);

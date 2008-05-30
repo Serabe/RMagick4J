@@ -53,7 +53,7 @@ module Magick
     def initialize
       # Docs say that you can initialize with a block, but it doesn't really work because it inits an ImageInfo not a DrawInfo.
       # instance_eval &add if add
-      @draw = Magick4J.DrawInfo.new
+      @draw = Magick4J::DrawInfo.new
       @primitives = ''
     end
 
