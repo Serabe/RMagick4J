@@ -61,10 +61,11 @@ public class CommandBuilder {
             public void perform(DrawContext context) {
                 DrawInfo info = context.getInfo();
                 Graphics2D graphics = (Graphics2D) context.getGraphics().create();
+                
                 try {
                     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, info.isStrokeAntialias() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
                     // TODO Should this be min, mult, or something else?
-                    if (Math.min(info.getFillOpacity(), info.getFill().getOpacity()) > 0.0) {
+                    if (Math.min(info.getFillOpacity(), info.getFill().toColor().getAlpha()) > 0.0) {
                         Graphics2D fillGraphics = (Graphics2D) graphics.create();
                         try {
                             if (info.getFillOpacity() < 1.0) {
@@ -77,14 +78,19 @@ public class CommandBuilder {
                         }
                     }
                     // FIXME: null pattern stroke (or have correct default if there is one) [enebo]
-                    if (info.getStroke() != null && info.getStroke().getOpacity() > 0.0) {
+                    // The default stoke now is black, as in RMagick. Waiting for the test to work to remove the fixme.[serabe]
+                    // Waiting for a commit to have my comment in the repo, as the test works.
+                    if (/*info.getStroke() != null &&*/ info.getStroke().toColor().getAlpha() > 0.0) {
                         double[] dashArray = info.getStrokeDashArray();
                         if (dashArray != null) {
+                            
                             float[] floatDashArray = new float[dashArray.length];
                             for (int d = 0; d < dashArray.length; d++) {
                                 floatDashArray[d] = (float) dashArray[d];
                             }
+                            
                             graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10f, floatDashArray, 0f));
+                            
                         } else {
                             graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
                         }

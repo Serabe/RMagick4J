@@ -15,7 +15,7 @@ public class DrawInfo implements Cloneable {
     private Gravity gravity = Gravity.FORGET;
     private double pointSize = 12.0;
     private double rotation;
-    private PixelPacket stroke;
+    private PixelPacket stroke = ColorDatabase.queryDefault("black");
     private boolean strokeAntialias = true;
     private double[] strokeDashArray;
     private double strokeWidth = 1.0;
