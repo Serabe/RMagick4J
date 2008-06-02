@@ -5,6 +5,10 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 
 /**
  * Creates instances of the built-in drawing commands.
@@ -18,8 +22,7 @@ public class CommandBuilder {
     public static Command affine(final double sx, final double rx, final double ry, final double sy, final double tx, final double ty) {
         return new Command(){
             public void perform(DrawContext context){
-                // TODO Finish. Create SpaceTransformation class.
-                context.getSpaceTransformation().compose(sx, rx, ry, sy, tx, ty);
+                context.getInfo().getSpaceTransformation().concatenate(new AffineTransform(sx, rx, ry, sy, tx, ty));
             }
         };
     }
@@ -56,12 +59,20 @@ public class CommandBuilder {
         };
     }
 
-    public static Command shape(final Shape shape) {
+    public static Command shape(final Shape s) {
         return new Command() {
             public void perform(DrawContext context) {
                 DrawInfo info = context.getInfo();
-                Graphics2D graphics = (Graphics2D) context.getGraphics().create();
                 
+                // Calculate the new stroke width.
+                double prevWidth = info.getStrokeWidth();
+                double scaledXWidth = info.getSpaceTransformation().getScaleX() * prevWidth;
+                double scaledYWidth = info.getSpaceTransformation().getScaleY() * prevWidth;
+                double newWidth = Math.max(scaledXWidth, scaledYWidth);
+                info.setStrokeWidth(newWidth);
+                
+                Graphics2D graphics = (Graphics2D) context.getGraphics().create();
+                Shape shape = info.getSpaceTransformation().createTransformedShape(s);
                 try {
                     graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, info.isStrokeAntialias() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
                     // TODO Should this be min, mult, or something else?
@@ -99,6 +110,9 @@ public class CommandBuilder {
                     }
                 } finally {
                     graphics.dispose();
+                    
+                    //Resets the width.
+                    info.setStrokeWidth(prevWidth);
                 }
             }
         };

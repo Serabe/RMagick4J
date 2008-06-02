@@ -4,6 +4,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.util.List;
 
 public class DrawInfo implements Cloneable {
@@ -15,6 +16,7 @@ public class DrawInfo implements Cloneable {
     private Gravity gravity = Gravity.FORGET;
     private double pointSize = 12.0;
     private double rotation;
+    private AffineTransform spaceTransformation = new AffineTransform(1,0,0,1,0,0);
     private PixelPacket stroke = ColorDatabase.queryDefault("black");
     private boolean strokeAntialias = true;
     private double[] strokeDashArray;
@@ -120,6 +122,10 @@ public class DrawInfo implements Cloneable {
 
     public String getFontFamily() {
         return fontFamily;
+    }
+
+    public AffineTransform getSpaceTransformation() {
+        return this.spaceTransformation;
     }
 
     public PixelPacket getStroke() {

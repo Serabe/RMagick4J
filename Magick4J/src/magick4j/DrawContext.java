@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class DrawContext {
     private List<Graphics2D> graphicsStack = new ArrayList<Graphics2D>();
     private List<DrawInfo> infoStack = new ArrayList<DrawInfo>();
-    private SpaceTransformation spaceTransformation = new SpaceTransformation();
+    
 
     public DrawContext(DrawInfo info, Graphics2D graphics) {
         graphicsStack.add(graphics);
@@ -26,7 +26,7 @@ public class DrawContext {
                 pop();
             } catch (Exception e) {
                 // Plow on, but log first.
-                Logger.getLogger(DrawContext.class.getName()).log(Level.WARNING, "error disposing graphics " + graphicsStack.size(), e);
+                Logger.getLogger(DrawContext.class.getName()).log(Level.WARNING, "error disposing images " + graphicsStack.size(), e);
             }
         }
         graphicsStack = null;
@@ -34,15 +34,11 @@ public class DrawContext {
     }
 
     public Graphics2D getGraphics() {
-        return graphicsStack.get(graphicsStack.size() - 1);
+        return (Graphics2D) graphicsStack.get(graphicsStack.size() - 1);
     }
 
     public DrawInfo getInfo() {
         return infoStack.get(infoStack.size() - 1);
-    }
-
-    public SpaceTransformation getSpaceTransformation() {
-        return this.spaceTransformation;
     }
 
     public void pop() {
