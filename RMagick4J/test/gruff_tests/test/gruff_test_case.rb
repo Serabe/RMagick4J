@@ -3,7 +3,7 @@ require 'rubygems'
 
 require 'test/unit'
 require 'gruff'
-require 'monkey_gruff'
+require File.join(File.dirname(__FILE__),'monkey_gruff')
 # require 'test_timer'
 
 class GruffTestCase < Test::Unit::TestCase

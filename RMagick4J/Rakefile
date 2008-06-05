@@ -23,6 +23,14 @@ task :clean do
   rm_rf jar_file
 end
 
+desc "Run gruff unit tests."
+task :gruff_test do
+  FileList['test/gruff_tests/test/test_*.rb'].each do |file|
+    puts `ruby #{file}`
+    puts ''
+  end
+end
+
 desc "Run a live sample using RMagick4j."
 task :sample do
   load_paths = '-Ijruby -Ilib -Ipkg'
