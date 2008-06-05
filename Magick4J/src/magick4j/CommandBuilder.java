@@ -163,7 +163,7 @@ public class CommandBuilder {
     public static Command strokeOpacity(final double opacity) {
         return new Command() {
             public void perform(DrawContext context) {
-            // TODO
+                context.getInfo().getStroke().setOpacity((int) Math.round(255*(1-opacity)));
             }
         };
     }

@@ -202,7 +202,7 @@ public class DrawInfo implements Cloneable {
         this.strokeAntialias = antialias;
     }
 
-    void setStrokeDashArray(double... lengths) {
+    public void setStrokeDashArray(double... lengths) {
         this.strokeDashArray = lengths;
     }
 

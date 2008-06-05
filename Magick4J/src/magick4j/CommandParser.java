@@ -220,7 +220,19 @@ public class CommandParser {
         
         builders.put("stroke-opacity", new ParserBuilder() {
             public Command build(String... parts) {
-                return CommandBuilder.strokeOpacity(Double.parseDouble(parts[1]));
+                // Manage two different type of string:
+                // 1.- "0.3"
+                // 2.- "30%"
+                String opacity = parts[1];
+                double value = 0.0;
+                char[] string = opacity.toCharArray();
+                if(string[string.length-1] == '%'){
+                    opacity = opacity.substring(0, string.length-1);
+                    value = Double.parseDouble(opacity)/100.0;
+                }else{
+                    value = Double.parseDouble(opacity);
+                }
+                return CommandBuilder.strokeOpacity(value);
             }
         });
         

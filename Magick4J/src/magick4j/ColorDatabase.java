@@ -715,7 +715,7 @@ public class ColorDatabase {
         // TODO Make PixelPacket cloneable and store PixelPackets in NAMED_COLORS instead of Strings?
         // TODO Should "#rrggbb" also support alpha at the end?
         if (colorName.equals("transparent") || colorName.equals("none")) {
-            return new PixelPacket(0, 0, 0, 0);
+            return new PixelPacket(0, 0, 0, 255);
         }
         String oldName = colorName;
         PixelPacket color = NAMED_COLORS.get(colorName);
