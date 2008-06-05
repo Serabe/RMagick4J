@@ -58,6 +58,15 @@ public class CommandParser {
             }
         });
         
+        builders.put("bezier", new ParserBuilder(){
+           public Command build(String... parts){
+               List<Command> commands = new ArrayList<Command>();
+               // TODO Study how bezier command work depending on the ammount
+               // of points.
+               return CommandBuilder.compose(commands);
+           } 
+        });
+        
         builders.put("circle", new ParserBuilder() {
             public Command build(String... parts) {
                 String[] args0 = parts[1].split(",");

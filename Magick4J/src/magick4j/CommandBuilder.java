@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.Collection;
 
 /**
  * Creates instances of the built-in drawing commands.
@@ -23,6 +24,14 @@ public class CommandBuilder {
         return new Command(){
             public void perform(DrawContext context){
                 context.getInfo().getSpaceTransformation().concatenate(new AffineTransform(sx, rx, ry, sy, tx, ty));
+            }
+        };
+    }
+    
+    public static Command compose(final Collection<Command> commands){
+        return new Command(){
+            public void perform(DrawContext context){
+                for(Command c : commands) c.perform(context);
             }
         };
     }
@@ -43,7 +52,7 @@ public class CommandBuilder {
         };
     }
 
-    static Command pop() {
+    public static Command pop() {
         return new Command() {
             public void perform(DrawContext context) {
                 context.pop();
