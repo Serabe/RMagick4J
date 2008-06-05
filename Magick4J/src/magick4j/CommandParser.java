@@ -4,6 +4,7 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.io.BufferedReader;
@@ -39,6 +40,21 @@ public class CommandParser {
                 double tx = Double.parseDouble(args[4]);
                 double ty = Double.parseDouble(args[5]);
                 return CommandBuilder.affine(sx, rx, ry, sy, tx, ty);
+            }
+        });
+        
+        builders.put("arc", new ParserBuilder(){
+            public Command build(String... parts){
+                String[] originPoint = parts[1].split(",");
+                String[] endPoint = parts[2].split(",");
+                String[] degrees = parts[3].split(",");
+                
+                Point2D origin = new Point2D.Double(Double.parseDouble(originPoint[0]),Double.parseDouble(originPoint[1]));
+                Point2D end = new Point2D.Double(Double.parseDouble(endPoint[0]),Double.parseDouble(endPoint[1]));
+                double arcStart = Double.parseDouble(degrees[0]);
+                double arcStop = Double.parseDouble(degrees[1]);
+                
+                return CommandBuilder.shape(new Arc2D.Double(origin.getX(), origin.getY(), end.getX()-origin.getX(), end.getY()-origin.getY(), -arcStart, -(arcStop - arcStart), Arc2D.OPEN));
             }
         });
         
