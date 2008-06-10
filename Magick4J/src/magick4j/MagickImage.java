@@ -410,6 +410,8 @@ public class MagickImage implements Cloneable {
         Graphics2D graphics = img.createGraphics();
         
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         
         double widthRatio = ((float) newWidth)/this.getWidth();
         double heightRatio = ((float) newHeight)/this.getHeight();
