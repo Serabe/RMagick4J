@@ -80,7 +80,7 @@ public class MagickImage implements Cloneable {
         if (info.getBackgroundColor() != null) {
             backgroundColor = info.getBackgroundColor();
         }else{
-            backgroundColor = ColorDatabase.lookUp("transparent");
+            backgroundColor = new PixelPacket(0,0,0,255);
         }
         erase();
     }
