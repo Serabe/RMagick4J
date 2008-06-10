@@ -80,7 +80,7 @@ public class MagickImage implements Cloneable {
         if (info.getBackgroundColor() != null) {
             backgroundColor = info.getBackgroundColor();
         }else{
-            backgroundColor = ColorDatabase.lookUp("white");
+            backgroundColor = ColorDatabase.lookUp("transparent");
         }
         erase();
     }
@@ -307,6 +307,44 @@ public class MagickImage implements Cloneable {
         return null;
     }
 
+    public MagickImage flatten(MagickImage img){
+        MagickImage result = this.clone();
+        
+        WritableRaster resultRaster = result.getImage().getRaster();
+        WritableRaster imgRaster = img.getImage().getRaster();
+        
+        int width = Math.min(img.getWidth(), result.getWidth());
+        int height = Math.min(img.getHeight(), result.getHeight());
+        
+        for(int j = 0; j < height; j++){
+            
+            for(int i = 0; i < width; i++){
+                double[] setData = new double[4];
+                double[] imgData = new double[4];
+                double[] resultData = new double[4];
+                
+                imgData = imgRaster.getPixel(i, j, imgData);
+                resultData = resultRaster.getPixel(i, j, resultData);
+                
+                setData[0] = (imgData[0]*imgData[3]+resultData[0]*(255-imgData[3]))/255;
+                setData[1] = (imgData[1]*imgData[3]+resultData[1]*(255-imgData[3]))/255;
+                setData[2] = (imgData[2]*imgData[3]+resultData[2]*(255-imgData[3]))/255;
+                setData[3] = 255;
+                
+//                data = imgAlphaRaster.getPixel(i, j, data);
+//                
+//                if(data != null)
+//                    setData[3] = data[0];
+                
+                resultRaster.setPixel(i, j, setData);
+            }
+            
+        }
+        
+        result.getImage().getGraphics().dispose();
+        return result;
+    }
+    
     public void flip() {
         transform(AffineTransform.getScaleInstance(1, -1));
     }
