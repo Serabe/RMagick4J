@@ -329,6 +329,40 @@ public class MagickImage implements Cloneable {
                 setData[0] = (imgData[0]*imgData[3]+resultData[0]*(255-imgData[3]))/255;
                 setData[1] = (imgData[1]*imgData[3]+resultData[1]*(255-imgData[3]))/255;
                 setData[2] = (imgData[2]*imgData[3]+resultData[2]*(255-imgData[3]))/255;
+                
+                /*
+                 * Let \alpha be the opacity of the base image.
+                 * Let \beta be the opacity of the image to be composed.
+                 * Let QuantumRange be 255.
+                 * Let QuantumScale be QuantumRange^{-1}
+                 * 
+                 * The original code is:
+                 * 
+                 * gamma=1.0-QuantumScale*QuantumScale*alpha*beta;
+                 * composite->opacity=(MagickRealType) QuantumRange*(1.0-gamma);
+                 * 
+                 * So, \gamma is 1.0 - QuantumScale^{2}\alpha\beta =
+                 * = 1.0 - QuantumRange^{-2}\alpha\beta =
+                 * 
+                 * Then, setData[3] = composite->opacity =
+                 * = QuantumRange(1.0-1.0+QuantumRange^{-2}\alpha\beta)=
+                 * = QuantumRange*QuantumRange^{-2}\alpha\beta =
+                 * = QuantumRange^{-1}\alpha\beta
+                 * 
+                 * ImageMagick measures compacity in terms of alpha and beta whereas
+                 * java measures it in terms of QuantumRange-alpha and QuantumRange-beta.  
+                 * So we need to perfom a conversion here:
+                 * 
+                 * \alpha = QuantumRange - \alpha'
+                 * \beta  = QuantumRange - \beta'
+                 * 
+                 * Then, QuantumRange^{-1}\alpha\beta =
+                 * =QuantumRange^{-1}(QuantumRange - \alpha')(QuantumRange - \beta')
+                 * 
+                 */
+                
+                // TODO Fix this formula.
+                // setData[3] = (255.0-resultData[3])*(255.0-imgData[3])/255.0;
                 setData[3] = 255;
                 
 //                data = imgAlphaRaster.getPixel(i, j, data);
