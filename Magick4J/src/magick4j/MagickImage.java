@@ -356,14 +356,17 @@ public class MagickImage implements Cloneable {
                  * \alpha = QuantumRange - \alpha'
                  * \beta  = QuantumRange - \beta'
                  * 
-                 * Then, QuantumRange^{-1}\alpha\beta =
+                 * Then, \gamma = QuantumRange^{-1}\alpha\beta =
                  * =QuantumRange^{-1}(QuantumRange - \alpha')(QuantumRange - \beta')
+                 * 
+                 * Finally, we undo the change of variable:
+                 * 
+                 * setData[3] = QuantumRange - \gamma
                  * 
                  */
                 
-                // TODO Fix this formula.
-                // setData[3] = (255.0-resultData[3])*(255.0-imgData[3])/255.0;
-                setData[3] = 255;
+                setData[3] = 255.0 - ( (255.0-resultData[3])*(255.0-imgData[3])/255.0);
+                
                 
 //                data = imgAlphaRaster.getPixel(i, j, data);
 //                
