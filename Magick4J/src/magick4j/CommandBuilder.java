@@ -51,6 +51,14 @@ public class CommandBuilder {
             }
         };
     }
+    
+    public static Command nil(){
+        return new Command(){
+            public void perform(DrawContext context){
+                
+            }
+        };
+    }
 
     public static Command pop() {
         return new Command() {

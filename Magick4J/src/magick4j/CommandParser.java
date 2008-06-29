@@ -154,11 +154,31 @@ public class CommandParser {
         builders.put("push", new ParserBuilder() {
             public Command build(String... parts) {
                 String type = parts[1];
-                if (type.equals("graphic-context")) {
-                    return CommandBuilder.push();
-                } else {
-                    throw new RuntimeException("unknown push type: " + type);
+                
+                if(type.equals("clip-path")){
+                    // TODO: Implement.
+                    throw new RuntimeException("unknown push type: clip-path");
                 }
+              
+                if(type.equals("gradient")){
+                    // TODO: Implement.
+                    throw new RuntimeException("unknown push type: gradient");
+                }
+                
+                if(type.equals("pattern")){
+                    //TODO: Implement.
+                    throw new RuntimeException("unknown push type: pattern");
+                }
+              
+                if(type.equals("graphic-context")) {
+                    return CommandBuilder.push();
+                }
+                
+                if(type.equals("defs")){
+                    return CommandBuilder.nil(); // Yep, it does nothing.
+                }
+                
+                throw new RuntimeException("unknown push type: " + type);
             }
         });
         
