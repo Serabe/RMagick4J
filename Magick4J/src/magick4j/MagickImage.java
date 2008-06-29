@@ -405,7 +405,45 @@ public class MagickImage implements Cloneable {
     public int getWidth() {
         return image.getWidth();
     }
-
+    
+    public void mask(MagickImage mask, Pattern pattern){
+        WritableRaster out = this.getImage().getRaster();
+        WritableRaster maskRaster = mask.getImage().getRaster();
+        WritableRaster patternRaster = pattern.getImage().getRaster();
+        
+        int width  = (int) Math.min(this.getWidth() , mask.getWidth());
+        int height = (int) Math.min(this.getHeight(), mask.getHeight());
+        
+        int patternWidth  = (int) pattern.getImage().getWidth();
+        int patternHeight = (int) pattern.getImage().getHeight();
+        
+        for(int j=0; j < height; j++){
+            
+            for(int i=0; i < width; i++){
+                double[] maskData = new double[4];
+                maskRaster.getPixel(i, j, maskData);
+                
+                double[] patternData = new double[4];
+                patternRaster.getPixel(i%patternWidth, j%patternHeight, patternData);
+                
+                double[] data = new double[4];
+                out.getPixel(i, j, data);
+                
+                double[] newData = new double[4];
+                
+                newData[0] = (patternData[0]*(255-maskData[0])+data[0]*maskData[0])/255;
+                newData[1] = (patternData[1]*(255-maskData[0])+data[1]*maskData[0])/255;
+                newData[2] = (patternData[2]*(255-maskData[0])+data[2]*maskData[0])/255;
+                newData[3] = 255;
+                
+                out.setPixel(i, j, newData);
+            }
+            
+        }
+        
+        this.getImage().getGraphics().dispose();
+    }
+    
     public MagickImage quantized(int numberColors, Colorspace colorspace, boolean dither,
             int treeDepth, boolean measureError) {
         MagickImage result = new MagickImage(getWidth(), getHeight());

@@ -9,15 +9,17 @@ import java.util.List;
 
 public class DrawInfo implements Cloneable {
 
-    private PixelPacket fill = new PixelPacket(0, 0, 0);
+    private PixelPacket fill = ColorDatabase.queryDefault("none");
     private double fillOpacity = 1.0;
+    private Pattern fillPattern = null;
     private String fontFamily = "SansSerif";
     private int fontWeight;
     private Gravity gravity = Gravity.FORGET;
     private double pointSize = 12.0;
     private double rotation;
     private AffineTransform spaceTransformation = new AffineTransform(1,0,0,1,0,0);
-    private PixelPacket stroke = ColorDatabase.queryDefault("black");
+    private PixelPacket stroke = ColorDatabase.queryDefault("none");
+    private Pattern strokePattern = null;
     private boolean strokeAntialias = true;
     private double[] strokeDashArray;
     private double strokeWidth = 1.0;
@@ -99,7 +101,7 @@ public class DrawInfo implements Cloneable {
     public void draw(MagickImage image, List<Command> commands) {
         Graphics2D graphics = image.getImage().createGraphics();
         try {
-            DrawContext context = new DrawContext(this, graphics);
+            DrawContext context = new DrawContext(this, image);
             try {
                 for (Command command : commands) {
                     command.perform(context);
@@ -119,6 +121,10 @@ public class DrawInfo implements Cloneable {
     public double getFillOpacity() {
         return fillOpacity;
     }
+    
+    public Pattern getFillPattern() {
+        return this.fillPattern;
+    }
 
     public String getFontFamily() {
         return fontFamily;
@@ -136,6 +142,10 @@ public class DrawInfo implements Cloneable {
         return strokeDashArray;
     }
 
+    public Pattern getStrokePattern(){
+        return this.strokePattern;
+    }
+    
     public double getStrokeWidth() {
         return strokeWidth;
     }
@@ -168,9 +178,14 @@ public class DrawInfo implements Cloneable {
         this.rotation += rotation;
     }
 
+    public void setFill(Pattern fill){
+        this.fillPattern = fill;
+    }
+    
     public void setFill(PixelPacket fill) {
         // TODO Clone?
         this.fill = fill;
+        this.fillPattern = null;
     }
 
     public void setFillOpacity(double fillOpacity) {
@@ -193,9 +208,18 @@ public class DrawInfo implements Cloneable {
         this.pointSize = pointSize;
     }
 
+    public void setStroke(Pattern color) {
+        this.strokePattern = color;
+    }
+
     public void setStroke(PixelPacket stroke) {
         // TODO Clone?
         this.stroke = stroke;
+        this.strokePattern = null;
+    }
+    
+    public void setStrokePattern(Pattern pattern){
+        this.strokePattern = pattern;
     }
 
     public void setStrokeAntialias(boolean antialias) {

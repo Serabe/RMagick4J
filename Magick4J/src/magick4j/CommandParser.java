@@ -101,7 +101,7 @@ public class CommandParser {
         builders.put("fill", new ParserBuilder() {
             public Command build(String... parts) {
                 String colorName = parts[1].replace("\"", "");
-                return CommandBuilder.fill(ColorDatabase.queryDefault(colorName));
+                return CommandBuilder.fill(colorName);
             }
         });
         
@@ -143,11 +143,30 @@ public class CommandParser {
         builders.put("pop", new ParserBuilder() {
             public Command build(String... parts) {
                 String type = parts[1];
-                if (type.equals("graphic-context")) {
-                    return CommandBuilder.pop();
-                } else {
-                    throw new RuntimeException("unknown pop type: " + type);
+                
+                if(type.equals("clip-path")){
+                    // TODO: Implement.
+                    throw new RuntimeException("unknown pop type: clip-path");
                 }
+              
+                if(type.equals("gradient")){
+                    // TODO: Implement.
+                    throw new RuntimeException("unknown pop type: gradient");
+                }
+                
+                if(type.equals("pattern")){
+                    return CommandBuilder.nil();
+                }
+              
+                if(type.equals("graphic-context")) {
+                    return CommandBuilder.pop();
+                }
+                
+                if(type.equals("defs")){
+                    return CommandBuilder.nil(); // Yep, it does nothing.
+                }
+                
+                throw new RuntimeException("unknown pop type: " + type);
             }
         });
         
@@ -166,8 +185,14 @@ public class CommandParser {
                 }
                 
                 if(type.equals("pattern")){
-                    //TODO: Implement.
-                    throw new RuntimeException("unknown push type: pattern");
+                    String name = parts[2];
+                    int x = Integer.parseInt(parts[3]);
+                    int y = Integer.parseInt(parts[4]);
+                    int width = Integer.parseInt(parts[5]);
+                    int height = Integer.parseInt(parts[6]);
+                    
+                    Pattern pattern = new Pattern(name, x, y, width, height);
+                    return CommandBuilder.pushPattern(pattern);
                 }
               
                 if(type.equals("graphic-context")) {
@@ -217,7 +242,8 @@ public class CommandParser {
         builders.put("stroke", new ParserBuilder() {
             public Command build(String... parts) {
                 String colorName = parts[1].replace("\"", "");
-                return CommandBuilder.stroke(ColorDatabase.queryDefault(colorName));
+                
+                return CommandBuilder.stroke(colorName);
             }
         });
         
