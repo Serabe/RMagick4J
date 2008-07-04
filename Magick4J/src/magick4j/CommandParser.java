@@ -181,7 +181,7 @@ public class CommandParser {
                     String[] params = currentCommand.split(" ");
                     
                     
-                    //TODO: Finish
+                    
                     switch(params[0].charAt(0)){
                         case 'C':
                             for(i = 1; params.length - i >= 6; i+=6){
@@ -191,15 +191,15 @@ public class CommandParser {
                                 float ctrly1 = (float) Double.parseDouble(params[i+1]);
                                 
                                 // Second control point
-                                float ctrlx2 = (float) Double.parseDouble(params[i+2]);
-                                float ctrly2 = (float) Double.parseDouble(params[i+3]);
+                                lastControlPointC = new Point2D.Double( Double.parseDouble(params[i+2]),
+                                                                        Double.parseDouble(params[i+3]));
                                 
                                 // End point becomes the current point.
                                 currentPoint.setLocation(Double.parseDouble(params[i+4]), Double.parseDouble(params[i+5]));
                                 
-                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
-                                
-                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                                path.curveTo(   ctrlx1, ctrly1,
+                                                (float) lastControlPointC.getX(), (float) lastControlPointC.getY(),
+                                                (float) currentPoint.getX(), (float) currentPoint.getY());
                             }
                             lastControlPointQ = null;
                             break;
@@ -212,16 +212,15 @@ public class CommandParser {
                                 float ctrly1 = (float) (currentPoint.getY() + Double.parseDouble(params[i+1]));
                                 
                                 // Second control point
-                                float ctrlx2 = (float) (currentPoint.getX() + Double.parseDouble(params[i+2]));
-                                float ctrly2 = (float) (currentPoint.getY() + Double.parseDouble(params[i+3]));
-                                
+                                lastControlPointC = new Point2D.Double( currentPoint.getX() + Double.parseDouble(params[i+2]),
+                                                                        currentPoint.getY() + Double.parseDouble(params[i+3]));
                                 // End point becomes the current point.
                                 currentPoint.setLocation(   currentPoint.getX() + Double.parseDouble(params[i+4]),
                                                             currentPoint.getY() + Double.parseDouble(params[i+5]));
                                 
-                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
-                                
-                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                                path.curveTo(   ctrlx1, ctrly1,
+                                                (float) lastControlPointC.getX(), (float) lastControlPointC.getY(),
+                                                (float) currentPoint.getX(), (float) currentPoint.getY());
                             }
                             lastControlPointQ = null;
                             break;
@@ -308,16 +307,16 @@ public class CommandParser {
                                 float ctrlx1 = (float)(2*currentPoint.getX() - lastControlPointC.getX());
                                 float ctrly1 = (float)(2*currentPoint.getY() - lastControlPointC.getY());
                                 
-                                // Second control point
-                                float ctrlx2 = (float) Double.parseDouble(params[i]);
-                                float ctrly2 = (float) Double.parseDouble(params[i+1]);
+                                // Second control 
+                                lastControlPointC = new Point2D.Double( Double.parseDouble(params[i]),
+                                                                        Double.parseDouble(params[i+1]));
                                 
                                 // End point becomes the current point.
                                 currentPoint.setLocation(Double.parseDouble(params[i+2]), Double.parseDouble(params[i+3]));
                                 
-                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
-                                
-                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                                path.curveTo(   ctrlx1, ctrly1,
+                                                (float) lastControlPointC.getX(), (float) lastControlPointC.getY(),
+                                                (float) currentPoint.getX(), (float) currentPoint.getY());
                             }
                             lastControlPointQ = null;
                             break;
@@ -333,16 +332,16 @@ public class CommandParser {
                                 float ctrly1 = (float)(2*currentPoint.getY() - lastControlPointC.getY());
                                 
                                 // Second control point
-                                float ctrlx2 = (float) (currentPoint.getX() + Double.parseDouble(params[i]));
-                                float ctrly2 = (float) (currentPoint.getY() + Double.parseDouble(params[i+1]));
+                                lastControlPointC = new Point2D.Double( currentPoint.getX() + Double.parseDouble(params[i]),
+                                                                        currentPoint.getY() + Double.parseDouble(params[i+1]));
                                 
                                 // End point becomes the current point.
                                 currentPoint.setLocation(   currentPoint.getX() + Double.parseDouble(params[i+2]),
                                                             currentPoint.getY() + Double.parseDouble(params[i+3]));
                                 
-                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
-                                
-                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                                path.curveTo(   ctrlx1, ctrly1,
+                                                (float) lastControlPointC.getX(), (float) lastControlPointC.getY(),
+                                                (float) currentPoint.getX(), (float) currentPoint.getY());
                             }
                             lastControlPointQ = null;
                             break;
@@ -370,7 +369,6 @@ public class CommandParser {
                             
                         case 'Z':
                         case 'z':
-                                
                             lastControlPointC = null;
                             lastControlPointQ = null;
                             break;
