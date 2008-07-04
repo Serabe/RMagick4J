@@ -8,6 +8,7 @@ task :default => [:compile, :move, :clean]
 
 task :compile do
   `ant -f #{BUILD_FILE} jar`
+  puts 'Compiled magick4j.jar'
 end
 
 task :clean do
@@ -15,6 +16,7 @@ task :clean do
 end
 
 task :move do
-  rm_f(JAR_DEST_FILE)
+  rm_f(JAR_DEST_FILE) 
   mv(JAR_SRC_FILE, JAR_DEST_FILE)
+  puts 'Moved jar file to lib folder.'
 end
