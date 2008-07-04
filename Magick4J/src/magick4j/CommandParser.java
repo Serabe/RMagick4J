@@ -139,7 +139,7 @@ public class CommandParser {
                 }
                 
                 commandLine = commandLine.replaceAll("'", "");
-                commandLine = commandLine.replaceAll(",", ""); // RMagick4J must be capable of recognize both comma separated values and blank space separated values.
+                commandLine = commandLine.replaceAll(",", " "); // RMagick4J must be capable of recognize both comma separated values and blank space separated values.
                 commandLine = commandLine.trim();
                 commandLine += "Z";
                 
@@ -155,6 +155,8 @@ public class CommandParser {
                 
                 String currentCommand = "";
                 Point2D currentPoint = new Point2D.Double(0,0);
+                Point2D lastControlPointC = null;
+                Point2D lastControlPointQ = null;
                 GeneralPath path = new GeneralPath();
                 
                 while(!commandLine.equals("")){
@@ -181,58 +183,168 @@ public class CommandParser {
                     
                     //TODO: Finish
                     switch(params[0].charAt(0)){
+                        case 'C':
+                            for(i = 1; params.length - i >= 6; i+=6){
+                                
+                                // First control point
+                                float ctrlx1 = (float) Double.parseDouble(params[i]);
+                                float ctrly1 = (float) Double.parseDouble(params[i+1]);
+                                
+                                // Second control point
+                                float ctrlx2 = (float) Double.parseDouble(params[i+2]);
+                                float ctrly2 = (float) Double.parseDouble(params[i+3]);
+                                
+                                // End point becomes the current point.
+                                currentPoint.setLocation(Double.parseDouble(params[i+4]), Double.parseDouble(params[i+5]));
+                                
+                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
+                                
+                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                            }
+                            lastControlPointQ = null;
+                            break;
+                            
+                        case 'c':
+                            for(i = 1; params.length - i >= 6; i+=6){
+                                
+                                // First control point
+                                float ctrlx1 = (float) (currentPoint.getX() + Double.parseDouble(params[i]));
+                                float ctrly1 = (float) (currentPoint.getY() + Double.parseDouble(params[i+1]));
+                                
+                                // Second control point
+                                float ctrlx2 = (float) (currentPoint.getX() + Double.parseDouble(params[i+2]));
+                                float ctrly2 = (float) (currentPoint.getY() + Double.parseDouble(params[i+3]));
+                                
+                                // End point becomes the current point.
+                                currentPoint.setLocation(   currentPoint.getX() + Double.parseDouble(params[i+4]),
+                                                            currentPoint.getY() + Double.parseDouble(params[i+5]));
+                                
+                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
+                                
+                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                            }
+                            lastControlPointQ = null;
+                            break;
+                            
                         case 'H':
                             for(i = 1; params.length - i > 0; i++){
-                                currentPoint = new Point2D.Double(Double.parseDouble(params[i]), currentPoint.getY());
+                                currentPoint.setLocation(Double.parseDouble(params[i]), currentPoint.getY());
                                 path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                             
                         case 'h':
-                            for(i = 0; params.length - i > 0; i++){
-                                currentPoint = new Point2D.Double(  currentPoint.getX() + Double.parseDouble(params[i]),
-                                                                    currentPoint.getY());
+                            for(i = 1; params.length - i > 0; i++){
+                                currentPoint.setLocation(   currentPoint.getX() + Double.parseDouble(params[i]),
+                                                            currentPoint.getY());
                                 path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                             
                         case 'L':
                             for(i = 1; params.length - i >= 2; i+=2){
-                                currentPoint = new Point2D.Double(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
+                                currentPoint.setLocation(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
                                 path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                             
                         case 'l':
                             for(i = 1; params.length - i >= 2; i+=2){
-                                currentPoint = new Point2D.Double(  currentPoint.getX()+Double.parseDouble(params[i]),
-                                                                    currentPoint.getY()+Double.parseDouble(params[i+1]));
+                                currentPoint.setLocation(   currentPoint.getX()+Double.parseDouble(params[i]),
+                                                            currentPoint.getY()+Double.parseDouble(params[i+1]));
                                 path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                         
                         
                         case 'M':
                             for(i = 1; params.length - i >= 2; i+=2){
-                                currentPoint = new Point2D.Double(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
-                                if(i==0){
+                                currentPoint.setLocation(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
+                                if(i==1){
                                     path.moveTo((float) currentPoint.getX(), (float) currentPoint.getY());
                                 } else {
                                     path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                                 }
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                             
                         case 'm':
                             for(i = 1; params.length - i >= 2; i+=2){
-                                currentPoint = new Point2D.Double(  currentPoint.getX()+Double.parseDouble(params[i]),
-                                                                    currentPoint.getY()+Double.parseDouble(params[i+1]));
-                                if(i==0){
+                                currentPoint.setLocation(   currentPoint.getX()+Double.parseDouble(params[i]),
+                                                            currentPoint.getY()+Double.parseDouble(params[i+1]));
+                                if(i==1){
                                     path.moveTo((float) currentPoint.getX(), (float) currentPoint.getY());
                                 } else {
                                     path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                                 }
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
+                            break;
+                            
+                        case 'S':
+                            for(i = 1; params.length - i >= 4; i+=4){
+                                
+                                // First control point
+                                if(lastControlPointC == null){
+                                    lastControlPointC = currentPoint;
+                                }
+                                float ctrlx1 = (float)(2*currentPoint.getX() - lastControlPointC.getX());
+                                float ctrly1 = (float)(2*currentPoint.getY() - lastControlPointC.getY());
+                                
+                                // Second control point
+                                float ctrlx2 = (float) Double.parseDouble(params[i]);
+                                float ctrly2 = (float) Double.parseDouble(params[i+1]);
+                                
+                                // End point becomes the current point.
+                                currentPoint.setLocation(Double.parseDouble(params[i+2]), Double.parseDouble(params[i+3]));
+                                
+                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
+                                
+                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                            }
+                            lastControlPointQ = null;
+                            break;
+                            
+                        case 's':
+                            for(i = 1; params.length - i >= 4; i+=4){
+                                
+                                // First control point
+                                if(lastControlPointC == null){
+                                    lastControlPointC = currentPoint;
+                                }
+                                float ctrlx1 = (float)(2*currentPoint.getX() - lastControlPointC.getX());
+                                float ctrly1 = (float)(2*currentPoint.getY() - lastControlPointC.getY());
+                                
+                                // Second control point
+                                float ctrlx2 = (float) (currentPoint.getX() + Double.parseDouble(params[i]));
+                                float ctrly2 = (float) (currentPoint.getY() + Double.parseDouble(params[i+1]));
+                                
+                                // End point becomes the current point.
+                                currentPoint.setLocation(   currentPoint.getX() + Double.parseDouble(params[i+2]),
+                                                            currentPoint.getY() + Double.parseDouble(params[i+3]));
+                                
+                                path.curveTo(ctrlx1, ctrly1, ctrlx2, ctrly2, (float) currentPoint.getX(), (float) currentPoint.getY());
+                                
+                                lastControlPointC = new Point2D.Double(ctrlx2, ctrly2);
+                            }
+                            lastControlPointQ = null;
                             break;
                             
                         case 'V':
@@ -240,6 +352,9 @@ public class CommandParser {
                                 currentPoint = new Point2D.Double(currentPoint.getX(), Double.parseDouble(params[i]));
                                 path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                             
                         case 'v':
@@ -248,10 +363,16 @@ public class CommandParser {
                                                                     currentPoint.getY() + Double.parseDouble(params[i]));
                                 path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
                             }
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                             
                         case 'Z':
                         case 'z':
+                                
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
                             break;
                         default:
                             throw new RuntimeException("attribute not recognized: "+params[0].charAt(0));
@@ -449,7 +570,7 @@ public class CommandParser {
             BufferedReader reader = new BufferedReader(new StringReader(script));
             // TODO MVG specs say this isn't really line based. They could all be on one line.
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null){
                 commands.add(parseCommand(line));
             }
             // Officially no need to close StringReaders.
