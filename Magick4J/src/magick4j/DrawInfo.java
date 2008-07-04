@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DrawInfo implements Cloneable {
 
-    private PixelPacket fill = ColorDatabase.queryDefault("none");
+    private PixelPacket fill = ColorDatabase.queryDefault("black");
     private double fillOpacity = 1.0;
     private Pattern fillPattern = null;
     private String fontFamily = "SansSerif";

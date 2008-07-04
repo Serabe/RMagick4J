@@ -1,6 +1,9 @@
 package magick4j;
 
+import java.awt.Polygon;
+import java.awt.Shape;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 // TODO Apply transformation to the primitives.
+import java.util.Stack;
 
 /**
  * See http://studio.imagemagick.org/script/magick-vector-graphics.php for specs.
@@ -122,6 +126,100 @@ public class CommandParser {
                 double y2 = Double.parseDouble(args1[1]);
                 // TODO Custom primitive to avoid fills?
                 return CommandBuilder.shape(new Line2D.Double(x1, y1, x2, y2));
+            }
+        });
+        
+        builders.put("path", new ParserBuilder() {
+            public Command build(String... parts){
+                String commandLine = "";
+                
+                // Join the parts.
+                for(int i=1; i<parts.length; i++){
+                    commandLine += parts[i] + " ";
+                }
+                
+                commandLine = commandLine.replaceAll("'", "");
+                commandLine = commandLine.trim();
+                commandLine += "Z";
+                
+                // Prepend a Z to every M or m. This way, parsing will be easier.
+                for(int i=1; i<commandLine.length(); i++){
+                    
+                    System.out.println("Command Line: '"+commandLine+"'.");
+                    char c = commandLine.charAt(i);
+                    if(c == 'M' || c == 'm'){
+                        commandLine = commandLine.substring(0,i) + "Z" + commandLine.substring(i);
+                        i++; // Don't touch this.
+                    }
+                }
+                
+                String currentCommand = "";
+                Point2D currentPoint = new Point2D.Double(0,0);
+                Polygon polygon = new Polygon();
+                polygon.addPoint(0,0);
+                Stack<Shape> curveStack = new Stack<Shape>();
+                List<Area> areas = new ArrayList<Area>();
+                
+                while(!commandLine.equals("")){
+                    
+                    // Get the current command.
+                    int i = 0;
+                    for(i=1; i<commandLine.length(); i++){
+                        if(Character.isLetter(commandLine.charAt(i))){
+                            break;
+                        }
+                    }
+                    
+                    currentCommand = commandLine.substring(0, i);
+                    commandLine = commandLine.substring(i);
+                    
+                    if(currentCommand.length() > 1 && currentCommand.charAt(1) != ' '){
+                        currentCommand =    currentCommand.substring(0,1)+
+                                            " "+
+                                            currentCommand.substring(1);
+                    }
+                    
+                    String[] params = currentCommand.split(" ");
+                    
+                    
+                    //TODO: Finish
+                    switch(params[0].charAt(0)){
+                        case 'M':
+                            polygon = new Polygon();
+                            for(i = 0; params.length-(1+2*i) >= 2; i++){
+                                currentPoint = new Point2D.Double(Double.parseDouble(params[2*i+1]), Double.parseDouble(params[2*i+2]));
+                                polygon.addPoint((int) currentPoint.getX(), (int) currentPoint.getY());
+                            }
+                            break;
+                        case 'm':
+                            polygon = new Polygon();
+                            for(i = 0; params.length-(1+2*i) >= 2; i++){
+                                currentPoint = new Point2D.Double(  currentPoint.getX()+Double.parseDouble(params[2*i+1]),
+                                                                    currentPoint.getY()+Double.parseDouble(params[2*i+2]));
+                                polygon.addPoint((int) currentPoint.getX(), (int) currentPoint.getY());
+                            }
+                            break;
+                        case 'Z':
+                        case 'z':
+                            Area pol = new Area(polygon);
+                            Area curves = new Area();
+                            for(Shape s : curveStack){
+                                curves.add(new Area(s));
+                            }
+                            //pol.exclusiveOr(curves);
+                            areas.add(pol);
+                            break;
+                        default:
+                            throw new RuntimeException("attribute not recognized: "+params[0].charAt(0));
+                    }
+                    
+                }
+                
+                Area area = new Area();
+                for(Area a : areas){
+                    area.add(a);
+                }
+                return CommandBuilder.shape(area);
             }
         });
         
