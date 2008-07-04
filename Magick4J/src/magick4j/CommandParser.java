@@ -139,13 +139,13 @@ public class CommandParser {
                 }
                 
                 commandLine = commandLine.replaceAll("'", "");
+                commandLine = commandLine.replaceAll(",", ""); // RMagick4J must be capable of recognize both comma separated values and blank space separated values.
                 commandLine = commandLine.trim();
                 commandLine += "Z";
                 
                 // Prepend a Z to every M or m. This way, parsing will be easier.
                 for(int i=1; i<commandLine.length(); i++){
                     
-                    System.out.println("Command Line: '"+commandLine+"'.");
                     char c = commandLine.charAt(i);
                     if(c == 'M' || c == 'm'){
                         commandLine = commandLine.substring(0,i) + "Z" + commandLine.substring(i);
@@ -155,10 +155,7 @@ public class CommandParser {
                 
                 String currentCommand = "";
                 Point2D currentPoint = new Point2D.Double(0,0);
-                Polygon polygon = new Polygon();
-                polygon.addPoint(0,0);
-                Stack<Shape> curveStack = new Stack<Shape>();
-                List<Area> areas = new ArrayList<Area>();
+                GeneralPath path = new GeneralPath();
                 
                 while(!commandLine.equals("")){
                     
@@ -184,42 +181,84 @@ public class CommandParser {
                     
                     //TODO: Finish
                     switch(params[0].charAt(0)){
+                        case 'H':
+                            for(i = 1; params.length - i > 0; i++){
+                                currentPoint = new Point2D.Double(Double.parseDouble(params[i]), currentPoint.getY());
+                                path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                            }
+                            break;
+                            
+                        case 'h':
+                            for(i = 0; params.length - i > 0; i++){
+                                currentPoint = new Point2D.Double(  currentPoint.getX() + Double.parseDouble(params[i]),
+                                                                    currentPoint.getY());
+                                path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                            }
+                            break;
+                            
+                        case 'L':
+                            for(i = 1; params.length - i >= 2; i+=2){
+                                currentPoint = new Point2D.Double(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
+                                path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                            }
+                            break;
+                            
+                        case 'l':
+                            for(i = 1; params.length - i >= 2; i+=2){
+                                currentPoint = new Point2D.Double(  currentPoint.getX()+Double.parseDouble(params[i]),
+                                                                    currentPoint.getY()+Double.parseDouble(params[i+1]));
+                                path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                            }
+                            break;
+                        
+                        
                         case 'M':
-                            polygon = new Polygon();
-                            for(i = 0; params.length-(1+2*i) >= 2; i++){
-                                currentPoint = new Point2D.Double(Double.parseDouble(params[2*i+1]), Double.parseDouble(params[2*i+2]));
-                                polygon.addPoint((int) currentPoint.getX(), (int) currentPoint.getY());
+                            for(i = 1; params.length - i >= 2; i+=2){
+                                currentPoint = new Point2D.Double(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
+                                if(i==0){
+                                    path.moveTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                                } else {
+                                    path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                                }
                             }
                             break;
+                            
                         case 'm':
-                            polygon = new Polygon();
-                            for(i = 0; params.length-(1+2*i) >= 2; i++){
-                                currentPoint = new Point2D.Double(  currentPoint.getX()+Double.parseDouble(params[2*i+1]),
-                                                                    currentPoint.getY()+Double.parseDouble(params[2*i+2]));
-                                polygon.addPoint((int) currentPoint.getX(), (int) currentPoint.getY());
+                            for(i = 1; params.length - i >= 2; i+=2){
+                                currentPoint = new Point2D.Double(  currentPoint.getX()+Double.parseDouble(params[i]),
+                                                                    currentPoint.getY()+Double.parseDouble(params[i+1]));
+                                if(i==0){
+                                    path.moveTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                                } else {
+                                    path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                                }
                             }
                             break;
+                            
+                        case 'V':
+                            for(i = 1; params.length - i > 0; i++){
+                                currentPoint = new Point2D.Double(currentPoint.getX(), Double.parseDouble(params[i]));
+                                path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                            }
+                            break;
+                            
+                        case 'v':
+                            for(i = 1; params.length - i > 0; i++){
+                                currentPoint = new Point2D.Double(  currentPoint.getX(),
+                                                                    currentPoint.getY() + Double.parseDouble(params[i]));
+                                path.lineTo((float) currentPoint.getX(), (float) currentPoint.getY());
+                            }
+                            break;
+                            
                         case 'Z':
                         case 'z':
-                            Area pol = new Area(polygon);
-                            Area curves = new Area();
-                            for(Shape s : curveStack){
-                                curves.add(new Area(s));
-                            }
-                            //pol.exclusiveOr(curves);
-                            areas.add(pol);
                             break;
                         default:
                             throw new RuntimeException("attribute not recognized: "+params[0].charAt(0));
                     }
                     
                 }
-                
-                Area area = new Area();
-                for(Area a : areas){
-                    area.add(a);
-                }
-                return CommandBuilder.shape(area);
+                return CommandBuilder.shape(path);
             }
         });
         

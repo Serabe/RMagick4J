@@ -49,7 +49,7 @@ module Bullseye
           pic = Magick::Image.new(300, 300)
           pic.background_color = 'red'
           pic.erase!
-          graphics.drawImage(pic._image.getImage, 0, 0, nil)
+          graphics.drawImage(pic._image.getImage, 310, 0, nil)
         end
       end
     end

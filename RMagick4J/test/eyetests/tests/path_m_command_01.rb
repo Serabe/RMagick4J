@@ -4,6 +4,9 @@ include Magick
 
 draw = Draw.new
 
+draw.fill 'red'
+draw.stroke 'blue'
+draw.stroke_width(5)
 draw.path 'M150 150 200 200 100 200'
 
 b = Image.new(300, 300, HatchFill.new('white', 'black'))

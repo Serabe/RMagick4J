@@ -4,7 +4,10 @@ include Magick
 
 draw = Draw.new
 
-draw.path 'M50 50 L100 100 0 100M190 190L290 190L290 290 190 290'
+draw.fill 'red'
+draw.stroke 'blue'
+draw.stroke_width(5)
+draw.path 'M50,50 L100,100 0,100M190,190L290,190L290,290 190,290'
 
 b = Image.new(300, 300, HatchFill.new('white', 'black'))
 

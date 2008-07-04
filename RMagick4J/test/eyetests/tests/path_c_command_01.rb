@@ -7,10 +7,10 @@ draw = Draw.new
 draw.fill 'red'
 draw.stroke 'blue'
 draw.stroke_width(5)
-draw.path 'M50 50 100 100 0 100M190 190 290 190 290 290 190 290'
+draw.path 'M100,200 C100,100 250,100 250,200'
 
 b = Image.new(300, 300, HatchFill.new('white', 'black'))
 
 draw.draw(b)
 
-b.write('path_m_command_02.jpg')
+b.write('path_c_command_01.jpg')
