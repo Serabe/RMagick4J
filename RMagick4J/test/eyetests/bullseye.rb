@@ -3,7 +3,7 @@ TEST_ROOT = File.expand_path(File.dirname(__FILE__))
 require 'java'
 require 'rubygems'
 
-require 'RMagick'
+#require 'RMagick'
 require 'profligacy/swing'
 require 'profligacy/lel'
 require  TEST_ROOT + '/tests/new_image.rb'
@@ -28,13 +28,30 @@ module Bullseye
     attr_accessor :image_1, :image_2
     
     def paint(graphics)
-      unless image_1.nil? || image_2.nil?
-        pic1 = load_image(image_1)
-        graphics.drawImage(pic1, 0, 0, nil)
-        graphics.drawImage(load_image(image_2), pic1.width + 10, 0, nil)
+      
+      unless image_1.nil?
+        begin
+          pic = load_image(image_1)
+          graphics.drawImage(pic, 0, 0, nil)
+        rescue
+          pic = Magick::Image.new(300, 300)
+          pic.background_color = 'red'
+          pic.erase!
+          graphics.drawImage(pic._image.getImage, 0, 0, nil)
+        end
       end
-    rescue
-      NOTIFIER.notify $!.message
+      
+      unless image_2.nil?
+        begin
+          pic = load_image(image_2)
+          graphics.drawImage(pic, 310, 0, nil)
+        rescue
+          pic = Magick::Image.new(300, 300)
+          pic.background_color = 'red'
+          pic.erase!
+          graphics.drawImage(pic._image.getImage, 0, 0, nil)
+        end
+      end
     end
 
     def load_image(filename)
@@ -61,7 +78,6 @@ module Bullseye
       if output_commands == ''
         NOTIFIER.notify 'Done'
         picture_panel.image_1 = File.join(OUTPUT_DIR, script_name + '.jruby.jpg')
-        picture_panel.repaint
         picture_panel.image_2 = File.join(OUTPUT_DIR, script_name + '.mri.jpg')
         picture_panel.repaint
       else
@@ -100,9 +116,9 @@ module Bullseye
        JScrollPane::HORIZONTAL_SCROLLBAR_NEVER
   end
   
-  lel = '[ <label_scripts | <label_results       ]
-         [ <scripts_list  | (610,300)image_panel ]
-         [ >run_button    | >status              ]'
+  lel = '[ <label_results       | <label_scripts   ]
+         [ (610,300)image_panel | <scripts_list    ]
+         [ >status              | >run_button      ]'
 
   ui = Swing::LEL.new(JFrame, lel) do |c, i|
     c.label_scripts = JLabel.new('Scripts')

@@ -10,4 +10,4 @@ b = Image.new(300, 300, HatchFill.new('white', 'black'))
 
 draw.draw(b)
 
-b.write('path_m_command_02.jpg')
+b.write('path_l_command_01.jpg')
