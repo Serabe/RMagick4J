@@ -68,7 +68,7 @@ module Magick
     def primitive primitive
       # TODO Concat in a string like they do, then use helper to parse later
       @primitives << "\n" unless @primitives.empty?
-      @primitives << primitive
+      @primitives << primitive.gsub(/[\r|\n]/, '')
       self
     end
 

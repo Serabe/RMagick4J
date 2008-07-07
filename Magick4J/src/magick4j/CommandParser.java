@@ -1,9 +1,7 @@
 package magick4j;
 
-import java.awt.Polygon;
-import java.awt.Shape;
+import com.kitfox.svg.pathcmd.Arc;
 import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
@@ -18,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 // TODO Apply transformation to the primitives.
-import java.util.Stack;
 
 /**
  * See http://studio.imagemagick.org/script/magick-vector-graphics.php for specs.
@@ -141,17 +138,6 @@ public class CommandParser {
                 commandLine = commandLine.replaceAll("'", "");
                 commandLine = commandLine.replaceAll(",", " "); // RMagick4J must be capable of recognize both comma separated values and blank space separated values.
                 commandLine = commandLine.trim();
-                commandLine += "Z";
-
-                // Prepend a Z to every M or m. This way, parsing will be easier.
-                for(int i=1; i<commandLine.length(); i++){
-
-                    char c = commandLine.charAt(i);
-                    if(c == 'M' || c == 'm'){
-                        commandLine = commandLine.substring(0,i) + "Z" + commandLine.substring(i);
-                        i++; // Don't touch this.
-                    }
-                }
 
                 String currentCommand = "";
                 Point2D currentPoint = new Point2D.Double(0,0);
@@ -184,6 +170,54 @@ public class CommandParser {
 
 
                     switch(params[0].charAt(0)){
+                        case 'A':
+                            for(i = 1; params.length - i >= 7; i+= 7){
+                                double xRadius = Math.abs(Double.parseDouble(params[i]));
+                                double yRadius = Math.abs(Double.parseDouble(params[i+1]));
+                                double rotation = Double.parseDouble(params[i+2]);
+                                boolean largeArcFlag = Double.parseDouble(params[i+3]) == 0;
+                                boolean sweepFlag = Double.parseDouble(params[i+4]) == 0;
+                                double x1 = currentPoint.getX();
+                                double y1 = currentPoint.getY();
+                                currentPoint.setLocation(   Double.parseDouble(params[i+5]),
+                                                            Double.parseDouble(params[i+6]));
+                                
+                                (new Arc()).arcTo(  path,
+                                                    (float) xRadius, (float) yRadius,
+                                                    (float) rotation,
+                                                    largeArcFlag, sweepFlag,
+                                                    (float) currentPoint.getX(), (float) currentPoint.getY(),
+                                                    (float) x1, (float) y1);
+                            }
+
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
+                            break;
+                            
+                        case 'a':
+                            for(i = 1; params.length - i >= 7; i+= 7){
+                                double xRadius = Math.abs(Double.parseDouble(params[i]));
+                                double yRadius = Math.abs(Double.parseDouble(params[i+1]));
+                                double rotation = Double.parseDouble(params[i+2]);
+                                boolean largeArcFlag = Double.parseDouble(params[i+3]) != 0;
+                                boolean sweepFlag = Double.parseDouble(params[i+4]) != 0;
+                                double x1 = currentPoint.getX();
+                                double y1 = currentPoint.getY();
+                                currentPoint.setLocation(   x1 + Double.parseDouble(params[i+5]),
+                                                            y1 + Double.parseDouble(params[i+6]));
+                                
+                                (new Arc()).arcTo(  path,
+                                                    (float) xRadius, (float) yRadius,
+                                                    (float) rotation,
+                                                    largeArcFlag, sweepFlag,
+                                                    (float) currentPoint.getX(), (float) currentPoint.getY(),
+                                                    (float) x1, (float) y1);
+                            }
+
+                            lastControlPointC = null;
+                            lastControlPointQ = null;
+                            break;
+                            
                         case 'C':
                             for(i = 1; params.length - i >= 6; i+=6){
 
@@ -443,11 +477,14 @@ public class CommandParser {
 
                         case 'Z':
                         case 'z':
+                            path.closePath();
                             lastControlPointC = null;
                             lastControlPointQ = null;
                             break;
+                            
                         default:
-                            throw new RuntimeException("attribute not recognized: "+params[0].charAt(0));
+                            if(!Character.isSpaceChar(params[0].charAt(0)))
+                                throw new RuntimeException("attribute not recognized: "+params[0].charAt(0));
                     }
 
                 }
