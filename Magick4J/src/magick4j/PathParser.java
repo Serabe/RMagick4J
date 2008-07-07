@@ -8,6 +8,8 @@ package magick4j;
 import com.kitfox.svg.pathcmd.Arc;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -15,10 +17,387 @@ import java.awt.geom.Point2D;
  */
 public class PathParser implements ParserBuilder{
 
+    private Point2D currentPoint;
     private Point2D lastControlPointC = null;
     private Point2D lastControlPointQ = null;
-    private Point2D currentPoint;
-    GeneralPath path;
+    private GeneralPath path;
+    private String[] params;
+    
+    private interface PathCommand{
+        public void perform(PathParser parser);
+    }
+    
+    private static final Map<String, PathCommand> COMMANDS = buildCommands();
+    
+    private static Map<String, PathCommand> buildCommands(){
+        Map<String,PathCommand> commands = new HashMap<String,PathCommand>();
+        
+        commands.put("A", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 7; i+= 7){
+                    double xRadius = Math.abs(Double.parseDouble(parser.getParams()[i]));
+                    double yRadius = Math.abs(Double.parseDouble(parser.getParams()[i+1]));
+                    double rotation = Double.parseDouble(parser.getParams()[i+2]);
+                    boolean largeArcFlag = Double.parseDouble(parser.getParams()[i+3]) != 0;
+                    boolean sweepFlag = Double.parseDouble(parser.getParams()[i+4]) != 0;
+                    double x1 = parser.getCurrentPoint().getX();
+                    double y1 = parser.getCurrentPoint().getY();
+                    parser.getCurrentPoint().setLocation(   Double.parseDouble(parser.getParams()[i+5]),
+                                                            Double.parseDouble(parser.getParams()[i+6]));
+
+                    (new Arc()).arcTo(  parser.getPath(),
+                                        (float) xRadius, (float) yRadius,
+                                        (float) rotation,
+                                        largeArcFlag, sweepFlag,
+                                        (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY(),
+                                        (float) x1, (float) y1);
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("a", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 7; i+= 7){
+                    double xRadius = Math.abs(Double.parseDouble(parser.getParams()[i]));
+                    double yRadius = Math.abs(Double.parseDouble(parser.getParams()[i+1]));
+                    double rotation = Double.parseDouble(parser.getParams()[i+2]);
+                    boolean largeArcFlag = Double.parseDouble(parser.getParams()[i+3]) != 0;
+                    boolean sweepFlag = Double.parseDouble(parser.getParams()[i+4]) != 0;
+                    double x1 = parser.getCurrentPoint().getX();
+                    double y1 = parser.getCurrentPoint().getY();
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i+5]),
+                                                            parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+6]));
+
+                    (new Arc()).arcTo(  parser.getPath(),
+                                        (float) xRadius, (float) yRadius,
+                                        (float) rotation,
+                                        largeArcFlag, sweepFlag,
+                                        (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY(),
+                                        (float) x1, (float) y1);
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("C", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 6; i+=6){
+
+                    // First control point
+                    float ctrlx1 = (float) (Double.parseDouble(parser.getParams()[i]));
+                    float ctrly1 = (float) (Double.parseDouble(parser.getParams()[i+1]));
+
+                    // Second control point
+                    parser.setLastControlPointC(new Point2D.Double( Double.parseDouble(parser.getParams()[i+2]),
+                                                                    Double.parseDouble(parser.getParams()[i+3])));
+                    // End point becomes the current point.
+                    parser.getCurrentPoint().setLocation(   Double.parseDouble(parser.getParams()[i+4]),
+                                                            Double.parseDouble(parser.getParams()[i+5]));
+
+                    parser.getPath().curveTo(   ctrlx1, ctrly1,
+                                                (float) parser.getLastControlPointC().getX(), (float) parser.getLastControlPointC().getY(),
+                                                (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("c", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 6; i+=6){
+
+                    // First control point
+                    float ctrlx1 = (float) (parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i]));
+                    float ctrly1 = (float) (parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+1]));
+
+                    // Second control point
+                    parser.setLastControlPointC(new Point2D.Double( parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i+2]),
+                                                                    parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+3])));
+                    // End point becomes the current point.
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i+4]),
+                                                            parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+5]));
+
+                    parser.getPath().curveTo(   ctrlx1, ctrly1,
+                                    (float) parser.getLastControlPointC().getX(), (float) parser.getLastControlPointC().getY(),
+                                    (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("H", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i > 0; i++){
+                    parser.getCurrentPoint().setLocation(Double.parseDouble(parser.getParams()[i]), parser.getCurrentPoint().getY());
+                    parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("h", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i > 0; i++){
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i]),
+                                                            parser.getCurrentPoint().getY());
+                    parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("L", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 2; i+=2){
+                    parser.getCurrentPoint().setLocation(Double.parseDouble(parser.getParams()[i]), Double.parseDouble(parser.getParams()[i+1]));
+                    parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("l", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 2; i+=2){
+                    parser.getCurrentPoint().setLocation(  parser.getCurrentPoint().getX()+Double.parseDouble(parser.getParams()[i]),
+                                                    parser.getCurrentPoint().getY()+Double.parseDouble(parser.getParams()[i+1]));
+                    parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("M", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 2; i+=2){
+                    parser.getCurrentPoint().setLocation(Double.parseDouble(parser.getParams()[i]), Double.parseDouble(parser.getParams()[i+1]));
+                    if(i==1){
+                        parser.getPath().moveTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                    } else {
+                        parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                    }
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("m", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 2; i+=2){
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX()+Double.parseDouble(parser.getParams()[i]),
+                                                            parser.getCurrentPoint().getY()+Double.parseDouble(parser.getParams()[i+1]));
+                    if(i==1){
+                        parser.getPath().moveTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                    } else {
+                        parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                    }
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("Q", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 4; i+=4){
+
+                    // Control point.
+                    parser.setLastControlPointQ(new Point2D.Double( Double.parseDouble(parser.getParams()[i]),
+                                                                    Double.parseDouble(parser.getParams()[i+1])));
+
+                    // End point.
+                    parser.getCurrentPoint().setLocation(  Double.parseDouble(parser.getParams()[i+2]),
+                                                    Double.parseDouble(parser.getParams()[i+3]));
+
+                    parser.getPath().quadTo(    (float) parser.getLastControlPointQ().getX(), (float) parser.getLastControlPointQ().getY(),
+                                                (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+                parser.setLastControlPointC(null);       
+            }
+        });
+        
+        commands.put("q", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 4; i+=4){
+
+                    // Control point.
+                    parser.setLastControlPointQ(new Point2D.Double( parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i]),
+                                                                    parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+1])));
+
+                    // End point.
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i+2]),
+                                                            parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+3]));
+
+                    parser.getPath().quadTo((float) parser.getLastControlPointQ().getX(), (float) parser.getLastControlPointQ().getY(),
+                                            (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+                parser.setLastControlPointC(null);
+            }
+        });
+        
+        commands.put("S", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 4; i+=4){
+
+                    // First control point
+                    if(parser.getLastControlPointC() == null){
+                        parser.setLastControlPointC(parser.getCurrentPoint());
+                    }
+                    float ctrlx1 = (float)(2*parser.getCurrentPoint().getX() - parser.getLastControlPointC().getX());
+                    float ctrly1 = (float)(2*parser.getCurrentPoint().getY() - parser.getLastControlPointC().getY());
+
+                    // Second control 
+                    parser.setLastControlPointC(new Point2D.Double( Double.parseDouble(parser.getParams()[i]),
+                                                                    Double.parseDouble(parser.getParams()[i+1])));
+
+                    // End point becomes the current point.
+                    parser.getCurrentPoint().setLocation(Double.parseDouble(parser.getParams()[i+2]), Double.parseDouble(parser.getParams()[i+3]));
+
+                    parser.getPath().curveTo(  ctrlx1, ctrly1,
+                                        (float) parser.getLastControlPointC().getX(), (float) parser.getLastControlPointC().getY(),
+                                        (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+                
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("s", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 4; i+=4){
+
+                    // First control point
+                    if(parser.getLastControlPointC() == null){
+                        parser.setLastControlPointC(parser.getCurrentPoint());
+                    }
+                    float ctrlx1 = (float)(2*parser.getCurrentPoint().getX() - parser.getLastControlPointC().getX());
+                    float ctrly1 = (float)(2*parser.getCurrentPoint().getY() - parser.getLastControlPointC().getY());
+
+                    // Second control point
+                    parser.setLastControlPointC(new Point2D.Double( parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i]),
+                                                                    parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+1])));
+
+                    // End point becomes the current point.
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i+2]),
+                                                            parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+3]));
+
+                    parser.getPath().curveTo(   ctrlx1, ctrly1,
+                                                (float) parser.getLastControlPointC().getX(), (float) parser.getLastControlPointC().getY(),
+                                                (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+                
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("T", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 2; i+=2){
+
+                    // First control point
+                    if(parser.getLastControlPointQ() == null){
+                        parser.setLastControlPointQ(parser.getCurrentPoint());
+                    }
+                    
+                    parser.getLastControlPointQ().setLocation(  2*parser.getCurrentPoint().getX() - parser.getLastControlPointQ().getX(),
+                                                                2*parser.getCurrentPoint().getY() - parser.getLastControlPointQ().getY());
+
+                    // End point becomes the current point.
+                    parser.getCurrentPoint().setLocation(Double.parseDouble(parser.getParams()[i]), Double.parseDouble(parser.getParams()[i+1]));
+
+                    parser.getPath().quadTo(    (float) parser.getLastControlPointQ().getX(), (float) parser.getLastControlPointQ().getY(),
+                                                (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+                
+                parser.setLastControlPointC(null);
+            }
+        });
+        
+        commands.put("t", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i >= 2; i+=2){
+
+                    // First control point
+                    if(parser.getLastControlPointQ() == null){
+                        parser.setLastControlPointQ(parser.getCurrentPoint());
+                    }
+                    
+                    parser.getLastControlPointQ().setLocation(  2*parser.getCurrentPoint().getX() - parser.getLastControlPointQ().getX(),
+                                                                2*parser.getCurrentPoint().getY() - parser.getLastControlPointQ().getY());
+
+                    // End point becomes the current point.
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX() + Double.parseDouble(parser.getParams()[i]),
+                                                            parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i+1]));
+
+                    parser.getPath().quadTo(    (float) parser.getLastControlPointQ().getX(), (float) parser.getLastControlPointQ().getY(),
+                                                (float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+                
+                parser.setLastControlPointC(null);
+            }
+        });
+        
+        commands.put("V", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i > 0; i++){
+                    parser.getCurrentPoint().setLocation(parser.getCurrentPoint().getX(), Double.parseDouble(parser.getParams()[i]));
+                    parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("v", new PathCommand(){
+            public void perform(PathParser parser){
+                for(int i = 1; parser.getParams().length - i > 0; i++){
+                    parser.getCurrentPoint().setLocation(   parser.getCurrentPoint().getX(),
+                                                            parser.getCurrentPoint().getY() + Double.parseDouble(parser.getParams()[i]));
+                    parser.getPath().lineTo((float) parser.getCurrentPoint().getX(), (float) parser.getCurrentPoint().getY());
+                }
+
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("Z", new PathCommand(){
+            public void perform(PathParser parser){
+                parser.getPath().closePath();
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        commands.put("z", new PathCommand(){
+            public void perform(PathParser parser){
+                parser.getPath().closePath();
+                parser.setLastControlPointC(null);
+                parser.setLastControlPointQ(null);
+            }
+        });
+        
+        return commands;
+    }
     
     public Command build(String... parts) {
         String commandLine = "";
@@ -56,414 +435,57 @@ public class PathParser implements ParserBuilder{
                                     currentCommand.substring(1);
             }
 
-            String[] params = currentCommand.split(" ");
+            this.setParams(currentCommand.split(" "));
 
 
-
-            switch(params[0].charAt(0)){
-                case 'A':
-                    this.arcAbsoluteCommand(params);
-                    break;
-
-                case 'a':
-                    this.arcRelativeCommand(params);
-                    break;
-
-                case 'C':
-                    this.cubicBezierAbsoluteCommand(params);
-                    break;
-
-                case 'c':
-                    this.cubicBezierRelativeCommand(params);
-                    break;
-
-                case 'H':
-                    this.horizontalLineAbsoluteCommand(params);
-                    break;
-
-                case 'h':
-                    this.horizontalLineRelativeCommand(params);
-                    break;
-
-                case 'L':
-                    this.lineAbsoluteCommand(params);
-                    break;
-
-                case 'l':
-                    this.lineRelativeCommand(params);
-                    break;
-
-                case 'M':
-                    this.moveToAbsoluteCommand(params);
-                    break;
-
-                case 'm':
-                    this.moveToRelativeCommand(params);
-                    break;
-
-                case 'Q':
-                    this.quadraticBezierAbsoluteCommand(params);
-                    break;
-
-                case 'q':
-                    this.quadraticBezierRelativeCommand(params);
-                    break;
-
-                case 'S':
-                    this.shorthandCubicBezierAbsoluteCommand(params);
-                    break;
-
-                case 's':
-                    this.shorthandCubicBezierRelativeCommand(params);
-                    break;
-
-                case 'T':
-                    this.shorthandQuadraticBezierAbsoluteCommand(params);
-                    break;
-
-                case 't':
-                    this.shorthandQuadraticBezierRelativeCommand(params);
-                    break;
-
-                case 'V':
-                    this.verticalLineAbsoluteCommand(params);
-                    break;
-
-                case 'v':
-                    this.verticalLineRelativeCommand(params);
-                    break;
-
-                case 'Z':
-                case 'z':
-                    this.closePath(params);
-                    break;
-
-                default:
-                    if(!Character.isSpaceChar(params[0].charAt(0)))
-                        throw new RuntimeException("attribute not recognized: "+params[0].charAt(0));
+            PathCommand command = COMMANDS.get(params[0]);
+            if(command == null && !Character.isSpaceChar(params[0].charAt(0))){
+                throw new RuntimeException("attribute not recognized: "+params[0].charAt(0));
+            }else{
+                command.perform(this);
             }
 
         }
         return CommandBuilder.shape(path);
     }
-
-    private void arcAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i >= 7; i+= 7){
-            double xRadius = Math.abs(Double.parseDouble(params[i]));
-            double yRadius = Math.abs(Double.parseDouble(params[i+1]));
-            double rotation = Double.parseDouble(params[i+2]);
-            boolean largeArcFlag = Double.parseDouble(params[i+3]) != 0;
-            boolean sweepFlag = Double.parseDouble(params[i+4]) != 0;
-            double x1 = this.currentPoint.getX();
-            double y1 = this.currentPoint.getY();
-            this.currentPoint.setLocation(  Double.parseDouble(params[i+5]),
-                                            Double.parseDouble(params[i+6]));
-
-            (new Arc()).arcTo(  this.path,
-                                (float) xRadius, (float) yRadius,
-                                (float) rotation,
-                                largeArcFlag, sweepFlag,
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY(),
-                                (float) x1, (float) y1);
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;            
+    
+    public Point2D getCurrentPoint(){
+        return this.currentPoint;
     }
     
-    private void arcRelativeCommand(String[] params){
-        for(int i = 1; params.length - i >= 7; i+= 7){
-            double xRadius = Math.abs(Double.parseDouble(params[i]));
-            double yRadius = Math.abs(Double.parseDouble(params[i+1]));
-            double rotation = Double.parseDouble(params[i+2]);
-            boolean largeArcFlag = Double.parseDouble(params[i+3]) != 0;
-            boolean sweepFlag = Double.parseDouble(params[i+4]) != 0;
-            double x1 = this.currentPoint.getX();
-            double y1 = this.currentPoint.getY();
-            this.currentPoint.setLocation(  this.currentPoint.getX() + Double.parseDouble(params[i+5]),
-                                            this.currentPoint.getY() + Double.parseDouble(params[i+6]));
-
-            (new Arc()).arcTo(  this.path,
-                                (float) xRadius, (float) yRadius,
-                                (float) rotation,
-                                largeArcFlag, sweepFlag,
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY(),
-                                (float) x1, (float) y1);
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-                    
-    }
-
-    private void closePath(String[] params) {
-        this.path.closePath();
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-    }
-
-    private void cubicBezierAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i >= 6; i+=6){
-
-            // First control point
-            float ctrlx1 = (float) (Double.parseDouble(params[i]));
-            float ctrly1 = (float) (Double.parseDouble(params[i+1]));
-
-            // Second control point
-            this.lastControlPointC = new Point2D.Double(    Double.parseDouble(params[i+2]),
-                                                            Double.parseDouble(params[i+3]));
-            // End point becomes the current point.
-            this.currentPoint.setLocation(  Double.parseDouble(params[i+4]),
-                                            Double.parseDouble(params[i+5]));
-
-            this.path.curveTo(  ctrlx1, ctrly1,
-                                (float) this.lastControlPointC.getX(), (float) this.lastControlPointC.getY(),
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        
-        this.lastControlPointQ = null;         
+    public Point2D getLastControlPointC(){
+        return this.lastControlPointC;
     }
     
-    private void cubicBezierRelativeCommand(String[] params){
-        for(int i = 1; params.length - i >= 6; i+=6){
-
-            // First control point
-            float ctrlx1 = (float) (this.currentPoint.getX() + Double.parseDouble(params[i]));
-            float ctrly1 = (float) (this.currentPoint.getY() + Double.parseDouble(params[i+1]));
-
-            // Second control point
-            this.lastControlPointC = new Point2D.Double(    this.currentPoint.getX() + Double.parseDouble(params[i+2]),
-                                                            this.currentPoint.getY() + Double.parseDouble(params[i+3]));
-            // End point becomes the current point.
-            this.currentPoint.setLocation(  this.currentPoint.getX() + Double.parseDouble(params[i+4]),
-                                            this.currentPoint.getY() + Double.parseDouble(params[i+5]));
-
-            this.path.curveTo(   ctrlx1, ctrly1,
-                            (float) this.lastControlPointC.getX(), (float) this.lastControlPointC.getY(),
-                            (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        
-        this.lastControlPointQ = null;
-                    
+    public Point2D getLastControlPointQ(){
+        return this.lastControlPointQ;
     }
-
-    private void horizontalLineAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i > 0; i++){
-            this.currentPoint.setLocation(Double.parseDouble(params[i]), this.currentPoint.getY());
-            this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-                    
+    
+    public String[] getParams(){
+        return this.params;
     }
-
-    private void horizontalLineRelativeCommand(String[] params) {
-        for(int i = 1; params.length - i > 0; i++){
-            this.currentPoint.setLocation(  this.currentPoint.getX() + Double.parseDouble(params[i]),
-                                            this.currentPoint.getY());
-            this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-        
+    
+    public GeneralPath getPath(){
+        return this.path;
     }
-
-    private void lineAbsoluteCommand(String[] params){
-        for(int i = 1; params.length - i >= 2; i+=2){
-            this.currentPoint.setLocation(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
-            this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-        
+    
+    public void setCurrentPoint(Point2D point){
+        this.currentPoint = point;
     }
-
-    private void lineRelativeCommand(String[] params) {
-        for(int i = 1; params.length - i >= 2; i+=2){
-            this.currentPoint.setLocation(  this.currentPoint.getX()+Double.parseDouble(params[i]),
-                                            this.currentPoint.getY()+Double.parseDouble(params[i+1]));
-            this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-        
+    
+    public void setLastControlPointC(Point2D point){
+        this.lastControlPointC = point;
     }
-
-    private void moveToAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i >= 2; i+=2){
-            this.currentPoint.setLocation(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
-            if(i==1){
-                this.path.moveTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-            } else {
-                this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-            }
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-        
+    
+    public void setLastControlPointQ(Point2D point){
+        this.lastControlPointQ = point;
     }
-
-    private void moveToRelativeCommand(String[] params) {
-        for(int i = 1; params.length - i >= 2; i+=2){
-            this.currentPoint.setLocation(  this.currentPoint.getX()+Double.parseDouble(params[i]),
-                                            this.currentPoint.getY()+Double.parseDouble(params[i+1]));
-            if(i==1){
-                this.path.moveTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-            } else {
-                this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-            }
-        }
-        
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-        
+    
+    public void setParams(String[] params){
+        this.params = params;
     }
-
-    private void quadraticBezierAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i >= 4; i+=4){
-
-            // Control point.
-            this.lastControlPointQ = new Point2D.Double(    Double.parseDouble(params[i]),
-                                                            Double.parseDouble(params[i+1]));
-
-            // End point.
-            this.currentPoint.setLocation(  Double.parseDouble(params[i+2]),
-                                            Double.parseDouble(params[i+3]));
-
-            this.path.quadTo(   (float) this.lastControlPointQ.getX(), (float) this.lastControlPointQ.getY(),
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        this.lastControlPointC=null;          
-    }
-
-    private void quadraticBezierRelativeCommand(String[] params) {
-        for(int i = 1; params.length - i >= 4; i+=4){
-
-            // Control point.
-            this.lastControlPointQ = new Point2D.Double(    this.currentPoint.getX() + Double.parseDouble(params[i]),
-                                                            this.currentPoint.getY() + Double.parseDouble(params[i+1]));
-
-            // End point.
-            this.currentPoint.setLocation(   this.currentPoint.getX() + Double.parseDouble(params[i+2]),
-                                        this.currentPoint.getY() + Double.parseDouble(params[i+3]));
-
-            this.path.quadTo(   (float) this.lastControlPointQ.getX(), (float) this.lastControlPointQ.getY(),
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        this.lastControlPointC=null;
-    }
-
-    private void shorthandCubicBezierAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i >= 4; i+=4){
-
-            // First control point
-            if(this.lastControlPointC == null){
-                this.lastControlPointC = this.currentPoint;
-            }
-            float ctrlx1 = (float)(2*this.currentPoint.getX() - this.lastControlPointC.getX());
-            float ctrly1 = (float)(2*this.currentPoint.getY() - this.lastControlPointC.getY());
-
-            // Second control 
-            this.lastControlPointC = new Point2D.Double( Double.parseDouble(params[i]),
-                                                    Double.parseDouble(params[i+1]));
-
-            // End point becomes the current point.
-            this.currentPoint.setLocation(Double.parseDouble(params[i+2]), Double.parseDouble(params[i+3]));
-
-            this.path.curveTo(  ctrlx1, ctrly1,
-                                (float) this.lastControlPointC.getX(), (float) this.lastControlPointC.getY(),
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        this.lastControlPointQ = null;
-    }
-
-    private void shorthandCubicBezierRelativeCommand(String[] params) {
-        for(int i = 1; params.length - i >= 4; i+=4){
-
-            // First control point
-            if(this.lastControlPointC == null){
-                this.lastControlPointC = this.currentPoint;
-            }
-            float ctrlx1 = (float)(2*this.currentPoint.getX() - this.lastControlPointC.getX());
-            float ctrly1 = (float)(2*this.currentPoint.getY() - this.lastControlPointC.getY());
-
-            // Second control point
-            this.lastControlPointC = new Point2D.Double( this.currentPoint.getX() + Double.parseDouble(params[i]),
-                                                    this.currentPoint.getY() + Double.parseDouble(params[i+1]));
-
-            // End point becomes the current point.
-            this.currentPoint.setLocation(  this.currentPoint.getX() + Double.parseDouble(params[i+2]),
-                                            this.currentPoint.getY() + Double.parseDouble(params[i+3]));
-
-            this.path.curveTo(   ctrlx1, ctrly1,
-                            (float) this.lastControlPointC.getX(), (float) this.lastControlPointC.getY(),
-                            (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        this.lastControlPointQ = null;
-    }
-
-    private void shorthandQuadraticBezierAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i >= 2; i+=2){
-
-            // First control point
-            if(this.lastControlPointQ == null){
-                this.lastControlPointQ = this.currentPoint;
-            }
-            this.lastControlPointQ.setLocation( 2*this.currentPoint.getX() - this.lastControlPointQ.getX(),
-                                                2*this.currentPoint.getY() - this.lastControlPointQ.getY());
-
-            // End point becomes the current point.
-            this.currentPoint.setLocation(Double.parseDouble(params[i]), Double.parseDouble(params[i+1]));
-
-            this.path.quadTo(   (float) this.lastControlPointQ.getX(), (float) this.lastControlPointQ.getY(),
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        this.lastControlPointC = null;
-    }
-
-    private void shorthandQuadraticBezierRelativeCommand(String[] params) {
-        for(int i = 1; params.length - i >= 2; i+=2){
-
-            // First control point
-            if(this.lastControlPointQ == null){
-                this.lastControlPointQ = this.currentPoint;
-            }
-            this.lastControlPointQ.setLocation( 2*this.currentPoint.getX() - this.lastControlPointQ.getX(),
-                                                2*this.currentPoint.getY() - this.lastControlPointQ.getY());
-
-            // End point becomes the current point.
-            this.currentPoint.setLocation(  this.currentPoint.getX() + Double.parseDouble(params[i]),
-                                            this.currentPoint.getY() + Double.parseDouble(params[i+1]));
-
-            this.path.quadTo(   (float) this.lastControlPointQ.getX(), (float) this.lastControlPointQ.getY(),
-                                (float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-        this.lastControlPointC = null;
-    }
-
-    private void verticalLineAbsoluteCommand(String[] params) {
-        for(int i = 1; params.length - i > 0; i++){
-            this.currentPoint = new Point2D.Double(this.currentPoint.getX(), Double.parseDouble(params[i]));
-            this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
-    }
-
-    private void verticalLineRelativeCommand(String[] params) {
-        for(int i = 1; params.length - i > 0; i++){
-            this.currentPoint = new Point2D.Double( this.currentPoint.getX(),
-                                                    this.currentPoint.getY() + Double.parseDouble(params[i]));
-            this.path.lineTo((float) this.currentPoint.getX(), (float) this.currentPoint.getY());
-        }
-
-        this.lastControlPointC = null;
-        this.lastControlPointQ = null;
+    
+    public void setPath(GeneralPath path){
+        this.path = path;
     }
 }

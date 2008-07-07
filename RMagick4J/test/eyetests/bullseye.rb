@@ -8,7 +8,9 @@ require 'profligacy/swing'
 require 'profligacy/lel'
 require  TEST_ROOT + '/tests/new_image.rb'
 require 'tmpdir'
-OUTPUT_DIR = Dir.tmpdir
+Kernel.srand(Time.now.to_i)
+OUTPUT_DIR = File.join(Dir.tmpdir,Kernel.rand(100).to_s)
+Dir.mkdir(OUTPUT_DIR)
 
 module Bullseye
   include Profligacy
