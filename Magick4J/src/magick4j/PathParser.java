@@ -434,9 +434,8 @@ public class PathParser implements ParserBuilder{
                                     " "+
                                     currentCommand.substring(1);
             }
-
-            this.setParams(currentCommand.split(" "));
-
+            
+            this.setParams(currentCommand.split("[ ]+"));
 
             PathCommand command = COMMANDS.get(params[0]);
             if(command == null && !Character.isSpaceChar(params[0].charAt(0))){

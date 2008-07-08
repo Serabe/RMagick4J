@@ -16,4 +16,4 @@ g.data(:Science, [2, 15, 8, 11], '#990099')
 
 g.minimum_value = 0
 
-g.write("gruff_fill_2.jpg")
+g.write("gruff_bar_2.jpg")

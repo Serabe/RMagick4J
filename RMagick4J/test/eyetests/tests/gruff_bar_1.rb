@@ -26,4 +26,4 @@ end
 
 g.theme_odeo
 
-g.write('gruff_fill_1.jpg')
+g.write('gruff_bar_1.jpg')
