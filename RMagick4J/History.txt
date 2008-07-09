@@ -1,3 +1,21 @@
+== 0.3.5
+
+- Implemented Draw primitives (affice, arc, pattern, path)
+
+- Improved Image and ImageList:
+  - crop ( http://www.imagemagick.org/RMagick/doc/image1.html#crop )
+  - rotate ( http://www.imagemagick.org/RMagick/doc/image3.html#rotate )
+  - store_pixels (http://www.imagemagick.org/RMagick/doc/image3.html#store_pixels )
+  - flatten_images (http://www.imagemagick.org/RMagick/doc/ilist.html#flatten_images )
+
+- Implemented more of Pixel (from_HSL, to_HSL, <=>, cmp, intensity)
+
+- Implemented the fill classes (http://www.imagemagick.org/RMagick/doc/struct.html#fill )
+
+- Added a side-by-side (MRI vs JRuby) image testing tool named Bullseye
+
+- Added 680 color names. It can search, but not retrieve the name correctly capitalized.
+
 == 0.3.4
 
 - No bugfixes nor new features, just added compatibility with JRuby 1.1. 
