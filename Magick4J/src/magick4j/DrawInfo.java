@@ -1,5 +1,6 @@
 package magick4j;
 
+import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -21,9 +22,10 @@ public class DrawInfo implements Cloneable {
     private double rotation;
     private AffineTransform spaceTransformation = new AffineTransform(1,0,0,1,0,0);
     private PixelPacket stroke = ColorDatabase.queryDefault("none");
-    private Pattern strokePattern = null;
     private boolean strokeAntialias = true;
     private double[] strokeDashArray;
+    private int strokeLinecap = BasicStroke.CAP_BUTT;
+    private Pattern strokePattern = null;
     private double strokeWidth = 1.0;
 
     public void annotate(MagickImage image, double width, double height, double x, double y, String text) {
@@ -147,6 +149,10 @@ public class DrawInfo implements Cloneable {
     public double[] getStrokeDashArray() {
         return strokeDashArray;
     }
+    
+    public int getStrokeLinecap() {
+        return this.strokeLinecap;
+    }
 
     public Pattern getStrokePattern(){
         return this.strokePattern;
@@ -227,10 +233,6 @@ public class DrawInfo implements Cloneable {
         this.stroke = stroke;
         this.strokePattern = null;
     }
-    
-    public void setStrokePattern(Pattern pattern){
-        this.strokePattern = pattern;
-    }
 
     public void setStrokeAntialias(boolean antialias) {
         this.strokeAntialias = antialias;
@@ -238,6 +240,14 @@ public class DrawInfo implements Cloneable {
 
     public void setStrokeDashArray(double... lengths) {
         this.strokeDashArray = lengths;
+    }
+
+    void setStrokeLinecap(int linecap) {
+        this.strokeLinecap = linecap;
+    }
+    
+    public void setStrokePattern(Pattern pattern){
+        this.strokePattern = pattern;
     }
 
     public void setStrokeWidth(double width) {

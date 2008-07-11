@@ -1,6 +1,7 @@
 package magick4j;
 
 import com.kitfox.svg.pathcmd.Arc;
+import java.awt.BasicStroke;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
@@ -270,6 +271,20 @@ public class CommandParser {
                 }
                 return CommandBuilder.strokeDashArray(lengths);
             }
+        });
+        
+        builders.put("stroke-linecap", new ParserBuilder(){
+           public Command build(String... parts){
+               int linecap=0;
+               if("butt".equals(parts[1]))
+                   linecap = BasicStroke.CAP_BUTT;
+               else if("round".equals(parts[1]))
+                   linecap = BasicStroke.CAP_ROUND;
+               else //if("square".equals(parts[1]))
+                   linecap = BasicStroke.CAP_SQUARE;
+               
+               return CommandBuilder.strokeLinecap(linecap);
+           } 
         });
         
         builders.put("stroke-opacity", new ParserBuilder() {

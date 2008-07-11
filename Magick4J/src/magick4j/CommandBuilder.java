@@ -68,10 +68,10 @@ public class CommandBuilder {
                                 floatDashArray[d] = (float) dashArray[d];
                             }
 
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, floatDashArray, 0f));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER, 10f, floatDashArray, 0f));
 
                         } else {
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER));
                         }
                         graphics.setColor(info.getStroke().toColor());
                         graphics.draw(shape);
@@ -118,10 +118,10 @@ public class CommandBuilder {
                             floatDashArray[d] = (float) dashArray[d];
                         }
 
-                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, floatDashArray, 0f));
+                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER, 10f, floatDashArray, 0f));
 
                     } else {
-                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER));
                     }
                     graphics.setColor(Color.BLACK);
                     graphics.draw(shape);
@@ -303,25 +303,8 @@ public class CommandBuilder {
             }
         };
     }
+   
     
-    /*
-    public static Command stroke(final Pattern color) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStroke(color);
-            }
-        };
-    }
-
-    public static Command stroke(final PixelPacket color) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStroke(color);
-            }
-        };
-    }
-    
-    */
     public static Command stroke(final String color){
         return new Command(){
             public void perform(DrawContext context){
@@ -347,6 +330,14 @@ public class CommandBuilder {
         return new Command() {
             public void perform(DrawContext context) {
                 context.getInfo().setStrokeDashArray(lengths);
+            }
+        };
+    }
+
+    static Command strokeLinecap(final int linecap) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                context.getInfo().setStrokeLinecap(linecap);
             }
         };
     }
