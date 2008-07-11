@@ -5,6 +5,7 @@ include Magick
 draw = Draw.new
 
 draw.fill 'red'
+draw.fill_rule 'nonzero'
 draw.stroke 'blue'
 draw.stroke_width(5)
 draw.path 'M153 334

@@ -517,8 +517,8 @@ public class MagickImage implements Cloneable {
     }
 
     public MagickImage resized(int newWidth, int newHeight){
-        // Copied from image_voodoo
         
+        // Copied from image_voodoo
         BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = img.createGraphics();
         

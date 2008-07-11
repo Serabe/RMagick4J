@@ -20,7 +20,7 @@ file jar_file => :compile
 desc "Clean up any generated file."
 task :clean do
   rm_rf 'pkg'
-  rm_rf jar_file
+  #rm_rf jar_file
 end
 
 desc "Run gruff unit tests."

@@ -109,6 +109,15 @@ public class CommandParser {
             }
         });
         
+        builders.put("fill-rule", new ParserBuilder() {
+           public Command build(String... parts) {
+               if(parts[1].equals("nonzero"))
+                   return CommandBuilder.fillRule(GeneralPath.WIND_NON_ZERO);
+               else
+                   return CommandBuilder.fillRule(GeneralPath.WIND_EVEN_ODD);
+           } 
+        });
+        
         builders.put("line", new ParserBuilder() {
             public Command build(String... parts) {
                 String[] args0 = parts[1].split(",");

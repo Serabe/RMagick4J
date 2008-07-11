@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -156,6 +157,14 @@ public class CommandBuilder {
         };
     }
     
+    public static Command fillRule(final int wind) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                context.getInfo().setFillRule(wind);
+            }
+        };
+    }
+    
     public static Command fillShape(final Color color, final Shape s){
         return new Command() {
             public void perform(DrawContext context){
@@ -265,7 +274,9 @@ public class CommandBuilder {
             public void perform(DrawContext context){
                 DrawInfo info = context.getInfo();
                 List<Command> list = new ArrayList<Command>();
-                
+                if(s instanceof GeneralPath){
+                    ((GeneralPath) s).setWindingRule(context.getInfo().getFillRule());
+                }
                 // TODO: Add fill pattern.
                 if(info.getFillPattern() == null){
                     list.add(CommandBuilder.fillShape(info.getFill().toColor(), s));

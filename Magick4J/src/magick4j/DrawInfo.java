@@ -5,6 +5,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.util.List;
 
 public class DrawInfo implements Cloneable {
@@ -12,6 +13,7 @@ public class DrawInfo implements Cloneable {
     private PixelPacket fill = ColorDatabase.queryDefault("black");
     private double fillOpacity = 1.0;
     private Pattern fillPattern = null;
+    private int fillRule = GeneralPath.WIND_EVEN_ODD;
     private String fontFamily = "SansSerif";
     private int fontWeight;
     private Gravity gravity = Gravity.FORGET;
@@ -125,6 +127,10 @@ public class DrawInfo implements Cloneable {
     public Pattern getFillPattern() {
         return this.fillPattern;
     }
+    
+    public int getFillRule(){
+        return this.fillRule;
+    }
 
     public String getFontFamily() {
         return fontFamily;
@@ -190,6 +196,10 @@ public class DrawInfo implements Cloneable {
 
     public void setFillOpacity(double fillOpacity) {
         this.fillOpacity = fillOpacity;
+    }
+    
+    public void setFillRule(int fillRule){
+        this.fillRule = fillRule;
     }
 
     public void setFontFamily(String fontFamily) {
