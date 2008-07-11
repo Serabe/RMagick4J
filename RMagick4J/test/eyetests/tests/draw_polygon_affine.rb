@@ -5,6 +5,7 @@ include Magick
 draw = Draw.new
 
 draw.stroke = 'blue'
+draw.stroke_linejoin 'round'
 draw.stroke_width 5.0
 draw.fill = 'red'
 

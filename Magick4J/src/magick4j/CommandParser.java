@@ -287,6 +287,20 @@ public class CommandParser {
            } 
         });
         
+        builders.put("stroke-linejoin", new ParserBuilder() {
+           public Command build(String... parts) {
+               int linejoin = 0;
+               if("miter".equals(parts[1]))
+                   linejoin = BasicStroke.JOIN_MITER;
+               else if("round".equals(parts[1]))
+                   linejoin = BasicStroke.JOIN_ROUND;
+               else //if("bevel".equals(parts[1]))
+                   linejoin = BasicStroke.JOIN_BEVEL;
+               
+               return CommandBuilder.strokeLinejoin(linejoin);
+           } 
+        });
+        
         builders.put("stroke-opacity", new ParserBuilder() {
             public Command build(String... parts) {
                 // Manage two different type of string:

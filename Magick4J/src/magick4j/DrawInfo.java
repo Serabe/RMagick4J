@@ -25,6 +25,7 @@ public class DrawInfo implements Cloneable {
     private boolean strokeAntialias = true;
     private double[] strokeDashArray;
     private int strokeLinecap = BasicStroke.CAP_BUTT;
+    private int strokeLinejoin = BasicStroke.JOIN_MITER;
     private Pattern strokePattern = null;
     private double strokeWidth = 1.0;
 
@@ -153,6 +154,10 @@ public class DrawInfo implements Cloneable {
     public int getStrokeLinecap() {
         return this.strokeLinecap;
     }
+    
+    public int getStrokeLinejoin() {
+        return this.strokeLinejoin;
+    }
 
     public Pattern getStrokePattern(){
         return this.strokePattern;
@@ -244,6 +249,10 @@ public class DrawInfo implements Cloneable {
 
     void setStrokeLinecap(int linecap) {
         this.strokeLinecap = linecap;
+    }
+
+    void setStrokeLinejoin(int linejoin) {
+        this.strokeLinejoin = linejoin;
     }
     
     public void setStrokePattern(Pattern pattern){

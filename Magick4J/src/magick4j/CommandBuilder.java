@@ -68,10 +68,10 @@ public class CommandBuilder {
                                 floatDashArray[d] = (float) dashArray[d];
                             }
 
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER, 10f, floatDashArray, 0f));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), 10f, floatDashArray, 0f));
 
                         } else {
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin()));
                         }
                         graphics.setColor(info.getStroke().toColor());
                         graphics.draw(shape);
@@ -118,10 +118,10 @@ public class CommandBuilder {
                             floatDashArray[d] = (float) dashArray[d];
                         }
 
-                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER, 10f, floatDashArray, 0f));
+                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), 10f, floatDashArray, 0f));
 
                     } else {
-                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), BasicStroke.JOIN_MITER));
+                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin()));
                     }
                     graphics.setColor(Color.BLACK);
                     graphics.draw(shape);
@@ -338,6 +338,14 @@ public class CommandBuilder {
         return new Command() {
             public void perform(DrawContext context) {
                 context.getInfo().setStrokeLinecap(linecap);
+            }
+        };
+    }
+
+    public static Command strokeLinejoin(final int linejoin) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                context.getInfo().setStrokeLinejoin(linejoin);
             }
         };
     }
