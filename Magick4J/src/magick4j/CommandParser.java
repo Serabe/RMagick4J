@@ -301,6 +301,12 @@ public class CommandParser {
            } 
         });
         
+        builders.put("stroke-miterlimit", new ParserBuilder() {
+           public Command build(String... parts) {
+               return CommandBuilder.strokeMiterLimit(Float.parseFloat(parts[1]));
+           }; 
+        });
+        
         builders.put("stroke-opacity", new ParserBuilder() {
             public Command build(String... parts) {
                 // Manage two different type of string:

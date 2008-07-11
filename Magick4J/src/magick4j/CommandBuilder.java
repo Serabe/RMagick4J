@@ -68,10 +68,10 @@ public class CommandBuilder {
                                 floatDashArray[d] = (float) dashArray[d];
                             }
 
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), 10f, floatDashArray, 0f));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), info.getStrokeMiterLimit(), floatDashArray, 0f));
 
                         } else {
-                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin()));
+                            graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), info.getStrokeMiterLimit()));
                         }
                         graphics.setColor(info.getStroke().toColor());
                         graphics.draw(shape);
@@ -118,10 +118,10 @@ public class CommandBuilder {
                             floatDashArray[d] = (float) dashArray[d];
                         }
 
-                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), 10f, floatDashArray, 0f));
+                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), info.getStrokeMiterLimit(), floatDashArray, 0f));
 
                     } else {
-                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin()));
+                        graphics.setStroke(new BasicStroke((float) info.getStrokeWidth(), info.getStrokeLinecap(), info.getStrokeLinejoin(), info.getStrokeMiterLimit()));
                     }
                     graphics.setColor(Color.BLACK);
                     graphics.draw(shape);
@@ -346,6 +346,14 @@ public class CommandBuilder {
         return new Command() {
             public void perform(DrawContext context) {
                 context.getInfo().setStrokeLinejoin(linejoin);
+            }
+        };
+    }
+
+    public static Command strokeMiterLimit(final float miterLimit) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                context.getInfo().setStrokeMiterLimit(miterLimit);
             }
         };
     }

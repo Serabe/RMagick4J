@@ -26,6 +26,7 @@ public class DrawInfo implements Cloneable {
     private double[] strokeDashArray;
     private int strokeLinecap = BasicStroke.CAP_BUTT;
     private int strokeLinejoin = BasicStroke.JOIN_MITER;
+    private float strokeMiterLimit = 10f;
     private Pattern strokePattern = null;
     private double strokeWidth = 1.0;
 
@@ -158,6 +159,10 @@ public class DrawInfo implements Cloneable {
     public int getStrokeLinejoin() {
         return this.strokeLinejoin;
     }
+    
+    public float getStrokeMiterLimit() {
+        return this.strokeMiterLimit;
+    }
 
     public Pattern getStrokePattern(){
         return this.strokePattern;
@@ -247,12 +252,16 @@ public class DrawInfo implements Cloneable {
         this.strokeDashArray = lengths;
     }
 
-    void setStrokeLinecap(int linecap) {
+    public void setStrokeLinecap(int linecap) {
         this.strokeLinecap = linecap;
     }
 
-    void setStrokeLinejoin(int linejoin) {
+    public void setStrokeLinejoin(int linejoin) {
         this.strokeLinejoin = linejoin;
+    }
+    
+    public void setStrokeMiterLimit(float miterLimit) {
+        this.strokeMiterLimit = miterLimit/2; //DO NOT CHANGE THIS. It converts the miterLimit from ImageMagick to Java.
     }
     
     public void setStrokePattern(Pattern pattern){
