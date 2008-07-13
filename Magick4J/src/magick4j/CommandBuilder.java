@@ -8,6 +8,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -268,6 +269,15 @@ public class CommandBuilder {
             }
         };
     }
+
+    public static Command scale(final double scaleX, final double scaleY) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                // TODO Change to a scale at the info level, so that push/pop works and so on.
+                context.getGraphics().scale(scaleX, scaleY);
+            }
+        };
+    }
     
     public static Command shape(final Shape s) {
         return new Command(){
@@ -277,11 +287,27 @@ public class CommandBuilder {
                 if(s instanceof GeneralPath){
                     ((GeneralPath) s).setWindingRule(context.getInfo().getFillRule());
                 }
-                // TODO: Add fill pattern.
+                
                 if(info.getFillPattern() == null){
-                    list.add(CommandBuilder.fillShape(info.getFill().toColor(), s));
+                    // This is suposed to fix a bug in Java that do not "fill" a Line2D Shape.
+                    if(s instanceof Line2D){
+                        PixelPacket p = info.getStroke();
+                        list.add(CommandBuilder.stroke(info.getFill()));
+                        list.add(CommandBuilder.drawShape(info.getStroke().toColor(), s));
+                        list.add(CommandBuilder.stroke(p));
+                    } else {
+                        list.add(CommandBuilder.fillShape(info.getFill().toColor(), s));
+                    }
                 } else {
-                    list.add(CommandBuilder.fillShapeWithPattern(info.getFillPattern(), s));
+                    // This is suposed to fix a bug in Java that do not "fill" a Line2D Shape.
+                    if(s instanceof Line2D){
+                        Pattern p = info.getStrokePattern();
+                        list.add(CommandBuilder.stroke(info.getFillPattern()));
+                        list.add(CommandBuilder.drawShapeWithPattern(info.getStrokePattern(), s));
+                        list.add(CommandBuilder.stroke(p));
+                    } else {
+                        list.add(CommandBuilder.fillShapeWithPattern(info.getFillPattern(), s));
+                    }
                 }
                 
                 if(info.getStrokePattern() == null){
@@ -294,17 +320,40 @@ public class CommandBuilder {
             }
         };
     }
-
-    public static Command scale(final double scaleX, final double scaleY) {
+   
+    
+    public static Command skewX(final double degrees) {
         return new Command() {
             public void perform(DrawContext context) {
-                // TODO Change to a scale at the info level, so that push/pop works and so on.
-                context.getGraphics().scale(scaleX, scaleY);
+                context.getInfo().skewX(degrees);
             }
         };
     }
-   
     
+    public static Command skewY(final double degrees) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                context.getInfo().skewY(degrees);
+            }
+        };
+    }
+
+    private static Command stroke(final Pattern pattern) {
+        return new Command() {
+            public void perform(DrawContext context){
+                context.getInfo().setStrokePattern(pattern);
+            }
+        };
+    }
+
+    public static Command stroke(final PixelPacket pixel) {
+        return new Command() {
+            public void perform(DrawContext context){
+                context.getInfo().setStroke(pixel);
+            }
+        };
+    }
+
     public static Command stroke(final String color){
         return new Command(){
             public void perform(DrawContext context){

@@ -248,6 +248,18 @@ public class CommandParser {
             }
         });
         
+        builders.put("skewX", new ParserBuilder() {
+           public Command build(String... parts) {
+               return CommandBuilder.skewX(Double.parseDouble(parts[1]));
+           } 
+        });
+        
+        builders.put("skewY", new ParserBuilder() {
+            public Command build(String... parts) {
+                return CommandBuilder.skewY(Double.parseDouble(parts[1]));
+            }
+        });
+        
         builders.put("stroke", new ParserBuilder() {
             public Command build(String... parts) {
                 String colorName = parts[1].replace("\"", "");

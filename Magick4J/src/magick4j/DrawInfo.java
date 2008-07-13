@@ -271,6 +271,16 @@ public class DrawInfo implements Cloneable {
     public void setStrokeWidth(double width) {
         this.strokeWidth = width;
     }
+    
+    public void skewX(double degrees){
+        AffineTransform af = new AffineTransform(1d, 0d, Math.tan(Math.toRadians(degrees)), 1d, 0d, 0d);
+        this.spaceTransformation.concatenate(af);
+    }
+    
+    public void skewY(double degrees){
+        AffineTransform af = new AffineTransform(1d, Math.tan(Math.toRadians(degrees)), 0d, 1d, 0d, 0d);
+        this.spaceTransformation.concatenate(af);
+    }
 
     private void updateFont(Graphics2D graphics) {
         Font font = new Font(fontFamily, fontWeight >= 700 ? Font.BOLD : Font.PLAIN,
