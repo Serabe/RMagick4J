@@ -282,7 +282,7 @@ public class CommandBuilder {
         return new Command() {
             public void perform(DrawContext context) {
                 // TODO Change to a scale at the info level, so that push/pop works and so on.
-                context.getGraphics().scale(scaleX, scaleY);
+                context.getInfo().scale(scaleX, scaleY);
             }
         };
     }

@@ -198,6 +198,10 @@ public class DrawInfo implements Cloneable {
         this.spaceTransformation.concatenate(AffineTransform.getRotateInstance(Math.toRadians(rotation)));
     }
 
+    public void scale(double scaleX, double scaleY) {
+        this.spaceTransformation.concatenate(AffineTransform.getScaleInstance(scaleX, scaleY));
+    }
+
     public void setFill(Pattern fill){
         this.fillPattern = fill;
     }

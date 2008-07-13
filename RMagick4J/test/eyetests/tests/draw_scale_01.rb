@@ -11,8 +11,8 @@ gc.affine 1, 0, 0, 1, 100, 100
 max_x = imgl.columns/2
 max_y = imgl.rows/2
 
-# Rotate 45 degrees
-gc.rotate(45)
+# Scale by 0.5 and 1/3.
+gc.scale(0.5, 1.0/3.0)
 
 gc.stroke('red')
 gc.stroke_width(3)
@@ -30,4 +30,4 @@ gc.line( max_x, 0, max_x-10,  10)
 
 gc.draw(imgl)
 
-imgl.write("draw_rotate_01.jpg")
+imgl.write("draw_scale_01.jpg")
