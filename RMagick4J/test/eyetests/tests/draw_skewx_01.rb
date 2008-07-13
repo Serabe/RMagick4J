@@ -7,7 +7,7 @@ imgl = Magick::Image.new(250, 250, Magick::HatchFill.new('white','lightcyan2'))
 gc = Magick::Draw.new
 
 # Move the origin to the center.
-gc.affine 1, 0, 0, 1, 125, 125
+gc.translate(125, 125)
 max_x = imgl.columns/2
 max_y = imgl.rows/2 - 5
 

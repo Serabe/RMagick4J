@@ -284,6 +284,10 @@ public class DrawInfo implements Cloneable {
         this.spaceTransformation.concatenate(af);
     }
 
+    public void translate(double x, double y) {
+        this.spaceTransformation.concatenate(AffineTransform.getTranslateInstance(x, y));
+    }
+
     private void updateFont(Graphics2D graphics) {
         Font font = new Font(fontFamily, fontWeight >= 700 ? Font.BOLD : Font.PLAIN,
                 (int) pointSize).deriveFont((float) pointSize);

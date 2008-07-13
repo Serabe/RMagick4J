@@ -430,4 +430,13 @@ public class CommandBuilder {
             }
         };
     }
+    
+    public static Command translate(final double x, final double y) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                context.getInfo().translate(x,y);
+            }
+        };
+    }
+
 }

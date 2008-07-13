@@ -349,6 +349,13 @@ public class CommandParser {
             }
         });
         
+        builders.put("translate", new ParserBuilder() {
+           public Command build(String... parts) {
+               String[] point = parts[1].split(",");
+               return CommandBuilder.translate(Double.parseDouble(point[0]), Double.parseDouble(point[1]));
+           } 
+        });
+        
         return builders;
     }
 
