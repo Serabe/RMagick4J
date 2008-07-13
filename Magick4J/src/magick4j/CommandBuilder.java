@@ -270,6 +270,14 @@ public class CommandBuilder {
         };
     }
 
+    public static Command rotate(final double rotation) {
+        return new Command(){
+            public void perform(DrawContext context){
+                context.getInfo().rotate(rotation);
+            }
+        };
+    }
+
     public static Command scale(final double scaleX, final double scaleY) {
         return new Command() {
             public void perform(DrawContext context) {

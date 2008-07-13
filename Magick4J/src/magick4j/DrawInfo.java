@@ -19,7 +19,6 @@ public class DrawInfo implements Cloneable {
     private int fontWeight;
     private Gravity gravity = Gravity.FORGET;
     private double pointSize = 12.0;
-    private double rotation;
     private AffineTransform spaceTransformation = new AffineTransform(1,0,0,1,0,0);
     private PixelPacket stroke = ColorDatabase.queryDefault("none");
     private boolean strokeAntialias = true;
@@ -96,7 +95,6 @@ public class DrawInfo implements Cloneable {
     private Graphics2D createGraphics(final MagickImage image) {
         Graphics2D graphics = image.getImage().createGraphics();
         try {
-            graphics.rotate(Math.toRadians(rotation));
             return graphics;
         } catch (Exception e) {
             graphics.dispose();
@@ -197,7 +195,7 @@ public class DrawInfo implements Cloneable {
     }
 
     public void rotate(double rotation) {
-        this.rotation += rotation;
+        this.spaceTransformation.concatenate(AffineTransform.getRotateInstance(Math.toRadians(rotation)));
     }
 
     public void setFill(Pattern fill){

@@ -228,6 +228,12 @@ public class CommandParser {
             }
         });
         
+        builders.put("rotate", new ParserBuilder() {
+            public Command build(String... parts) {
+                return CommandBuilder.rotate(Double.parseDouble(parts[1]));
+            }
+        });
+        
         builders.put("roundrectangle", new ParserBuilder() {
             public Command build(String... parts) {
                 String[] args = parts[1].split(",");
