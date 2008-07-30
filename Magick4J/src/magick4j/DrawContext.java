@@ -1,7 +1,6 @@
 package magick4j;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -9,21 +8,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DrawContext {
+    private String applyClipPath = null;
+    private Hashtable<String, ClipPath> clipPathHash = new Hashtable<String, ClipPath>();
+    private String composingClipPath = null;
     private String composingPattern = null;
-    private List<Graphics2D> graphicsStack = new ArrayList<Graphics2D>();
-    private MagickImage image;
+    private List<MagickImage> imagesStack = new ArrayList<MagickImage>();
     private List<DrawInfo> infoStack = new ArrayList<DrawInfo>();
     private Hashtable<String, Pattern> patternHash = new Hashtable<String, Pattern>();
     
 
     public DrawContext(DrawInfo info, MagickImage image) {
-        this.graphicsStack.add((Graphics2D) image.getImage().createGraphics());
+        this.imagesStack.add(image);
         this.infoStack.add(info);
-        this.image = image;
+    }
+
+    void addClipPath(String name) {
+        this.clipPathHash.put(name, new ClipPath(name, getImage().getWidth(), getImage().getHeight()));
     }
 
     void addPattern(Pattern pattern) {
         this.patternHash.put(pattern.getName(), pattern);
+    }
+
+    void composeClipPath(String name) {
+        this.composingClipPath = name;
     }
 
     void composePattern(String name) {
@@ -35,24 +43,28 @@ public class DrawContext {
      * This context is unusable after disposal.
      */
     public void dispose() {
-        while (graphicsStack.size() > 1) {
+        while (imagesStack.size() > 1) {
             try {
                 pop();
             } catch (Exception e) {
                 // Plow on, but log first.
-                Logger.getLogger(DrawContext.class.getName()).log(Level.WARNING, "error disposing images " + graphicsStack.size(), e);
+                Logger.getLogger(DrawContext.class.getName()).log(Level.WARNING, "error disposing images " + imagesStack.size(), e);
             }
         }
-        graphicsStack = null;
+        imagesStack = null;
         infoStack = null;
     }
 
+    public ClipPath getClipPath(String name){
+        return this.clipPathHash.get(name);
+    }
+    
     public Graphics2D getGraphics() {
-        return (Graphics2D) graphicsStack.get(graphicsStack.size() - 1);
+        return (Graphics2D) getImage().getImage().getGraphics();
     }
 
     public MagickImage getImage(){
-        return this.image;
+        return this.imagesStack.get(this.imagesStack.size()-1);
     }
     
     public DrawInfo getInfo() {
@@ -71,17 +83,24 @@ public class DrawContext {
         try {
             getGraphics().dispose();
         } finally {
-            graphicsStack.remove(graphicsStack.size() - 1);
+            imagesStack.remove(imagesStack.size() - 1);
             infoStack.remove(infoStack.size() - 1);
         }
     }
 
+    public void prepareClipPath(String name) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
     public void push() {
         if(this.composingPattern != null){
-            graphicsStack.add((Graphics2D) this.patternHash.get(this.composingPattern).getImage().getGraphics());
+            imagesStack.add(this.patternHash.get(this.composingPattern).getImage());
             this.composingPattern = null;
-        }else{
-            graphicsStack.add((Graphics2D) getGraphics().create());
+        } else if(this.composingClipPath != null){
+            imagesStack.add(this.clipPathHash.get(this.composingClipPath).getImage());
+            this.composingClipPath = null;
+        } else{
+            imagesStack.add(getImage().createCanvas());
         }
         infoStack.add(getInfo().clone());
     }

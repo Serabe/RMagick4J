@@ -211,6 +211,12 @@ public class MagickImage implements Cloneable {
         result.composite(image, x, y, op);
         return result;
     }
+    
+    public MagickImage createCanvas(){
+        ImageInfo info = new ImageInfo();
+        info.setBackgroundColor(ColorDatabase.lookUp("none"));
+        return new MagickImage(getWidth(), getHeight(), info);
+    }
 
     public MagickImage crop(Gravity gravity, int width, int height) {
         return crop(gravity.getX(this, width),gravity.getY(this, height),width,height);
@@ -410,7 +416,7 @@ public class MagickImage implements Cloneable {
     public void mask(MagickImage mask, Pattern pattern){
         WritableRaster out = this.getImage().getRaster();
         WritableRaster maskRaster = mask.getImage().getRaster();
-        WritableRaster patternRaster = pattern.getImage().getRaster();
+        WritableRaster patternRaster = pattern.getImage().getImage().getRaster();
         
         int width  = (int) Math.min(this.getWidth() , mask.getWidth());
         int height = (int) Math.min(this.getHeight(), mask.getHeight());

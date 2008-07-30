@@ -3,7 +3,7 @@ package magick4j;
 import java.awt.image.BufferedImage;
 
 public class Pattern {
-    private BufferedImage image;
+    private MagickImage image;
     private int x;
     private int y;
     private String name;
@@ -12,10 +12,10 @@ public class Pattern {
         this.name = name;
         this.x = x;
         this.y = y;
-        this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        this.image = new MagickImage(width, height);
     }
     
-    public BufferedImage getImage(){
+    public MagickImage getImage(){
         return this.image;
     }
     

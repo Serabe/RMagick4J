@@ -445,7 +445,7 @@ public class PathParser implements ParserBuilder{
             }
 
         }
-        return CommandBuilder.shape(path);
+        return CommandParser.getCurrentBuilder().shape(path);
     }
     
     public Point2D getCurrentPoint(){

@@ -7,22 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
-/**
- * Creates instances of the built-in drawing commands.
- */
-public class CommandBuilder {
-
-    private CommandBuilder() {
-    // Hidden
-    }
-
-    public static Command affine(final double sx, final double rx, final double ry, final double sy, final double tx, final double ty) {
+public abstract class CommandBuilder {
+    
+    public Command affine(final double sx, final double rx, final double ry, final double sy, final double tx, final double ty) {
         return new Command(){
             public void perform(DrawContext context){
                 context.getInfo().getSpaceTransformation().concatenate(new AffineTransform(sx, rx, ry, sy, tx, ty));
@@ -30,7 +19,7 @@ public class CommandBuilder {
         };
     }
     
-    public static Command compose(final Collection<Command> commands){
+    public Command compose(final Collection<Command> commands){
         return new Command(){
             public void perform(DrawContext context){
                 for(Command c : commands) c.perform(context);
@@ -38,7 +27,7 @@ public class CommandBuilder {
         };
     }
     
-    public static Command drawShape(final Color color, final Shape s){
+    public Command drawShape(final Color color, final Shape s){
         return new Command() {
             public void perform(DrawContext context){
                 DrawInfo info = context.getInfo();
@@ -84,7 +73,7 @@ public class CommandBuilder {
         };
     }
     
-    public static Command drawShapeWithPattern(final Pattern pattern, final Shape s){
+    public Command drawShapeWithPattern(final Pattern pattern, final Shape s){
         return new Command(){
             public void perform(DrawContext context){
                 DrawInfo info = context.getInfo();
@@ -135,35 +124,13 @@ public class CommandBuilder {
         };
     }
     
-    public static Command fill(final String color) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                if(context.hasPattern(color)){
-                    context.getInfo().setFill(context.getPattern(color));
-                } else {
-                    context.getInfo().setFill(ColorDatabase.queryDefault(color));
-                }
-            }
-        };
-    }
+    public abstract Command fill(final String color);
 
-    public static Command fillOpacity(final double opacity) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setFillOpacity(opacity);
-            }
-        };
-    }
+    public abstract Command fillOpacity(final double opacity);
     
-    public static Command fillRule(final int wind) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setFillRule(wind);
-            }
-        };
-    }
+    public abstract Command fillRule(final int wind);
     
-    public static Command fillShape(final Color color, final Shape s){
+    public Command fillShape(final Color color, final Shape s){
         return new Command() {
             public void perform(DrawContext context){
                 DrawInfo info = context.getInfo();
@@ -196,7 +163,7 @@ public class CommandBuilder {
         };
     }
     
-    public static Command fillShapeWithPattern(final Pattern pattern, final Shape s){
+    public Command fillShapeWithPattern(final Pattern pattern, final Shape s){
         return new Command() {
             public void perform(DrawContext context){
                 DrawInfo info = context.getInfo();
@@ -236,13 +203,13 @@ public class CommandBuilder {
         };
     }
     
-    public static Command nil(){
+    public Command nil(){
         return new Command(){
             public void perform(DrawContext context){}
         };
     }
 
-    public static Command pop() {
+    public Command pop() {
         return new Command() {
             public void perform(DrawContext context) {
                 context.pop();
@@ -250,24 +217,21 @@ public class CommandBuilder {
         };
     }
 
-    public static Command push() {
+    public abstract Command prepareClipPath(String name);
+    
+    public Command push() {
         return new Command() {
             public void perform(DrawContext context) {
                 context.push();
             }
         };
     }
+    
+    public abstract Command pushClipPath(final String name);
 
-    static Command pushPattern(final Pattern pattern) {
-        return new Command(){
-            public void perform(DrawContext context){
-                context.addPattern(pattern);
-                context.composePattern(pattern.getName());
-            }
-        };
-    }
+    public abstract Command pushPattern(final Pattern pattern);
 
-    public static Command rotate(final double rotation) {
+    public Command rotate(final double rotation) {
         return new Command(){
             public void perform(DrawContext context){
                 context.getInfo().rotate(rotation);
@@ -275,7 +239,7 @@ public class CommandBuilder {
         };
     }
 
-    public static Command scale(final double scaleX, final double scaleY) {
+    public Command scale(final double scaleX, final double scaleY) {
         return new Command() {
             public void perform(DrawContext context) {
                 // TODO Change to a scale at the info level, so that push/pop works and so on.
@@ -284,50 +248,9 @@ public class CommandBuilder {
         };
     }
     
-    public static Command shape(final Shape s) {
-        return new Command(){
-            public void perform(DrawContext context){
-                DrawInfo info = context.getInfo();
-                List<Command> list = new ArrayList<Command>();
-                if(s instanceof GeneralPath){
-                    ((GeneralPath) s).setWindingRule(context.getInfo().getFillRule());
-                }
-                
-                if(info.getFillPattern() == null){
-                    // This is suposed to fix a bug in Java that do not "fill" a Line2D Shape.
-                    if(s instanceof Line2D){
-                        PixelPacket p = info.getStroke();
-                        list.add(CommandBuilder.stroke(info.getFill()));
-                        list.add(CommandBuilder.drawShape(info.getStroke().toColor(), s));
-                        list.add(CommandBuilder.stroke(p));
-                    } else {
-                        list.add(CommandBuilder.fillShape(info.getFill().toColor(), s));
-                    }
-                } else {
-                    // This is suposed to fix a bug in Java that do not "fill" a Line2D Shape.
-                    if(s instanceof Line2D){
-                        Pattern p = info.getStrokePattern();
-                        list.add(CommandBuilder.stroke(info.getFillPattern()));
-                        list.add(CommandBuilder.drawShapeWithPattern(info.getStrokePattern(), s));
-                        list.add(CommandBuilder.stroke(p));
-                    } else {
-                        list.add(CommandBuilder.fillShapeWithPattern(info.getFillPattern(), s));
-                    }
-                }
-                
-                if(info.getStrokePattern() == null){
-                    list.add(CommandBuilder.drawShape(info.getStroke().toColor(), s));
-                } else {
-                    list.add(CommandBuilder.drawShapeWithPattern(info.getStrokePattern(), s));
-                }
-                
-                CommandBuilder.compose(list).perform(context);
-            }
-        };
-    }
+    public abstract Command shape(final Shape s);
    
-    
-    public static Command skewX(final double degrees) {
+    public Command skewX(final double degrees) {
         return new Command() {
             public void perform(DrawContext context) {
                 context.getInfo().skewX(degrees);
@@ -335,7 +258,7 @@ public class CommandBuilder {
         };
     }
     
-    public static Command skewY(final double degrees) {
+    public Command skewY(final double degrees) {
         return new Command() {
             public void perform(DrawContext context) {
                 context.getInfo().skewY(degrees);
@@ -343,97 +266,31 @@ public class CommandBuilder {
         };
     }
 
-    private static Command stroke(final Pattern pattern) {
-        return new Command() {
-            public void perform(DrawContext context){
-                context.getInfo().setStrokePattern(pattern);
-            }
-        };
-    }
+    public abstract Command stroke(final Pattern pattern);
 
-    public static Command stroke(final PixelPacket pixel) {
-        return new Command() {
-            public void perform(DrawContext context){
-                context.getInfo().setStroke(pixel);
-            }
-        };
-    }
+    public abstract Command stroke(final PixelPacket pixel);
 
-    public static Command stroke(final String color){
-        return new Command(){
-            public void perform(DrawContext context){
-                if(context.hasPattern(color)){
-                    context.getInfo().setStroke(context.getPattern(color));
-                } else {
-                    context.getInfo().setStroke(ColorDatabase.queryDefault(color));
-                }
-            }
+    public abstract Command stroke(final String color);
 
-        };
-    }
+    public abstract Command strokeAntialias(final boolean antialias);
 
-    public static Command strokeAntialias(final boolean antialias) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStrokeAntialias(antialias);
-            }
-        };
-    }
+    public abstract Command strokeDashArray(final double... lengths);
 
-    public static Command strokeDashArray(final double... lengths) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStrokeDashArray(lengths);
-            }
-        };
-    }
+    public abstract Command strokeLinecap(final int linecap);
 
-    static Command strokeLinecap(final int linecap) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStrokeLinecap(linecap);
-            }
-        };
-    }
+    public abstract Command strokeLinejoin(final int linejoin);
 
-    public static Command strokeLinejoin(final int linejoin) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStrokeLinejoin(linejoin);
-            }
-        };
-    }
+    public abstract Command strokeMiterLimit(final float miterLimit);
 
-    public static Command strokeMiterLimit(final float miterLimit) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStrokeMiterLimit(miterLimit);
-            }
-        };
-    }
+    public abstract Command strokeOpacity(final double opacity);
 
-    public static Command strokeOpacity(final double opacity) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().getStroke().setOpacity((int) Math.round(255*(1-opacity)));
-            }
-        };
-    }
-
-    public static Command strokeWidth(final double width) {
-        return new Command() {
-            public void perform(DrawContext context) {
-                context.getInfo().setStrokeWidth(width);
-            }
-        };
-    }
+    public abstract Command strokeWidth(final double width);
     
-    public static Command translate(final double x, final double y) {
+    public Command translate(final double x, final double y) {
         return new Command() {
             public void perform(DrawContext context) {
                 context.getInfo().translate(x,y);
             }
         };
     }
-
 }

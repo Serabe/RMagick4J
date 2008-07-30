@@ -1,6 +1,5 @@
 package magick4j;
 
-import com.kitfox.svg.pathcmd.Arc;
 import java.awt.BasicStroke;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
@@ -16,14 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO Apply transformation to the primitives.
 
 /**
  * See http://studio.imagemagick.org/script/magick-vector-graphics.php for specs.
  */
 public class CommandParser {
     
-    private static final Map<String, ParserBuilder> BUILDERS = buildBuilders();
+    private static final Map<String, ParserBuilder> PARSERS = buildBuilders();
+    private static CommandBuilder currentBuilder = new StandardCommandBuilder();
 
     private static Map<String, ParserBuilder> buildBuilders() {
         Map<String, ParserBuilder> builders = new HashMap<String, ParserBuilder>();
@@ -37,7 +36,7 @@ public class CommandParser {
                 double sy = Double.parseDouble(args[3]);
                 double tx = Double.parseDouble(args[4]);
                 double ty = Double.parseDouble(args[5]);
-                return CommandBuilder.affine(sx, rx, ry, sy, tx, ty);
+                return CommandParser.getCurrentBuilder().affine(sx, rx, ry, sy, tx, ty);
             }
         });
         
@@ -52,7 +51,7 @@ public class CommandParser {
                 double arcStart = Double.parseDouble(degrees[0]);
                 double arcStop = Double.parseDouble(degrees[1]);
                 
-                return CommandBuilder.shape(new Arc2D.Double(origin.getX(), origin.getY(), end.getX()-origin.getX(), end.getY()-origin.getY(), -arcStart, -(arcStop - arcStart), Arc2D.OPEN));
+                return CommandParser.getCurrentBuilder().shape(new Arc2D.Double(origin.getX(), origin.getY(), end.getX()-origin.getX(), end.getY()-origin.getY(), -arcStart, -(arcStop - arcStart), Arc2D.OPEN));
             }
         });
         
@@ -61,7 +60,7 @@ public class CommandParser {
                List<Command> commands = new ArrayList<Command>();
                // TODO Study how bezier command work depending on the ammount
                // of points.
-               return CommandBuilder.compose(commands);
+               return CommandParser.getCurrentBuilder().compose(commands);
            } 
         });
         
@@ -76,7 +75,7 @@ public class CommandParser {
                 double dX = perimeterX - centerX;
                 double dY = perimeterY - centerY;
                 double radius = Math.sqrt(dX * dX + dY * dY);
-                return CommandBuilder.shape(new Ellipse2D.Double(centerX - radius, centerY - radius, 2 * radius, 2 * radius));
+                return CommandParser.getCurrentBuilder().shape(new Ellipse2D.Double(centerX - radius, centerY - radius, 2 * radius, 2 * radius));
             }
         });
         
@@ -92,30 +91,30 @@ public class CommandParser {
                 double arcStart = Double.parseDouble(args2[0]);
                 double arcStop = Double.parseDouble(args2[1]);
                 // TODO Custom primitive class to support OPEN strokes and PIE fills?
-                return CommandBuilder.shape(new Arc2D.Double(centerX - radiusX, centerY - radiusY, 2 * radiusX, 2 * radiusY, -arcStart, -(arcStop - arcStart), Arc2D.OPEN));
+                return CommandParser.getCurrentBuilder().shape(new Arc2D.Double(centerX - radiusX, centerY - radiusY, 2 * radiusX, 2 * radiusY, -arcStart, -(arcStop - arcStart), Arc2D.OPEN));
             }
         });
         
         builders.put("fill", new ParserBuilder() {
             public Command build(String... parts) {
                 String colorName = parts[1].replace("\"", "");
-                return CommandBuilder.fill(colorName);
+                return CommandParser.getCurrentBuilder().fill(colorName);
             }
         });
         
         builders.put("fill-opacity", new ParserBuilder() {
             public Command build(String... parts) {
                 double opacity = Double.parseDouble(parts[1]);
-                return CommandBuilder.fillOpacity(opacity);
+                return CommandParser.getCurrentBuilder().fillOpacity(opacity);
             }
         });
         
         builders.put("fill-rule", new ParserBuilder() {
            public Command build(String... parts) {
                if(parts[1].equals("nonzero"))
-                   return CommandBuilder.fillRule(GeneralPath.WIND_NON_ZERO);
+                   return CommandParser.getCurrentBuilder().fillRule(GeneralPath.WIND_NON_ZERO);
                else
-                   return CommandBuilder.fillRule(GeneralPath.WIND_EVEN_ODD);
+                   return CommandParser.getCurrentBuilder().fillRule(GeneralPath.WIND_EVEN_ODD);
            } 
         });
         
@@ -128,7 +127,7 @@ public class CommandParser {
                 double x2 = Double.parseDouble(args1[0]);
                 double y2 = Double.parseDouble(args1[1]);
                 // TODO Custom primitive to avoid fills?
-                return CommandBuilder.shape(new Line2D.Double(x1, y1, x2, y2));
+                return CommandParser.getCurrentBuilder().shape(new Line2D.Double(x1, y1, x2, y2));
             }
         });
         
@@ -138,14 +137,14 @@ public class CommandParser {
             public Command build(String... parts) {
                 GeneralPath path = buildPolyline(parts);
                 path.closePath();
-                return CommandBuilder.shape(path);
+                return CommandParser.getCurrentBuilder().shape(path);
             }
         });
         
         builders.put("polyline", new ParserBuilder() {
             public Command build(String... parts) {
                 GeneralPath path = buildPolyline(parts);
-                return CommandBuilder.shape(path);
+                return CommandParser.getCurrentBuilder().shape(path);
             }
         });
         
@@ -154,25 +153,24 @@ public class CommandParser {
                 String type = parts[1];
                 
                 if(type.equals("clip-path")){
-                    // TODO: Implement.
-                    throw new RuntimeException("unknown pop type: clip-path");
+                    ((ClipPathCommandBuilder) CommandParser.getCurrentBuilder()).drawClipPath();
+                }
+                
+                if(type.equals("defs")){
+                    return CommandParser.getCurrentBuilder().nil(); // Yep, it does nothing.
                 }
               
                 if(type.equals("gradient")){
                     // TODO: Implement.
                     throw new RuntimeException("unknown pop type: gradient");
                 }
-                
-                if(type.equals("pattern")){
-                    return CommandBuilder.nil();
-                }
               
                 if(type.equals("graphic-context")) {
-                    return CommandBuilder.pop();
+                    return CommandParser.getCurrentBuilder().pop();
                 }
                 
-                if(type.equals("defs")){
-                    return CommandBuilder.nil(); // Yep, it does nothing.
+                if(type.equals("pattern")){
+                    return CommandParser.getCurrentBuilder().nil();
                 }
                 
                 throw new RuntimeException("unknown pop type: " + type);
@@ -184,13 +182,21 @@ public class CommandParser {
                 String type = parts[1];
                 
                 if(type.equals("clip-path")){
-                    // TODO: Implement.
-                    throw new RuntimeException("unknown push type: clip-path");
+                    CommandParser.setCurrentBuilder(new ClipPathCommandBuilder());
+                    CommandParser.getCurrentBuilder().pushClipPath(parts[2]);
+                }
+                
+                if(type.equals("defs")){
+                    return CommandParser.getCurrentBuilder().nil(); // Yep, it does nothing.
                 }
               
                 if(type.equals("gradient")){
                     // TODO: Implement.
                     throw new RuntimeException("unknown push type: gradient");
+                }
+              
+                if(type.equals("graphic-context")) {
+                    return CommandParser.getCurrentBuilder().push();
                 }
                 
                 if(type.equals("pattern")){
@@ -201,15 +207,7 @@ public class CommandParser {
                     int height = Integer.parseInt(parts[6]);
                     
                     Pattern pattern = new Pattern(name, x, y, width, height);
-                    return CommandBuilder.pushPattern(pattern);
-                }
-              
-                if(type.equals("graphic-context")) {
-                    return CommandBuilder.push();
-                }
-                
-                if(type.equals("defs")){
-                    return CommandBuilder.nil(); // Yep, it does nothing.
+                    return CommandParser.getCurrentBuilder().pushPattern(pattern);
                 }
                 
                 throw new RuntimeException("unknown push type: " + type);
@@ -224,13 +222,13 @@ public class CommandParser {
                 double y1 = Double.parseDouble(args0[1]);
                 double x2 = Double.parseDouble(args1[0]);
                 double y2 = Double.parseDouble(args1[1]);
-                return CommandBuilder.shape(new Rectangle2D.Double(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)));
+                return CommandParser.getCurrentBuilder().shape(new Rectangle2D.Double(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)));
             }
         });
         
         builders.put("rotate", new ParserBuilder() {
             public Command build(String... parts) {
-                return CommandBuilder.rotate(Double.parseDouble(parts[1]));
+                return CommandParser.getCurrentBuilder().rotate(Double.parseDouble(parts[1]));
             }
         });
         
@@ -243,26 +241,26 @@ public class CommandParser {
                 double y2 = Double.parseDouble(args[3]);
                 double cornerWidth = Double.parseDouble(args[4]);
                 double cornerHeight = Double.parseDouble(args[5]);
-                return CommandBuilder.shape(new RoundRectangle2D.Double(x1, y1, x2 - x1, y2 - y1, cornerWidth, cornerHeight));
+                return CommandParser.getCurrentBuilder().shape(new RoundRectangle2D.Double(x1, y1, x2 - x1, y2 - y1, cornerWidth, cornerHeight));
             }
         });
         
         builders.put("scale", new ParserBuilder() {
             public Command build(String... parts) {
                 String[] args = parts[1].split(",");
-                return CommandBuilder.scale(Double.parseDouble(args[0]), Double.parseDouble(args[1]));
+                return CommandParser.getCurrentBuilder().scale(Double.parseDouble(args[0]), Double.parseDouble(args[1]));
             }
         });
         
         builders.put("skewX", new ParserBuilder() {
            public Command build(String... parts) {
-               return CommandBuilder.skewX(Double.parseDouble(parts[1]));
+               return CommandParser.getCurrentBuilder().skewX(Double.parseDouble(parts[1]));
            } 
         });
         
         builders.put("skewY", new ParserBuilder() {
             public Command build(String... parts) {
-                return CommandBuilder.skewY(Double.parseDouble(parts[1]));
+                return CommandParser.getCurrentBuilder().skewY(Double.parseDouble(parts[1]));
             }
         });
         
@@ -270,13 +268,13 @@ public class CommandParser {
             public Command build(String... parts) {
                 String colorName = parts[1].replace("\"", "");
                 
-                return CommandBuilder.stroke(colorName);
+                return CommandParser.getCurrentBuilder().stroke(colorName);
             }
         });
         
         builders.put("stroke-antialias", new ParserBuilder() {
             public Command build(String... parts) {
-                return CommandBuilder.strokeAntialias(Integer.parseInt(parts[1]) == 1);
+                return CommandParser.getCurrentBuilder().strokeAntialias(Integer.parseInt(parts[1]) == 1);
             }
         });
         
@@ -287,7 +285,7 @@ public class CommandParser {
                 for (int a = 0; a < args.length; a++) {
                     lengths[a] = Double.parseDouble(args[a]);
                 }
-                return CommandBuilder.strokeDashArray(lengths);
+                return CommandParser.getCurrentBuilder().strokeDashArray(lengths);
             }
         });
         
@@ -301,7 +299,7 @@ public class CommandParser {
                else //if("square".equals(parts[1]))
                    linecap = BasicStroke.CAP_SQUARE;
                
-               return CommandBuilder.strokeLinecap(linecap);
+               return CommandParser.getCurrentBuilder().strokeLinecap(linecap);
            } 
         });
         
@@ -315,13 +313,13 @@ public class CommandParser {
                else //if("bevel".equals(parts[1]))
                    linejoin = BasicStroke.JOIN_BEVEL;
                
-               return CommandBuilder.strokeLinejoin(linejoin);
+               return CommandParser.getCurrentBuilder().strokeLinejoin(linejoin);
            } 
         });
         
         builders.put("stroke-miterlimit", new ParserBuilder() {
            public Command build(String... parts) {
-               return CommandBuilder.strokeMiterLimit(Float.parseFloat(parts[1]));
+               return CommandParser.getCurrentBuilder().strokeMiterLimit(Float.parseFloat(parts[1]));
            }; 
         });
         
@@ -339,20 +337,20 @@ public class CommandParser {
                 }else{
                     value = Double.parseDouble(opacity);
                 }
-                return CommandBuilder.strokeOpacity(value);
+                return CommandParser.getCurrentBuilder().strokeOpacity(value);
             }
         });
         
         builders.put("stroke-width", new ParserBuilder() {
             public Command build(String... parts) {
-                return CommandBuilder.strokeWidth(Double.parseDouble(parts[1]));
+                return CommandParser.getCurrentBuilder().strokeWidth(Double.parseDouble(parts[1]));
             }
         });
         
         builders.put("translate", new ParserBuilder() {
            public Command build(String... parts) {
                String[] point = parts[1].split(",");
-               return CommandBuilder.translate(Double.parseDouble(point[0]), Double.parseDouble(point[1]));
+               return CommandParser.getCurrentBuilder().translate(Double.parseDouble(point[0]), Double.parseDouble(point[1]));
            } 
         });
         
@@ -372,6 +370,13 @@ public class CommandParser {
             }
         }
         return path;
+    }
+    
+    public static CommandBuilder getCurrentBuilder(){
+        if(currentBuilder == null){
+            System.out.println("CurrentBuilder es null *******************************************");
+        }
+        return currentBuilder;
     }
 
     public static List<Command> parse(String script) {
@@ -393,7 +398,7 @@ public class CommandParser {
     private static Command parseCommand(String text) {
         String[] parts = text.split(" +");
         String command = parts[0];
-        ParserBuilder builder = BUILDERS.get(command);
+        ParserBuilder builder = PARSERS.get(command);
         if (builder == null) {
             // TODO This should also be the error for bad params (at least when I tested roundrectangle with only 2)
             // Magick::ImageMagickError: Non-conforming drawing primitive definition `yodle'
@@ -403,5 +408,9 @@ public class CommandParser {
             throw new RuntimeException("Non-conforming drawing primitive definition `" + command + "'");
         }
         return builder.build(parts);
+    }
+
+    private static void setCurrentBuilder(CommandBuilder commandBuilder) {
+        currentBuilder = commandBuilder;
     }
 }
