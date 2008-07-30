@@ -85,6 +85,7 @@ public class DrawInfo implements Cloneable {
     public DrawInfo clone() {
         try {
             DrawInfo clone = (DrawInfo) super.clone();
+            clone.setSpaceTransformation((AffineTransform) this.getSpaceTransformation().clone());
             // TODO Mutable fill and stroke?
             return clone;
         } catch (Exception e) {
@@ -137,7 +138,7 @@ public class DrawInfo implements Cloneable {
     public String getFontFamily() {
         return fontFamily;
     }
-
+    
     public AffineTransform getSpaceTransformation() {
         return this.spaceTransformation;
     }
@@ -234,6 +235,10 @@ public class DrawInfo implements Cloneable {
 
     public void setPointSize(double pointSize) {
         this.pointSize = pointSize;
+    }
+
+    private void setSpaceTransformation(AffineTransform spaceTransformation) {
+        this.spaceTransformation = spaceTransformation;
     }
 
     public void setStroke(Pattern color) {

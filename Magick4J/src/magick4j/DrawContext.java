@@ -1,6 +1,7 @@
 package magick4j;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -8,11 +9,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DrawContext {
+    private String composingPattern = null;
     private List<Graphics2D> graphicsStack = new ArrayList<Graphics2D>();
+    private MagickImage image;
     private List<DrawInfo> infoStack = new ArrayList<DrawInfo>();
     private Hashtable<String, Pattern> patternHash = new Hashtable<String, Pattern>();
-    private String composingPattern = null;
-    private MagickImage image;
+    
 
     public DrawContext(DrawInfo info, MagickImage image) {
         this.graphicsStack.add((Graphics2D) image.getImage().createGraphics());

@@ -75,12 +75,13 @@ public class MagickImage implements Cloneable {
 
     public MagickImage(int width, int height, ImageInfo info) {
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        
         // TODO Deep clone and store the info??? How much redundancy? I really don't want to copy the fields into this image itself.
         // TODO Clone the background? Make things immutable?
         if (info.getBackgroundColor() != null) {
             backgroundColor = info.getBackgroundColor();
         }else{
-            backgroundColor = new PixelPacket(0,0,0,255);
+            backgroundColor = new PixelPacket(255,255,255,0);
         }
         erase();
     }
