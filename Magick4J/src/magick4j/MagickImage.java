@@ -81,7 +81,7 @@ public class MagickImage implements Cloneable {
         if (info.getBackgroundColor() != null) {
             backgroundColor = info.getBackgroundColor();
         }else{
-            backgroundColor = new PixelPacket(255,255,255,0);
+            backgroundColor = new PixelPacket(255,255,255,255);
         }
         erase();
     }
@@ -94,6 +94,35 @@ public class MagickImage implements Cloneable {
         }
     }
 
+    public void applyMask(MagickImage maskImage){
+        WritableRaster img = this.getImage().getRaster();
+        WritableRaster mask = maskImage.getImage().getRaster();
+        
+        int width = this.getWidth();
+        int maskWidth = maskImage.getWidth();
+        int maskHeight = maskImage.getHeight();
+        int height = this.getHeight();
+        
+        for(int j = 0; j < height; j++){
+            
+            for(int i = 0; i < width; i++){
+                
+                double[] maskData = new double[4];
+                double[] imgData = new double[4];
+                
+                maskData = mask.getPixel(i%maskWidth, j%maskHeight, maskData);
+                imgData = img.getPixel(i, j, imgData);
+                imgData[3] = 255 - maskData[0];
+                
+                img.setPixel(i, j, imgData);
+            }
+            
+        }
+        
+        this.getImage().getGraphics().dispose();
+        
+    }
+    
     public MagickImage blurred(double deviation, double radius) {
         // -- Not knowing exactly what it did, I reviewed the ImageMagick source for this, but I didn't copy exactly verbatim. Might be why it still has quirks. --
         // GetOptimalKernelWidth() computes the optimal kernel radius for a convolution
@@ -213,9 +242,7 @@ public class MagickImage implements Cloneable {
     }
     
     public MagickImage createCanvas(){
-        ImageInfo info = new ImageInfo();
-        info.setBackgroundColor(ColorDatabase.lookUp("none"));
-        return new MagickImage(getWidth(), getHeight(), info);
+        return new MagickImage(getWidth(), getHeight());
     }
 
     public MagickImage crop(Gravity gravity, int width, int height) {
@@ -633,7 +660,9 @@ public class MagickImage implements Cloneable {
             if (type.equals("JPEG")) {
                 // JPEGs apparently need alpha-less images, or else ImageIO generates bad images.
                 image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-                Graphics graphics = image.createGraphics();
+                Graphics2D graphics = (Graphics2D) image.createGraphics();
+                graphics.setBackground(Color.WHITE);
+                graphics.clearRect(0, 0, getWidth(), getHeight());
                 try {
                     graphics.drawImage(this.image, 0, 0, null);
                 } finally {

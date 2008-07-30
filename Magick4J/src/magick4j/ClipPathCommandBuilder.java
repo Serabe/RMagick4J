@@ -3,13 +3,22 @@ package magick4j;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClipPathCommandBuilder extends CommandBuilder{
 
     private final GeneralPath path = new GeneralPath();
     
     public Command drawClipPath(){
-        return fillShape(Color.black, path);
+        List<Command> list = new ArrayList<Command>();
+        list.add(fillShape(Color.black, path));
+        list.add(new Command(){
+            public void perform(DrawContext context){
+                context.pop();
+            }
+        });
+        return compose(list);
     }
     
     @Override
@@ -25,6 +34,11 @@ public class ClipPathCommandBuilder extends CommandBuilder{
     @Override
     public Command fillRule(int wind) {
         //TODO Test if it works for the clip-path too or if its ignored.
+        return nil();
+    }
+    
+    @Override
+    public Command pop(){
         return nil();
     }
 

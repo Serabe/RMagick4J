@@ -79,6 +79,12 @@ public class CommandParser {
             }
         });
         
+        builders.put("clip-path", new ParserBuilder(){
+            public Command build(String... parts){
+                return CommandParser.getCurrentBuilder().prepareClipPath(parts[1]);
+            }
+        });
+        
         builders.put("ellipse", new ParserBuilder() {
             public Command build(String... parts) {
                 String[] args0 = parts[1].split(",");
@@ -153,7 +159,9 @@ public class CommandParser {
                 String type = parts[1];
                 
                 if(type.equals("clip-path")){
-                    ((ClipPathCommandBuilder) CommandParser.getCurrentBuilder()).drawClipPath();
+                    Command c = ((ClipPathCommandBuilder) CommandParser.getCurrentBuilder()).drawClipPath();
+                    CommandParser.setCurrentBuilder(new StandardCommandBuilder());
+                    return c;
                 }
                 
                 if(type.equals("defs")){
@@ -182,8 +190,9 @@ public class CommandParser {
                 String type = parts[1];
                 
                 if(type.equals("clip-path")){
+                    Command c = CommandParser.getCurrentBuilder().pushClipPath(parts[2]);
                     CommandParser.setCurrentBuilder(new ClipPathCommandBuilder());
-                    CommandParser.getCurrentBuilder().pushClipPath(parts[2]);
+                    return c;
                 }
                 
                 if(type.equals("defs")){

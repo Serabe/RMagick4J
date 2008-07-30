@@ -102,6 +102,10 @@ public class PixelPacket {
         return data;
     }
     
+    public Color toOpaqueColor(){
+        return new Color(red, green, blue);
+    }
+    
     @Override
     public String toString(){
         String name = ColorDatabase.getName(this);

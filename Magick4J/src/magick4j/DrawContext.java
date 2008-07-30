@@ -82,6 +82,16 @@ public class DrawContext {
     public void pop() {
         try {
             getGraphics().dispose();
+            if(this.applyClipPath != null){
+                imagesStack.get(imagesStack.size() - 1).applyMask(this.clipPathHash.get(this.applyClipPath).getImage());
+                this.applyClipPath = null;
+            }
+            if(this.composingClipPath == null && this.composingPattern == null){
+                imagesStack.get(imagesStack.size() - 2).composite(imagesStack.get(imagesStack.size() - 1), 0, 0, CompositeOperator.OVER);
+            }else{
+                this.composingClipPath = null;
+                this.composingPattern = null;
+            }
         } finally {
             imagesStack.remove(imagesStack.size() - 1);
             infoStack.remove(infoStack.size() - 1);
@@ -89,16 +99,14 @@ public class DrawContext {
     }
 
     public void prepareClipPath(String name) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        this.applyClipPath = name;
     }
 
     public void push() {
         if(this.composingPattern != null){
             imagesStack.add(this.patternHash.get(this.composingPattern).getImage());
-            this.composingPattern = null;
         } else if(this.composingClipPath != null){
             imagesStack.add(this.clipPathHash.get(this.composingClipPath).getImage());
-            this.composingClipPath = null;
         } else{
             imagesStack.add(getImage().createCanvas());
         }
