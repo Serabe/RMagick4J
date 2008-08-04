@@ -12,11 +12,15 @@ public class TypeMetrics {
     private double width = 0;
 
     public void compose(TypeMetrics metrics){
-        this.setAscent( max(this.getAscent(), metrics.getAscent()) );
-        this.setDescent( min(this.getDescent(), metrics.getDescent()) );
+        
+        if(metrics.getWidth() > getWidth()){
+            this.setAscent( metrics.getAscent() );
+            this.setDescent( metrics.getDescent() );
+            this.setMaxAdvance( metrics.getMaxAdvance() );
+            this.setWidth( metrics.getWidth() );
+        }
+        
         this.setHeight( this.getHeight() + metrics.getHeight() );
-        this.setMaxAdvance( max(this.getMaxAdvance(), metrics.getMaxAdvance()) );
-        this.setWidth( max(this.getWidth(), metrics.getWidth()) );
     }
     
     public static TypeMetrics fromFontMetrics(FontMetrics fontMetrics, String string){

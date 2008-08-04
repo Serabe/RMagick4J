@@ -1,4 +1,9 @@
-require File.join(File.dirname(__FILE__),'..','..','lib','RMagick')
+if PLATFORM == 'java'
+  require File.join(File.dirname(__FILE__),'..','..','lib','RMagick')
+else
+  require 'rubygems'
+  require 'RMagick'
+end
 require File.join(File.dirname(__FILE__),"image_constants.rb")
 
 include Magick
