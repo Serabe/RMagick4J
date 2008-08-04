@@ -15,7 +15,7 @@ draw.fill 'green'
 draw.pop
 draw.circle 100, 100, 100, 50
 
-b = Image.new 300, 300
+b = Image.new(300, 300)
 
 draw.draw b
 

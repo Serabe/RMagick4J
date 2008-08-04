@@ -552,8 +552,8 @@ public class MagickImage implements Cloneable {
     public MagickImage resized(int newWidth, int newHeight){
         
         // Copied from image_voodoo
-        BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = img.createGraphics();
+        MagickImage result = new MagickImage(newWidth, newHeight);
+        Graphics2D graphics = result.getImage().createGraphics();
         
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -565,10 +565,6 @@ public class MagickImage implements Cloneable {
         graphics.drawRenderedImage(this.getImage(), AffineTransform.getScaleInstance(widthRatio, heightRatio));
         
         graphics.dispose();
-        
-        MagickImage result = new MagickImage();
-        result.image = img;
-        result.format = format;
         
         return result;
     }
