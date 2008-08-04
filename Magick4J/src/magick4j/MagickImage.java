@@ -1,5 +1,7 @@
 package magick4j;
 
+import static java.lang.Math.min;
+
 import com.jhlabs.image.GaussianFilter;
 
 import java.awt.AlphaComposite;
@@ -112,7 +114,7 @@ public class MagickImage implements Cloneable {
                 
                 maskData = mask.getPixel(i%maskWidth, j%maskHeight, maskData);
                 imgData = img.getPixel(i, j, imgData);
-                imgData[3] = 255 - maskData[0];
+                imgData[3] = min(255 - maskData[0], imgData[3]);
                 
                 img.setPixel(i, j, imgData);
             }
@@ -320,11 +322,8 @@ public class MagickImage implements Cloneable {
     public void erase() {
         Graphics2D graphics = (Graphics2D) image.getGraphics();
         try {
-            // TODO Use correct background.
-            // Serabe: I tried using the way it was, but didn't work,
-            // so I changed it.
-            graphics.setColor(this.getBackgroundColor().toColor());
-            graphics.fillRect(0, 0, getWidth(), getHeight());
+            graphics.setBackground(this.backgroundColor.toColor());
+            graphics.clearRect(0, 0, getWidth(), getHeight());
         } finally {
             graphics.dispose();
         }
@@ -659,12 +658,17 @@ public class MagickImage implements Cloneable {
             BufferedImage image = this.image;
             if (type.equals("JPEG")) {
                 // JPEGs apparently need alpha-less images, or else ImageIO generates bad images.
+                ImageInfo info = new ImageInfo();
+                info.setBackgroundColor(new PixelPacket(255, 255, 255, 0));
                 image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 Graphics2D graphics = (Graphics2D) image.createGraphics();
                 graphics.setBackground(Color.WHITE);
                 graphics.clearRect(0, 0, getWidth(), getHeight());
                 try {
-                    graphics.drawImage(this.image, 0, 0, null);
+                    graphics.drawImage( this.getImage(),
+                                        0,
+                                        0,
+                                        null);
                 } finally {
                     graphics.dispose();
                 }

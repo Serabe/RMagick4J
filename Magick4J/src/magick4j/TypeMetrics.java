@@ -1,8 +1,6 @@
 package magick4j;
 
 import java.awt.FontMetrics;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 public class TypeMetrics {
     private double ascent = 0;

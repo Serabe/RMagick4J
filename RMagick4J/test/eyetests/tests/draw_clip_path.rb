@@ -28,7 +28,7 @@ pr.circle(300, 150, 150, 150)
 pr.pop
 
 # Create a canvas to draw on, a bit bigger than the star.
-canvas = Image.new(300, 300)
+canvas = Image.new(300, 300, HatchFill.new('white', 'black'))
 
 pr.draw(canvas)
 
