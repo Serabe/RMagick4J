@@ -1,12 +1,36 @@
 package magick4j;
 
-public class TypeMetrics {
-    private double ascent;
-    private double descent;
-    private double height;
-    private double maxAdvance;
-    private double width;
+import java.awt.FontMetrics;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
+public class TypeMetrics {
+    private double ascent = 0;
+    private double descent = 0;
+    private double height = 0;
+    private double maxAdvance = 0;
+    private double width = 0;
+
+    public void compose(TypeMetrics metrics){
+        this.setAscent( max(this.getAscent(), metrics.getAscent()) );
+        this.setDescent( min(this.getDescent(), metrics.getDescent()) );
+        this.setHeight( this.getHeight() + metrics.getHeight() );
+        this.setMaxAdvance( max(this.getMaxAdvance(), metrics.getMaxAdvance()) );
+        this.setWidth( max(this.getWidth(), metrics.getWidth()) );
+    }
+    
+    public static TypeMetrics fromFontMetrics(FontMetrics fontMetrics, String string){
+        TypeMetrics metrics = new TypeMetrics();
+        
+        metrics.setAscent(fontMetrics.getAscent());
+        metrics.setDescent(fontMetrics.getDescent());
+        metrics.setHeight(fontMetrics.getHeight());
+        metrics.setMaxAdvance(fontMetrics.getMaxAdvance());
+        metrics.setWidth(fontMetrics.stringWidth(string));
+        
+        return metrics;
+    }
+    
     public double getAscent() {
         return ascent;
     }

@@ -139,6 +139,26 @@ public class DrawInfo implements Cloneable {
         return fontFamily;
     }
     
+    public TypeMetrics getMultilineTypeMetrics(String string, MagickImage image) {
+        TypeMetrics metrics = new TypeMetrics();
+        if (image == null) {
+            image = new MagickImage(1, 1);
+        }
+        Graphics2D graphics = createGraphics(image);
+        try {
+            updateFont(graphics);
+            
+            String[] line = string.split("\n");
+            
+            for(int i=0; i < line.length; i++)
+                metrics.compose(TypeMetrics.fromFontMetrics(graphics.getFontMetrics(), line[i]));
+            
+        } finally {
+            graphics.dispose();
+        }
+        return metrics;
+    }
+    
     public AffineTransform getSpaceTransformation() {
         return this.spaceTransformation;
     }
@@ -179,12 +199,7 @@ public class DrawInfo implements Cloneable {
         Graphics2D graphics = createGraphics(image);
         try {
             updateFont(graphics);
-            FontMetrics fontMetrics = graphics.getFontMetrics();
-            metrics.setAscent(fontMetrics.getAscent());
-            metrics.setDescent(fontMetrics.getDescent());
-            metrics.setHeight(fontMetrics.getHeight());
-            metrics.setMaxAdvance(fontMetrics.getMaxAdvance());
-            metrics.setWidth(fontMetrics.stringWidth(string));
+            metrics = TypeMetrics.fromFontMetrics(graphics.getFontMetrics(), string);
         } finally {
             graphics.dispose();
         }
