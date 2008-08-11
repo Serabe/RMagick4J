@@ -24,6 +24,7 @@ y = (background.rows - metrics.height) / 2
 
 # Draw 2 rectangles over the text.
 gc = Draw.new
+
 gc.stroke('red')
 gc.stroke_width(5)
 gc.stroke_linejoin('round')

@@ -4,6 +4,7 @@ module Magick
 
     def annotate(img, width, height, x, y, text, &add)
       instance_eval &add if add
+      text = parse_string(text)
       @draw.annotate(img._image, width, height, x, y, text)
       self
     end
@@ -38,14 +39,14 @@ module Magick
 
     def get_multiline_type_metrics(*args)
       raise ArgumentError.new('wrong number of arguments (#{args.length})') if not (1..2) === args.length
-      string = args.last
+      string = parse_string(args.last)
       image = args.first._image if args.length == 2
       type_metrics_from_java(@draw.getMultilineTypeMetrics(string, image))
     end
     
     def get_type_metrics(*args)
       raise ArgumentError.new('wrong number of arguments (#{args.length})') if not (1..2) === args.length
-      string = args.last
+      string = parse_string(args.last)
       image = args.first._image if args.length == 2
       type_metrics_from_java(@draw.getTypeMetrics(string, image))
     end
@@ -95,6 +96,10 @@ module Magick
     end
 
     private
+    
+    def parse_string(text)
+      text.split(/\\n/).join("\n")
+    end
     
     def type_metrics_from_java(jmetrics)
       metrics = TypeMetric.new

@@ -19,11 +19,18 @@ pr.push
 pr.clip_path('example')
 
 pr.stroke 'none'
+
+pr.fill 'green'
+pr.circle(150, 0, 150, 150)
+
 pr.fill 'red'
 pr.circle(0, 150, 150, 150)
 
 pr.fill 'blue'
 pr.circle(300, 150, 150, 150)
+
+pr.fill 'orange'
+pr.circle(150, 300, 150, 150)
 
 pr.pop
 

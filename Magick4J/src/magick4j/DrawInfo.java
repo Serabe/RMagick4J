@@ -29,7 +29,8 @@ public class DrawInfo implements Cloneable {
     private Pattern strokePattern = null;
     private double strokeWidth = 1.0;
 
-    public void annotate(MagickImage image, double width, double height, double x, double y, String text) {
+    public void annotate(MagickImage image, double width, double height, double iniX, double iniY, String text) {
+        
         text = new TextFormatter(image).format(text);
         
         if (width == 0 && height == 0) {
@@ -37,45 +38,68 @@ public class DrawInfo implements Cloneable {
             height = image.getHeight();
         }
         
+        TypeMetrics mlm = this.getMultilineTypeMetrics(text, image);
+        
         Graphics2D graphics = createGraphics(image);
         try {
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             updateFont(graphics);
-            FontMetrics metrics = graphics.getFontMetrics();
-            // x gravity
-            switch (gravity) {
-                case CENTER:
-                case NORTH:
-                case SOUTH:
-                    x += 0.5 * (width - metrics.stringWidth(text));
-                    break;
-                case EAST:
-                case NORTH_EAST:
-                case SOUTH_EAST:
-                    x = width - metrics.stringWidth(text) - x;
-                    break;
-            }
-            // y gravity
+            
+            String[] strings = text.split("\n");
+            
+            double y = iniY;
+            
+            
             switch (gravity) {
                 case CENTER:
                 case EAST:
                 case WEST:
-                    y += 0.5 * (height + metrics.getAscent());
+                    y += 0.5 * (height - mlm.getHeight());
                     break;
-                case NORTH:
-                case NORTH_EAST:
-                case NORTH_WEST:
-                    y += metrics.getAscent();
-                    break;
+//                case NORTH:
+//                case NORTH_EAST:
+//                case NORTH_WEST:
+//                    DO NOTHING
+//                    break;
                 case SOUTH:
                 case SOUTH_EAST:
                 case SOUTH_WEST:
-                    y = image.getHeight() - metrics.getDescent() - y;
+                    y += height - mlm.getHeight();
                     break;
             }
-            // TODO If we have a fill and a stroke, we may need to make a path
-            graphics.setColor(fill.toColor());
-            graphics.drawString(text, (float) x, (float) y);
+            
+            y += mlm.getAscent();
+            
+            for(int i = 0; i<strings.length; i++){
+                
+                TypeMetrics slm = this.getTypeMetrics(strings[i], image);
+                
+                double x = iniX;
+                
+                // x gravity
+                switch (gravity) {
+                    case CENTER:
+                    case NORTH:
+                    case SOUTH:
+                        //x += 0.5 * (width - metrics.stringWidth(text));
+                        x += 0.5 * (width - slm.getWidth());
+                        break;
+                    case EAST:
+                    case NORTH_EAST:
+                    case SOUTH_EAST:
+                        //x = width - metrics.stringWidth(text) - x;
+                        x += width - slm.getWidth();
+                        break;
+                }
+                
+                // TODO If we have a fill and a stroke, we may need to make a path
+                graphics.setColor(fill.toColor());
+                
+                graphics.drawString(strings[i], (float) x, (float) y);
+                
+                y += slm.getHeight();
+            }
+                
         } finally {
             graphics.dispose();
         }
