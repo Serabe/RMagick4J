@@ -14,6 +14,7 @@ describe Draw do
   end
   
   it "should clone correctly the primitives" do
+    @draw.line(0, 0, 100, 100)
     b = @draw.clone
     b.push
     

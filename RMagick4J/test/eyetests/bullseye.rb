@@ -100,7 +100,8 @@ module Bullseye
     def initialize
       @default_model = DefaultListModel.new
       super(@default_model)
-      load_test_scripts
+      load_test_scriptsi
+
       self.setSelectedIndex(0)
     end
    
