@@ -1,4 +1,4 @@
-# $Id: RMagick.rb,v 1.80 2009/01/02 21:08:14 rmagick Exp $
+# $Id: RMagick.rb,v 1.72 2008/06/08 13:41:39 rmagick Exp $
 #==============================================================================
 #                  Copyright (C) 2008 by Timothy P. Hunter
 #   Name:       RMagick.rb
@@ -362,30 +362,6 @@ class Draw
             Kernel.raise ArgumentError, "Unknown text positioning gravity"
         end
         primitive "gravity #{GRAVITY_NAMES[grav.to_i]}"
-    end
-
-    # IM 6.4.8-3 and later
-    def interword_spacing(space)
-        begin
-            Float(space)
-        rescue ArgumentError
-            Kernel.raise ArgumentError, "invalid value for interword_spacing"
-        rescue TypeError
-            Kernel.raise TypeError, "can't convert #{space.class} into Float"
-        end
-        primitive "interword-spacing #{space}"
-    end
-
-    # IM 6.4.8-3 and later
-    def kerning(space)
-        begin
-            Float(space)
-        rescue ArgumentError
-            Kernel.raise ArgumentError, "invalid value for kerning"
-        rescue TypeError
-            Kernel.raise TypeError, "can't convert #{space.class} into Float"
-        end
-        primitive "kerning #{space}"
     end
 
     # Draw a line
@@ -757,8 +733,6 @@ end # module Magick::IPTC
 # Ruby-level Magick::Image methods
 class Image
     include Comparable
-
-    alias_method :affinity, :remap
 
     # Provide an alternate version of Draw#annotate, for folks who
     # want to find it in this class.
@@ -1435,7 +1409,7 @@ public
     end
 
     [:at, :each, :each_index, :empty?, :fetch,
-     :first, :hash, :include?, :index, :length, :rindex, :sort!].each do |mth|
+     :first, :hash, :include?, :index, :length, :nitems, :rindex, :sort!].each do |mth|
         module_eval <<-END_SIMPLE_DELEGATES
             def #{mth}(*args, &block)
                 @images.#{mth}(*args, &block)
@@ -1443,13 +1417,6 @@ public
         END_SIMPLE_DELEGATES
     end
     alias_method :size, :length
-
-    # Array#nitems is not available in 1.9
-    if Array.instance_methods.include?("nitems")
-       def nitems()
-          @images.nitems()
-       end
-    end
 
     def clear
         @scene = nil
@@ -1499,9 +1466,6 @@ public
     alias_method :__map__, :collect
     alias_method :map!, :collect!
     alias_method :__map__!, :collect!
-
-    # ImageMagic used affinity in 6.4.3, switch to remap in 6.4.4.
-    alias_method :affinity, :remap
 
     def compact
         current = get_current()
@@ -1607,11 +1571,11 @@ public
     end
 
     # Initialize new instances
-    def initialize(*filenames, &block)
+    def initialize(*filenames)
         @images = []
         @scene = nil
         filenames.each { |f|
-            Magick::Image.read(f, &block).each { |n| @images << n }
+            Magick::Image.read(f).each { |n| @images << n }
             }
         if length > 0
             @scene = length - 1     # last image in array
@@ -1655,19 +1619,6 @@ public
           a = ilist
         end
         return a
-    end
-
-    # Custom marshal/unmarshal for Ruby 1.8.
-    def marshal_dump()
-       ary = [@scene]
-       @images.each {|i| ary << Marshal.dump(i)}
-       ary
-    end
-
-    def marshal_load(ary)
-       @scene = ary.shift
-       @images = []
-       ary.each {|a| @images << Marshal.load(a)}
     end
 
     # The ImageList class supports the Magick::Image class methods by simply sending
@@ -1881,37 +1832,6 @@ public
     alias_method :indices, :values_at
 
 end # Magick::ImageList
-
-
-#  Collects non-specific optional method arguments
-class OptionalMethodArguments
-    def initialize(img)
-       @img = img
-    end
-
-    # miscellaneous options like -verbose
-    def method_missing(mth, val)
-       @img.define(mth.to_s.tr('_', '-'), val)
-    end
-
-    # set(key, val) corresponds to -set option:key val
-    def define(key, val = nil)
-       @img.define(key, val)
-    end
-
-    # accepts Pixel object or color name
-    def highlight_color=(color)
-       color = @img.to_color(color) if color.respond_to?(:to_color)
-       @img.define("highlight-color", color)
-    end
-
-    # accepts Pixel object or color name
-    def lowlight_color=(color)
-       color = @img.to_color(color) if color.respond_to?(:to_color)
-       @img.define("lowlight-color", color)
-    end
-end
-
 
 # Example fill class. Fills the image with the specified background
 # color, then crosshatches with the specified crosshatch color.

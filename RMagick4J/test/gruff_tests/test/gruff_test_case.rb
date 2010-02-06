@@ -3,11 +3,8 @@ require 'rubygems'
 
 require 'test/unit'
 require 'gruff'
-require 'fileutils'
+require File.join(File.dirname(__FILE__),'monkey_gruff')
 # require 'test_timer'
-
-TEST_OUTPUT_DIR = File.dirname(__FILE__) + "/output"
-FileUtils.mkdir_p(TEST_OUTPUT_DIR)
 
 class GruffTestCase < Test::Unit::TestCase
 
@@ -80,7 +77,7 @@ protected
   end
 
   def write_test_file(graph, filename)
-    graph.write([TEST_OUTPUT_DIR, filename].join("/"))
+    graph.write(File.dirname(__FILE__) + "/output/#{filename}")
   end
 
   ##

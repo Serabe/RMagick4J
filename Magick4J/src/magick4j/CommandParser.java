@@ -136,22 +136,6 @@ public class CommandParser {
                 return CommandParser.getCurrentBuilder().shape(new Line2D.Double(x1, y1, x2, y2));
             }
         });
-
-        builders.put("opacity", new ParserBuilder(){
-            public Command build(String... parts){
-                String opString = parts[1];
-                double o = 0;
-                if(opString.charAt(opString.length()-1) == '%'){
-                    o = Double.parseDouble(opString.substring(0, opString.length()-2))/100;
-                } else {
-                    o = Double.parseDouble(opString);
-                }
-                List<Command> commands = new ArrayList<Command>();
-                commands.add(CommandParser.getCurrentBuilder().fillOpacity(o));
-                commands.add(CommandParser.getCurrentBuilder().strokeOpacity(o));
-                return CommandParser.getCurrentBuilder().compose(commands);
-            }
-        });
         
         builders.put("path", new PathParser());
         
@@ -356,8 +340,8 @@ public class CommandParser {
                 String opacity = parts[1];
                 double value = 0.0;
                 char[] string = opacity.toCharArray();
-                if(opacity.charAt(opacity.length()-1) == '%'){
-                    opacity = opacity.substring(0, opacity.length()-1);
+                if(string[string.length-1] == '%'){
+                    opacity = opacity.substring(0, string.length-1);
                     value = Double.parseDouble(opacity)/100.0;
                 }else{
                     value = Double.parseDouble(opacity);

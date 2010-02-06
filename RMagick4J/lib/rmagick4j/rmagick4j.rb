@@ -3,6 +3,7 @@ require 'java'
 rmagick4j_dir = File.dirname(__FILE__)
 
 # TODO See about using Raven to get gems of jhlabs and svgsalamander?
+require File.join(rmagick4j_dir, '..', 'jhlabs-filters.jar')
 require File.join(rmagick4j_dir, '..', 'magick4j.jar')
 require File.join(rmagick4j_dir, '..', 'svgsalamander.jar')
 

@@ -1,5 +1,4 @@
 module Magick
-  Effects = Java::Magick4jEffects
   Magick4J = Java::magick4j
   RMagick4J = Java::rmagick4j
 

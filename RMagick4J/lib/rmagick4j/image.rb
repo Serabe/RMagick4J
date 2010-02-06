@@ -1,3 +1,4 @@
+
 module Magick
   class Image
     
@@ -51,19 +52,10 @@ module Magick
       value = Pixel.from_color(value) if value.is_a?(String)
       @image.setBackgroundColor(value)
     end
-
-    def blur
-      @image.getBlur
-    end
     
-    def blur=(value)
-      raise TypeError, "no implicit conversion to float from #{value.class.to_s.downcase}" unless value.is_a? Numeric
-      @image.setBlur(value)
-    end
-
     def blur_image(radius=0.0, sigma=1.0)
       # Swap order on purpose. I wanted them the other way around in Magick4J.
-      Image.from_image(Effects.BlurEffect.new(radius,sigma).apply(_image))
+      Image.from_image(@image.blurred(sigma, radius))
     end
     
     def change_geometry(geometry)
@@ -78,10 +70,6 @@ module Magick
       yield geometry.calculate_width(self._image),
             geometry.calculate_height(self._image),
             self
-    end
-
-    def charcoal(radius=0.0, sigma=1.0)
-      Image.from_image(Effects.CharcoalEffect.new(radius,sigma).apply(_image))
     end
 
     def columns
@@ -138,11 +126,7 @@ module Magick
       @image.display
       self
     end
-
-    def edge(radius=0.0)
-      Image.from_image(Effects.EdgeEffect.new(radius).apply(_image))
-    end
-
+    
     def erase!
       @image.erase
     end
@@ -172,10 +156,6 @@ module Magick
     def _image=(new_image)
       @image = new_image
     end
-
-    def implode(amount=0.5)
-      Image.from_image(Effects.ImplodeEffect.new(amount).apply(_image))
-    end
     
     def _info
       @info
@@ -191,20 +171,8 @@ module Magick
       fill.fill(self) if fill.respond_to? :fill
     end
 
-    def matte
-      @image.getMatte
-    end
-
     def matte= matte
       @image.setMatte(matte)
-    end
-
-    def negate(grayscale=false)
-      Image.from_image(Effects.NegateEffect.new(grayscale).apply(_image))
-    end
-
-    def normalize
-      Image.from_image(Effects.NormalizeEffect.new().apply(_image))
     end
 
     def quantize(number_colors=256, colorspace=RGBColorspace, dither=true, tree_depth=0, measure_error=false)
@@ -214,10 +182,6 @@ module Magick
     def raise(width=6, height=6, raise=true)
       Image.from_image(@image.raised(width, height, raise))
     end
-
-		def remap
-			# TODO: Implement. Just here to avoid warning in RMagick 2.9 file.
-		end
 
     def resize(*args)
       copy.resize!(*args)
@@ -261,15 +225,7 @@ module Magick
     def rows
       @image.getHeight
     end
-
-    def shade(shading=false,azimuth=30,elevation=30)
-      Image.from_image(Effects.ShadeEffect.new(shading,azimuth,elevation).apply(_image))
-    end
     
-    def solarize(threshold=50)
-      Image.from_image(Effects.SolarizeEffect.new(threshold).apply(_image))
-    end
-
     def store_pixels(x, y, columns, rows, pixels)
       ria_size = columns*rows
       raise IndexError, "not enough elements in array - expecting #{ria_size}, got #{pixels.size}" if pixels.size < ria_size
@@ -291,10 +247,6 @@ module Magick
       end
       # TODO Perform watermark.
       self
-    end
-
-    def wave(amplitude=25.0, wavelength=150.0)
-      Image.from_image(Effects.WaveEffect.new(amplitude,wavelength).apply(_image))
     end
 
     def write(file, &add)

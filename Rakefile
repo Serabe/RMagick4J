@@ -20,7 +20,3 @@ task :move do
   mv(JAR_SRC_FILE, JAR_DEST_FILE)
   puts 'Moved jar file to lib folder.'
 end
-
-task :work do
-  puts `git diff --shortstat 538db96f13ba63fc057b81f9f710554d8f48d84b..HEAD`
-end

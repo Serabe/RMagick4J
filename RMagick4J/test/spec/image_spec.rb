@@ -21,21 +21,7 @@ describe Image do
       # @image.should respond_to? method.to_sym
     end
   end
-
-  it "should keep format after resized!" do
-    @image = @image.first
-    first_format = @image.format
-    @image.resize!(50,50)
-    @image.format.should == first_format
-  end
-
-  it "should keep format after crop_resized!" do
-    @image = @image.first
-    first_format = @image.format
-    @image.crop_resized!(50, 50, NorthGravity)
-    @image.format.should == first_format
-  end
-
+  
   it "should return a one-item array after reading an image" do
     @image.should have(1).images
   end

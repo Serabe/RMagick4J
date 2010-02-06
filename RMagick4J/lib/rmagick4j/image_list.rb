@@ -12,10 +12,6 @@ module Magick
       
       Image.from_image(image)
     end
-
-		def remap
-			# TODO: Implement. Just here to avoid RMagick 2.9 errors.
-		end
     
     def to_blob(&add)
       # TODO Support lists.
