@@ -4,7 +4,6 @@ import java.awt.image.BufferedImageOp;
 import static java.lang.Math.min;
 import static java.lang.Math.max;
 
-import com.jhlabs.image.GaussianFilter;
 
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
@@ -146,61 +145,6 @@ public class MagickImage implements Cloneable {
         this.format = image.format;
         this.image = image.image;
         this.matte = image.matte;
-    }
-    
-    public MagickImage blurred(double deviation, double radius) {
-        // -- Not knowing exactly what it did, I reviewed the ImageMagick source for this, but I didn't copy exactly verbatim. Might be why it still has quirks. --
-        // GetOptimalKernelWidth() computes the optimal kernel radius for a convolution
-        // filter. Start with the minimum value of 3 pixels and walk out until we drop
-        // below the threshold of one pixel numerical accuracy.
-        // TODO Remove default value.
-        // int size;
-        // TODO For nonmatching radius/deviation values, we may need to compute the kernel manually again. JHLabs only takes radius.
-        if (radius > 0.0) {
-        // size = max(3, 2 * (int)ceil(radius) + 1);
-        } else {
-            // "walk out until we drop/ below the threshold of one pixel numerical accuracy"
-            int QUANTUM_RANGE = 0xFF; // Should be based on color depth - Why isn't this working for getting good values? - I've hacked it here until I got okay results. Might also be an issue of
-            // that image edge thing. They at least make a larger kernel than I'm making right now.
-            for (int r = 2;; r++) {
-                // TODO This total seems too much to need to do every time.
-                double total = 0;
-                for (int r2 = -r; r2 <= r; r2++) {
-                    total += gaussian(deviation, r2);
-                }
-                double value = gaussian(deviation, r) / total;
-                if ((int) (QUANTUM_RANGE * value) == 0) {
-                    // If this is zero, we could have stopped at the previous point.
-                    // TODO Is this not always some simple function of deviation (so as to avoid the loop)?
-                    // size = 2 * (r - 1) + 1;
-                    radius = r;
-                    break;
-                }
-            }
-        }
-        // int mean = size / 2;
-        // float[] data = new float[size * size];
-        // double total = 0;
-        // for (int y = 0; y < size; y++) {
-        // for (int x = 0; x < size; x++) {
-        // double value = gaussian2d(deviation, x - mean, y - mean);
-        // total += value;
-        // data[size * y + x] = (float)value;
-        // }
-        // }
-        // // Normalize to total of 1.
-        // for (int d = 0; d < data.length; d++) {
-        // data[d] /= total;
-        // }
-        // Kernel kernel = new Kernel(size, size, data);
-        // ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-        GaussianFilter filter = new GaussianFilter((float) radius);
-        MagickImage result = new MagickImage();
-        result.format = format;
-        // result.image = op.filter(image, null);
-        result.image = filter.filter(image, null);
-		result.backgroundColor = (PixelPacket) this.backgroundColor.clone();
-        return result;
     }
 
     public MagickImage clone() {

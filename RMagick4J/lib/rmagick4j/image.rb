@@ -55,7 +55,7 @@ module Magick
     
     def blur_image(radius=0.0, sigma=1.0)
       # Swap order on purpose. I wanted them the other way around in Magick4J.
-      Image.from_image(@image.blurred(sigma, radius))
+      Image.from_image(Effects.BlurEffect.new(radius,sigma).apply(_image))
     end
     
     def change_geometry(geometry)
