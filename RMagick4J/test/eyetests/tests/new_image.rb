@@ -5,6 +5,13 @@ else
   require "RMagick"
 end
 
+class Float
+
+	def to_threshold
+		self/255 * Magick::QuantumRange
+	end
+end
+
 class Magick::Image
   alias_method :old_write, :write
   

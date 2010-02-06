@@ -234,6 +234,10 @@ module Magick
       @image.getHeight
     end
     
+    def solarize(threshold=50)
+      Image.from_image(Effects.SolarizeEffect.new(threshold).apply(_image))
+    end
+
     def store_pixels(x, y, columns, rows, pixels)
       ria_size = columns*rows
       raise IndexError, "not enough elements in array - expecting #{ria_size}, got #{pixels.size}" if pixels.size < ria_size

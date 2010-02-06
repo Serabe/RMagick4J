@@ -30,10 +30,10 @@ public abstract class BasicEffect {
     protected static MagickImage convolve(MagickImage image, int order, Kernel kernel)
               throws OptionException{
 
-	if(kernel.getWidth()!=kernel.getHeight())
-		throw new OptionException("Kernel must be a square matrix.");
-	if(kernel.getWidth()%2 == 0)
-		throw new OptionException("Kernel width must be an odd number.");
+		if(kernel.getWidth()!=kernel.getHeight())
+			throw new OptionException("Kernel must be a square matrix.");
+		if(kernel.getWidth()%2 == 0)
+			throw new OptionException("Kernel width must be an odd number.");
 
         double bias = 0.0; // Not used;
         int h = image.getHeight(), w = image.getWidth();
