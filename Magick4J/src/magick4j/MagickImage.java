@@ -308,6 +308,129 @@ public class MagickImage implements Cloneable {
         }
     }
 
+    public BufferedImage expandBorders(int top, int right, int bottom, int left){
+        int i,j;
+        int w = this.getWidth(), h = this.getHeight();
+        int nw = w+right+left;
+        int nh = h+top+bottom;
+        WritableRaster o = this.image.getRaster();
+        BufferedImage dest = new BufferedImage(nw, nh, BufferedImage.TYPE_INT_ARGB);
+        WritableRaster d = dest.getRaster();
+        double[] tl = new double[4];
+        tl = o.getPixel(0, 0, tl);
+        double[] tr = new double[4];
+        tr = o.getPixel(w-1, 0, tr);
+        double[] br = new double[4];
+        br = o.getPixel(w-1, h-1, br);
+        double[] bl = new double[4];
+        bl = o.getPixel(0, h-1, bl);
+        double[] t  = new double[w*4];
+        t = o.getPixels(0, 0, w, 1, t);
+        double[] r  = new double[h*4];
+        r = o.getPixels(w-1, 0, 1, h, r);
+        double[] b  = new double[w*4];
+        b = o.getPixels(0, h-1, w, 1, b);
+        double[] l  = new double[h*4];
+        l = o.getPixels(0, 0, 1, h, l);
+
+        //Expand top left corner
+        int size = top*left;
+        double[] f;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i=0; i<size; i++)
+                System.arraycopy(tl, 0, f, 4*i, 4);
+
+            d.setPixels(0, 0, left, top, f);
+        }
+
+        // Expand top border.
+        size = top*w;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < top; i++)
+                System.arraycopy(t, 0, f, i*4*w, w*4);
+
+            d.setPixels(left, 0, w, top, f);
+        }
+
+        // Expand top right corner.
+        size = top*right;
+        if(size != 0){
+            f = new double[size*4];
+            for(i=0; i<size; i++)
+                System.arraycopy(tr, 0, f, 4*i, 4);
+
+            d.setPixels(nw-right, 0, right, top, f);
+        }
+
+        // Expand right border.
+        size = right*h;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < h; i++)
+                for(j = 0; j < right; j++)
+                    System.arraycopy(r, i*4, f, (i*right+j)*4, 4);
+
+            d.setPixels(nw-right, top, right, h, f);
+        }
+
+        // Expand bottom right corner.
+        size = bottom*right;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i=0; i<size; i++)
+                System.arraycopy(br, 0, f, 4*i, 4);
+
+            d.setPixels(nw-right, nh-bottom, right, bottom, f);
+        }
+        
+        // Expand bottom border.
+        size = bottom*w;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < bottom; i++)
+                System.arraycopy(b, 0, f, i*w*4, w*4);
+
+            d.setPixels(left, nh-bottom, w, bottom, f);
+        }
+
+        // Expand bottom left border.
+        size = bottom*left;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < size; i++)
+                System.arraycopy(bl, 0, f, 4*i, 4);
+
+            d.setPixels(0, nh-bottom, left, bottom, f);
+        }
+
+        // Expand left border.
+        size = left*h;
+        
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < h; i++)
+                for(j = 0; j < left; j++)
+                    System.arraycopy(l, i*4, f, (i*left+j)+4, 4);
+            
+            d.setPixels(0, top, left, h, f);
+        }
+
+        // Copy the image.
+        Graphics2D g = dest.createGraphics();
+        g.drawImage(this.image, left, top, w, h, null);
+        g.dispose();
+
+        return dest;
+    }
+
     private Composite findComposite(CompositeOperator op) {
         switch (op) {
             case COPY_OPACITY:
@@ -421,52 +544,7 @@ public class MagickImage implements Cloneable {
      */
     public BufferedImage getImageToConvolve(int width){
         int halfWidth = width/2;
-        int h = this.getHeight(), w = this.getWidth();
-        int newHeight = h + 2*halfWidth;
-        int newWidth = w + 2*halfWidth;
-
-        BufferedImage conv = new BufferedImage(newWidth, newHeight, this.image.getType());
-
-        WritableRaster orig = this.image.getRaster();
-        WritableRaster dest = conv.getRaster();
-
-        /*
-         * Fill new pixels.
-         */
-
-        int size = halfWidth*newWidth;
-        double[] f = new double[size*4];
-        double[] bg = this.backgroundColor.toDoubleArray();
-
-        for(int i = 0; i<size; i++){
-            System.arraycopy(bg, 0, f, i*4, 4);
-        }
-
-        dest.setPixels(0, 0, newWidth, halfWidth, f);
-        dest.setPixels(0, newHeight-halfWidth, newWidth, halfWidth, f);
-
-        size = halfWidth*this.getHeight();
-        f = new double[size*4];
-
-        for(int i = 0; i<size; i++){
-            System.arraycopy(bg, 0, f, i*4, 4);
-        }
-
-        dest.setPixels(0, halfWidth, halfWidth, this.getHeight(), f);
-        dest.setPixels(newWidth-halfWidth, halfWidth, halfWidth, this.getHeight(), f);
-
-        /*
-         * Copy image.
-         */
-        f = new double[w*4];
-
-        size = h;
-        for(int i=0; i<size; i++){
-            f = orig.getPixels(0, i, w, 1, f);
-
-            dest.setPixels(halfWidth, halfWidth+i, w, 1, f);
-        }
-        return conv;
+        return this.expandBorders(halfWidth, halfWidth, halfWidth, halfWidth);
     }
 
     /**

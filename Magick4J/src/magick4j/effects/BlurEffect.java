@@ -40,7 +40,7 @@ public class BlurEffect extends BasicEffect{
         double[] pixel = new double[4];
 
         MagickImage blur = image.createCompatible();
-        BufferedImage conv = image.getImageToConvolve(width);
+        BufferedImage conv = image.expandBorders(0, halfWidth, 0, halfWidth);
 
         WritableRaster o = conv.getRaster();
         WritableRaster d = blur.getImage().getRaster();
@@ -86,7 +86,7 @@ public class BlurEffect extends BasicEffect{
         o = null;
         conv = null;
 
-        conv = blur.getImageToConvolve(width);
+        conv = blur.expandBorders(halfWidth, 0, halfWidth, 0);
         o = conv.getRaster();
         
         for(x = 0; x < w; x++){
