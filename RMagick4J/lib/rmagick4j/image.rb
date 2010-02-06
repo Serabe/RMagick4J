@@ -52,7 +52,16 @@ module Magick
       value = Pixel.from_color(value) if value.is_a?(String)
       @image.setBackgroundColor(value)
     end
+
+    def blur
+      @image.getBlur
+    end
     
+    def blur=(value)
+      raise TypeError, "no implicit conversion to float from #{value.class.to_s.downcase}" unless value.is_a? Numeric
+      @image.setBlur(value)
+    end
+
     def blur_image(radius=0.0, sigma=1.0)
       # Swap order on purpose. I wanted them the other way around in Magick4J.
       Image.from_image(Effects.BlurEffect.new(radius,sigma).apply(_image))
@@ -179,6 +188,10 @@ module Magick
       fill.fill(self) if fill.respond_to? :fill
     end
 
+    def matte
+      @image.getMatte
+    end
+
     def matte= matte
       @image.setMatte(matte)
     end
@@ -271,6 +284,10 @@ module Magick
       end
       # TODO Perform watermark.
       self
+    end
+
+    def wave(amplitude=25.0, wavelength=150.0)
+      Image.from_image(Effects.WaveEffect.new(amplitude,wavelength).apply(_image))
     end
 
     def write(file, &add)

@@ -1,6 +1,5 @@
 package magick4j;
 
-import java.awt.image.BufferedImageOp;
 import static java.lang.Math.min;
 import static java.lang.Math.max;
 
@@ -53,7 +52,8 @@ public class MagickImage implements Cloneable {
     private PixelPacket backgroundColor;
     private String format;
     private BufferedImage image;
-    private boolean matte;
+    private boolean matte = false;
+    private double blur=1.0;
 
     private MagickImage() {
     // Just for internal use.
@@ -213,13 +213,17 @@ public class MagickImage implements Cloneable {
         result.composite(image, x, y, op);
         return result;
     }
-    
+
     public MagickImage createCanvas(){
         return new MagickImage(getWidth(), getHeight());
     }
 
     public MagickImage createCompatible(){
-        MagickImage img = this.createCanvas();
+        return this.createCompatible(getWidth(), getHeight());
+    }
+
+    public MagickImage createCompatible(int width, int height){
+        MagickImage img = new MagickImage(width, height);
         img.format = format;
         img.backgroundColor = (PixelPacket) backgroundColor.clone();
         return img;
@@ -524,6 +528,10 @@ public class MagickImage implements Cloneable {
     public PixelPacket getBackgroundColor(){
         return this.backgroundColor;
     }
+
+    public double getBlur(){
+        return this.blur;
+    }
     
     public String getFormat() {
         return format;
@@ -545,6 +553,10 @@ public class MagickImage implements Cloneable {
     public BufferedImage getImageToConvolve(int width){
         int halfWidth = width/2;
         return this.expandBorders(halfWidth, halfWidth, halfWidth, halfWidth);
+    }
+
+    public boolean getMatte(){
+        return this.matte;
     }
 
     /**
@@ -751,6 +763,10 @@ public class MagickImage implements Cloneable {
 
     public void setBackgroundColor(PixelPacket bg){
         this.backgroundColor = bg;
+    }
+
+    public void setBlur(double blur){
+        this.blur = blur;
     }
     
     public void setFormat(String format) {
