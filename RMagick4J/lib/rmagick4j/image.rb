@@ -233,6 +233,10 @@ module Magick
     def rows
       @image.getHeight
     end
+
+    def shade(shading=false,azimuth=30,elevation=30)
+      Image.from_image(Effects.ShadeEffect.new(shading,azimuth,elevation).apply(_image))
+    end
     
     def solarize(threshold=50)
       Image.from_image(Effects.SolarizeEffect.new(threshold).apply(_image))
