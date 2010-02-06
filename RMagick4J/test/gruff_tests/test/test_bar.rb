@@ -114,12 +114,12 @@ class TestGruffBar < GruffTestCase
 
   def test_set_legend_box_size
     g = setup_basic_graph(400)
-    g.title = "Set Legend Box Size"
+    g.title = "Set Small Legend Box Size"
     g.legend_box_size = 10.0
     g.write("test/output/bar_set_legend_box_size_sm.png")
     
     g = setup_basic_graph(400)
-    g.title = "Set Legend Box Size"
+    g.title = "Set Large Legend Box Size"
     g.legend_box_size = 50.0
     g.write("test/output/bar_set_legend_box_size_lg.png")
   end
@@ -233,7 +233,7 @@ class TestGruffBar < GruffTestCase
       :colors => %w(#efd250 #666699 #e5573f #9595e2),
       :marker_color => 'white',
       :font_color => 'blue',
-      :background_image => File.join(File.dirname(__FILE__),"..","assets/pc306715.jpg")
+      :background_image => "assets/pc306715.jpg"
     }
     g.labels = {
       0 => '5/6', 
@@ -247,6 +247,18 @@ class TestGruffBar < GruffTestCase
     g.data(:victoria, [4, 3, 5, 7])
     g.minimum_value = 0
     g.write("test/output/bar_themed.png")
+  end
+  
+  def test_legend_should_not_overlap
+    g = Gruff::Bar.new(400)
+    g.theme_37signals()
+    g.title = 'My Graph'
+    g.data("Apples Oranges Watermelon Apples Oranges", [1, 2, 3, 4, 4, 3])
+    g.data('Oranges', [4, 8, 7, 9, 8, 9])
+    g.data('Watermelon', [2, 3, 1, 5, 6, 8])
+    g.data('Peaches', [9, 9, 10, 8, 7, 9])
+    g.labels = {0 => '2003', 2 => '2004', 4 => '2005'}
+    g.write("test/output/bar_long_legend_text.png")
   end
 
   def test_july_enhancements

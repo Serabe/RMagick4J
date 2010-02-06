@@ -5,6 +5,27 @@ require File.dirname(__FILE__) + "/gruff_test_case"
 class TestGruffLine < GruffTestCase
 
   # TODO Delete old output files once when starting tests
+
+  def test_should_render_with_transparent_theme
+    g = Gruff::Line.new(400)
+    g.title = "Transparent Background"
+    g.theme = {
+      :colors => ['black', 'grey'],
+      :marker_color => 'grey',
+      :font_color => 'black',
+      :background_colors => 'transparent'
+    }
+    
+    g.labels = {
+      0 => '5/6', 
+      1 => '5/15', 
+      2 => '5/24', 
+      3 => '5/30', 
+    }
+    g.data(:apples, [-1, 0, 4, -4])
+    g.data(:peaches, [10, 8, 6, 3])
+    g.write("test/output/line_transparent.png")
+  end
   
   def test_line_graph_with_themes
     line_graph_with_themes()
@@ -118,21 +139,32 @@ class TestGruffLine < GruffTestCase
     g.write("test/output/line_large.png")
   end
     
-  def test_long_title
-    
-  end
-  
-  def test_add_colors
-    
-  end
+  # def test_long_title
+  #   
+  # end
+  # 
+  # def test_add_colors
+  #   
+  # end
+  # 
 
   def test_request_too_many_colors
-    
+    g = Gruff::Line.new
+    g.title = "More Sets Than in Color Array"
+#     g.theme = {} # Sets theme with only black and white
+    @datasets.each do |data|
+      g.data(data[0], data[1])
+    end
+    @datasets.each do |data|
+      g.data("#{data[0]}-B", data[1].map {|d| d + 20})
+    end
+    g.write("test/output/line_more_sets_than_colors.png")    
   end
-
-  def test_add_data
-    
-  end
+  
+  # 
+  # def test_add_data
+  #   
+  # end
 
   def test_many_datapoints
     g = Gruff::Line.new
@@ -414,8 +446,38 @@ class TestGruffLine < GruffTestCase
     g.hide_line_markers = false
     g.write('test/output/line_no_hide.png')
   end
+  
 
-protected
+  def test_jruby_error
+    g = Gruff::Line.new
+    g.theme = {
+      :colors => ['#7F0099', '#2F85ED', '#2FED09','#EC962F'],
+      :marker_color => '#aaa',
+      :background_colors => ['#E8E8E8','#B9FD6C']
+    }
+    g.hide_title = true
+
+    g.legend_font_size = 12
+    g.marker_font_size = 16
+    g.hide_dots = false
+    g.label_max_decimals = 1
+
+    g.write('test/output/line_jruby_error.png')
+  end
+
+private
+  
+  def bmi(params={})
+    g = basic_graph()
+
+    g.y_axis_label = 'BMI'
+
+    bmis = [24.3, 23.9, 23.7, 23.7, 23.6, 23.9, 23.6, 23.7, 23.4, 23.4, 23.4, 22.9]
+
+    g.data( 'BMI', bmis )
+    g.hide_legend = true
+    return g
+  end
 
   # TODO Reset data after each theme
   def line_graph_with_themes(size=nil)
@@ -439,7 +501,6 @@ protected
     end
     g.write("test/output/line_theme_37signals_#{size}.png")
   
-
     g = Gruff::Line.new(size)
     g.title = "Multi-Line Graph Test #{size}"
     g.labels = @labels

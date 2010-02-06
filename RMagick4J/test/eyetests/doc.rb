@@ -44,7 +44,7 @@ template = %{
       </ul>
       <table>
         <% i = 0 %>
-        <% IMAGES.each do |img| %>
+        <% IMAGES.sort.each do |img| %>
         <% if i % 4 == 0 %>
         <tr> 
           <td >RMagick4J</td>

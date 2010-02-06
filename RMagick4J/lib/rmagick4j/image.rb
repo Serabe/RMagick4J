@@ -1,4 +1,3 @@
-
 module Magick
   class Image
     
@@ -173,6 +172,10 @@ module Magick
     def _image=(new_image)
       @image = new_image
     end
+
+    def implode(amount=0.5)
+      Image.from_image(Effects.ImplodeEffect.new(amount).apply(_image))
+    end
     
     def _info
       @info
@@ -211,6 +214,10 @@ module Magick
     def raise(width=6, height=6, raise=true)
       Image.from_image(@image.raised(width, height, raise))
     end
+
+		def remap
+			# TODO: Implement. Just here to avoid warning in RMagick 2.9 file.
+		end
 
     def resize(*args)
       copy.resize!(*args)
