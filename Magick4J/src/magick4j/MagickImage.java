@@ -283,6 +283,7 @@ public class MagickImage implements Cloneable {
         }finally {
             graphics.dispose();
         }
+        result.setFormat(this.getFormat());
         return result;
     }
 
@@ -543,6 +544,7 @@ public class MagickImage implements Cloneable {
             // Um, obviously wrong here.
             result.composite(this, 0, 0, CompositeOperator.OVER);
         }
+        result.setFormat(this.getFormat());
         return result;
     }
 
@@ -617,7 +619,8 @@ public class MagickImage implements Cloneable {
         graphics.drawRenderedImage(this.getImage(), AffineTransform.getScaleInstance(widthRatio, heightRatio));
         
         graphics.dispose();
-        
+
+        result.setFormat(this.getFormat());
         return result;
     }
     
