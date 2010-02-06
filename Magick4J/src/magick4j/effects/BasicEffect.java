@@ -73,7 +73,7 @@ public abstract class BasicEffect {
         // Convolve
 
 		for(int j=1; j<kw; j++)
-			p[j] = o.getPixels(0, j, cw, 1, p[j]);
+			p[j] = o.getPixels(0, j-1, cw, 1, p[j]);
 
         for(int y=0; y<h; y++){
 
@@ -103,7 +103,7 @@ public abstract class BasicEffect {
                 q[4*x+0] = roundToQuantum(pixel[0]+bias);
                 q[4*x+1] = roundToQuantum(pixel[1]+bias);
                 q[4*x+2] = roundToQuantum(pixel[2]+bias);
-                q[4*x+3] = 255.0;//1.0 - roundToQuantum(pixel[3]+bias)*Constants.QuantumScale;
+                q[4*x+3] = 255.0;
             }
             d.setPixels(0, y, w, 1, q);
         }

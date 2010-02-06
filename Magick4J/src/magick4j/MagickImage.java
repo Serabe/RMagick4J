@@ -418,7 +418,7 @@ public class MagickImage implements Cloneable {
             f = new double[size*4];
             for(i = 0; i < h; i++)
                 for(j = 0; j < left; j++)
-                    System.arraycopy(l, i*4, f, (i*left+j)+4, 4);
+                    System.arraycopy(l, i*4, f, (i*left+j)*4, 4);
             
             d.setPixels(0, top, left, h, f);
         }
