@@ -1,19 +1,16 @@
 package magick4j.effects;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.awt.image.WritableRaster;
 import magick4j.Constants;
 import magick4j.MagickImage;
 
-import magick4j.PixelPacket;
 import magick4j.exceptions.OptionException;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
 import static java.lang.Math.exp;
-import static java.lang.Math.round;
 
 public abstract class BasicEffect {
     
@@ -67,8 +64,6 @@ public abstract class BasicEffect {
         // Some things to do before actual convolving.
 
         int kw = kernel.getWidth();
-        int halfWidth = kw/2;
-        int centralIndex = halfWidth +1;
         double[][] p = new double[kw][cw*4];
         double[] q;
 
@@ -77,10 +72,15 @@ public abstract class BasicEffect {
 
         // Convolve
 
+		for(int j=1; j<kw; j++)
+			p[j] = o.getPixels(0, j, cw, 1, p[j]);
+
         for(int y=0; y<h; y++){
 
-            for(int j=0; j<kw; j++)
-                p[j] = o.getPixels(0, y+j, cw, 1, p[j]);
+            for(int j=1; j<kw; j++)
+				System.arraycopy(p[j], 0, p[j-1], 0, cw*4);
+
+			p[kw-1] = o.getPixels(0, y+kw-1, cw, 1, p[kw-1]);
 
             q = new double[w*4];
             for(int x=0; x<w; x++){

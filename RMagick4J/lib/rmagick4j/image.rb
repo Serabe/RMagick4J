@@ -72,6 +72,10 @@ module Magick
             self
     end
 
+    def charcoal(radius=0.0, sigma=1.0)
+      Image.from_image(Effects.CharcoalEffect.new(radius,sigma).apply(_image))
+    end
+
     def columns
       @image.getWidth
     end
