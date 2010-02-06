@@ -481,12 +481,12 @@ public class MagickImage implements Cloneable {
          * Fill new pixels.
          */
 
-        int size = halfWidth*newHeight;
+        int size = halfWidth*newWidth;
         double[] f = new double[size*4];
         double[] bg = this.backgroundColor.toDoubleArray();
 
-        for(int i = 0; i<size; i+=4){
-            System.arraycopy(bg, 0, f, i, 4);
+        for(int i = 0; i<size; i++){
+            System.arraycopy(bg, 0, f, i*4, 4);
         }
 
         dest.setPixels(0, 0, newWidth, halfWidth, f);
@@ -495,8 +495,8 @@ public class MagickImage implements Cloneable {
         size = halfWidth*this.getHeight();
         f = new double[size*4];
 
-        for(int i = 0; i<size; i+=4){
-            System.arraycopy(bg, 0, f, i, 4);
+        for(int i = 0; i<size; i++){
+            System.arraycopy(bg, 0, f, i*4, 4);
         }
 
         dest.setPixels(0, halfWidth, halfWidth, this.getHeight(), f);
