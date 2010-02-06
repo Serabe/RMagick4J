@@ -46,6 +46,16 @@ public class PixelPacket {
         this.setBlue(blue);
         this.setOpacity(opacity);
     }
+
+    @Override
+    public Object clone(){
+        return new PixelPacket(
+                                this.red,
+                                this.green,
+                                this.blue,
+                                this.opacity
+                                );
+    }
     
     @Override
     public boolean equals(Object o){

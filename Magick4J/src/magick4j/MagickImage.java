@@ -1,5 +1,6 @@
 package magick4j;
 
+import java.awt.image.BufferedImageOp;
 import static java.lang.Math.min;
 import static java.lang.Math.max;
 
@@ -59,6 +60,12 @@ public class MagickImage implements Cloneable {
     // Just for internal use.
     }
 
+    public MagickImage(BufferedImage img){
+        this.image = img;
+        this.format = "JPG";
+        this.backgroundColor = new PixelPacket(255,255,255,0);
+    }
+
     public MagickImage(File file) {
         try {
             readImage(file);
@@ -84,7 +91,7 @@ public class MagickImage implements Cloneable {
         if (info.getBackgroundColor() != null) {
             backgroundColor = info.getBackgroundColor();
         }else{
-            backgroundColor = new PixelPacket(255,255,255,255);
+            backgroundColor = new PixelPacket(255,255,255,0);
         }
         erase();
     }
@@ -124,6 +131,13 @@ public class MagickImage implements Cloneable {
         
         this.getImage().getGraphics().dispose();
         
+    }
+
+    public void assimilate(MagickImage image){
+        this.backgroundColor = image.backgroundColor;
+        this.format = image.format;
+        this.image = image.image;
+        this.matte = image.matte;
     }
     
     public MagickImage blurred(double deviation, double radius) {
@@ -187,7 +201,9 @@ public class MagickImage implements Cloneable {
             // TODO There has to be a better way to copy an image.
             MagickImage result = new MagickImage(getWidth(), getHeight());
             result.composite(this, 0, 0, CompositeOperator.OVER);
+            result.backgroundColor = (PixelPacket) backgroundColor.clone();
             result.format = format;
+            result.matte = matte;
             return result;
         } catch (Exception e) {
             throw Thrower.throwAny(e);
@@ -235,6 +251,7 @@ public class MagickImage implements Cloneable {
     }
 
     public MagickImage composited(MagickImage image, Gravity gravity, int x, int y, CompositeOperator op) {
+        //TODO
         return null;
     }
 
@@ -246,6 +263,13 @@ public class MagickImage implements Cloneable {
     
     public MagickImage createCanvas(){
         return new MagickImage(getWidth(), getHeight());
+    }
+
+    public MagickImage createCompatible(){
+        MagickImage img = this.createCanvas();
+        img.format = format;
+        img.backgroundColor = (PixelPacket) backgroundColor.clone();
+        return img;
     }
 
     public MagickImage crop(Gravity gravity, int width, int height) {
@@ -329,6 +353,13 @@ public class MagickImage implements Cloneable {
         } finally {
             graphics.dispose();
         }
+    }
+
+    public void setImageFromConvolve(BufferedImage convolved, int width) {
+        int halfWidth = width/2;
+        int w = convolved.getWidth() - 2*halfWidth;
+        int h = convolved.getHeight() - 2*halfWidth;
+        this.image = convolved.getSubimage(halfWidth, halfWidth, w, h);
     }
 
     private Composite findComposite(CompositeOperator op) {
@@ -437,6 +468,60 @@ public class MagickImage implements Cloneable {
         return image;
     }
 
+    /***
+     * Prepare the image for convolving.
+     * @param width width of the Kernel.
+     * @return New Image prepared to be convolved.
+     */
+    public BufferedImage getImageToConvolve(int width){
+        int halfWidth = width/2;
+        int h = this.getHeight(), w = this.getWidth();
+        int newHeight = h + 2*halfWidth;
+        int newWidth = w + 2*halfWidth;
+
+        BufferedImage conv = new BufferedImage(newWidth, newHeight, this.image.getType());
+        WritableRaster orig = this.image.getRaster();
+        WritableRaster dest = conv.getRaster();
+
+        /*
+         * Fill new pixels.
+         */
+
+        int size = halfWidth*newHeight;
+        double[] f = new double[size*4];
+        double[] bg = this.backgroundColor.toDoubleArray();
+
+        for(int i = 0; i<size; i+=4){
+            System.arraycopy(bg, 0, f, i, 4);
+        }
+
+        dest.setPixels(0, 0, newWidth, halfWidth, f);
+        dest.setPixels(0, newHeight-halfWidth, newWidth, halfWidth, f);
+
+        size = halfWidth*this.getHeight();
+        f = new double[size*4];
+
+        for(int i = 0; i<size; i+=4){
+            System.arraycopy(bg, 0, f, i, 4);
+        }
+
+        dest.setPixels(0, halfWidth, halfWidth, this.getHeight(), f);
+        dest.setPixels(newWidth-halfWidth, halfWidth, halfWidth, this.getHeight(), f);
+
+        /*
+         * Copy image.
+         */
+        f = new double[w*4];
+
+        size = h;
+        for(int i=0; i<size; i++){
+            f = orig.getPixels(0, i, w, 1, f);
+
+            dest.setPixels(halfWidth, halfWidth+i, w, 1, f);
+        }
+        return conv;
+    }
+
     /**
      * Return the pixels in an area.
      * @param x x-coordinate for the upper-left corner.
@@ -455,8 +540,7 @@ public class MagickImage implements Cloneable {
         PixelPacket pixel = this.getBackgroundColor();
 
         int i,j;
-        
-        int limit_i, limit_j;
+
 
         // Pixels out of image.
 
@@ -465,8 +549,10 @@ public class MagickImage implements Cloneable {
             for(j=0; j<height; j++)
                 pixels[i][j] = pixel;
 
-        if(x<=this.getWidth() && y<=this.getHeight()){
+        if(x<=this.getWidth() && y<=this.getHeight() && (x+width)>=0 && (y+height)>=0){
             int x1 = max(x,0), y1=max(y,0);
+            int offset_i = x1-x, offset_j= y1-y;
+            
             int x2 = min(x+width,this.getWidth()), y2 = min(y+height,this.getHeight());
             int new_width = x2-x1, new_height = y2 - y1;
 
@@ -476,9 +562,9 @@ public class MagickImage implements Cloneable {
 
             int index = 0;
 
-            for(i=0; i<=new_width; i++){
-                for(j=0; j<=new_height; j++){
-                    pixels[i][j] = new PixelPacket(ps[index],ps[index+1],ps[index+2],ps[index+3]);
+            for(i=0; i<new_width; i++){
+                for(j=0; j<new_height; j++){
+                    pixels[i+offset_i][j+offset_j] = new PixelPacket(ps[index],ps[index+1],ps[index+2],ps[index+3]);
                     index+=4;
                 }
             }
@@ -589,6 +675,7 @@ public class MagickImage implements Cloneable {
                         reader.setInput(stream);
                         format = reader.getFormatName().toUpperCase();
                         image = reader.read(0);
+                        backgroundColor = ColorDatabase.lookUp("white");
                         // TODO Read multiple images if present? How to coordinate this and ImageList?
                         break;
                     } finally {
@@ -638,6 +725,10 @@ public class MagickImage implements Cloneable {
     
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public void setImage(BufferedImage img){
+        this.image = img;
     }
 
     public void setMatte(boolean matte) {

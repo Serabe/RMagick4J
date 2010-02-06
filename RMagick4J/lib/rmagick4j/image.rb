@@ -126,7 +126,11 @@ module Magick
       @image.display
       self
     end
-    
+
+    def edge(radius=0.0)
+      Image.from_image(Effects.EdgeEffect.new(radius).apply(_image))
+    end
+
     def erase!
       @image.erase
     end
