@@ -25,8 +25,19 @@ public class PixelPacket {
         this(0, 0, 0, 0);
     }
 
+    public PixelPacket(double red, double green, double blue){
+        this(red,green,blue,0);
+    }
+
     public PixelPacket(int red, int green, int blue) {
         this(red, green, blue, 0);
+    }
+
+    public PixelPacket(double red, double green, double blue, double alpha){
+        this.setRed((int) Math.round(red*Constants.QuantumRange));
+        this.setGreen((int) Math.round(green*Constants.QuantumRange));
+        this.setBlue((int) Math.round(blue*Constants.QuantumRange));
+        this.setOpacity((int) Math.round(alpha*Constants.QuantumRange));
     }
 
     public PixelPacket(int red, int green, int blue, int opacity) {

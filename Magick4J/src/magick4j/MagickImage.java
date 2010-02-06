@@ -1,6 +1,7 @@
 package magick4j;
 
 import static java.lang.Math.min;
+import static java.lang.Math.max;
 
 import com.jhlabs.image.GaussianFilter;
 
@@ -433,6 +434,57 @@ public class MagickImage implements Cloneable {
 
     public BufferedImage getImage() {
         return image;
+    }
+
+    /**
+     * Return the pixels in an area.
+     * @param x x-coordinate for the upper-left corner.
+     * @param y y-coordinate for the upper-left corner.
+     * @param width width of the region.
+     * @param height height of the region.
+     * @return A PixelPacket[width][height] containing the pixels in the region.
+     */
+    public PixelPacket[][] getPixels(int x, int y, int width, int height){
+        PixelPacket[][] pixels = new PixelPacket[width][height];
+        //TODO Implement VirtualPixelMethod stuff.
+
+        int imageWidth = this.getWidth();
+        int imageHeight = this.getHeight();
+
+        PixelPacket pixel = this.getBackgroundColor();
+
+        int i,j;
+        
+        int limit_i, limit_j;
+
+        // Pixels out of image.
+
+        
+        for(i=0; i<width; i++)
+            for(j=0; j<height; j++)
+                pixels[i][j] = pixel;
+
+        if(x<=this.getWidth() && y<=this.getHeight()){
+            int x1 = max(x,0), y1=max(y,0);
+            int x2 = min(x+width,this.getWidth()), y2 = min(y+height,this.getHeight());
+            int new_width = x2-x1, new_height = y2 - y1;
+
+            double[] ps = new double[new_width*new_height*4];
+
+            this.getImage().getRaster().getPixels(x1, y1, new_width, new_height, ps);
+
+            int index = 0;
+
+            for(i=0; i<=new_width; i++){
+                for(j=0; j<=new_height; j++){
+                    pixels[i][j] = new PixelPacket(ps[index],ps[index+1],ps[index+2],ps[index+3]);
+                    index+=4;
+                }
+            }
+
+        }
+
+        return pixels;
     }
 
     public int getWidth() {
