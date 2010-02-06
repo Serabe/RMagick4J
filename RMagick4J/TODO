@@ -1,7 +1,8 @@
 New RMagick methods:
 
-· charcoal
-· edge
-· shade
-· solarize
+· charcoal [DONE]
+· edge [DONE]
+· shade [DONE]
+· solarize [DONE]
 · wave
+· negate

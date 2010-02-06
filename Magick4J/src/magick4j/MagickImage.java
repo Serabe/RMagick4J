@@ -61,7 +61,15 @@ public class MagickImage implements Cloneable {
     }
 
     public MagickImage(BufferedImage img){
-        this.image = img;
+		BufferedImage n = null;
+		if(img.getType() == BufferedImage.TYPE_INT_ARGB)
+			n = img;
+		else{
+			n = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			n.createGraphics().drawImage(img,0,0,null);
+			n.createGraphics().dispose();
+		}
+        this.image = n;
         this.format = "JPG";
         this.backgroundColor = new PixelPacket(255,255,255,0);
     }
@@ -191,6 +199,7 @@ public class MagickImage implements Cloneable {
         result.format = format;
         // result.image = op.filter(image, null);
         result.image = filter.filter(image, null);
+		result.backgroundColor = (PixelPacket) this.backgroundColor.clone();
         return result;
     }
 

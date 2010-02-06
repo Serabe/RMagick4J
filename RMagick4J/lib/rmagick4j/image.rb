@@ -183,6 +183,10 @@ module Magick
       @image.setMatte(matte)
     end
 
+    def negate(grayscale=false)
+      Image.from_image(Effects.NegateEffect.new(grayscale).apply(_image))
+    end
+
     def quantize(number_colors=256, colorspace=RGBColorspace, dither=true, tree_depth=0, measure_error=false)
       Image.from_image(@image.quantized(number_colors, colorspace._val, dither, tree_depth, measure_error))
     end
