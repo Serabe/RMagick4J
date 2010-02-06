@@ -119,7 +119,7 @@ public class PixelPacket {
         data[0] = this.getRed();
         data[1] = this.getGreen();
         data[2] = this.getBlue();
-        data[3] = 255-this.getOpacity(); // See warning above.
+        data[3] = Constants.QuantumRange-this.getOpacity(); // See warning above.
         return data;
     }
     

@@ -3,6 +3,7 @@ package magick4j.effects;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.awt.image.WritableRaster;
 import magick4j.Constants;
 import magick4j.MagickImage;
 
@@ -31,25 +32,90 @@ public abstract class BasicEffect {
 
     protected static MagickImage convolve(MagickImage image, int order, Kernel kernel)
               throws OptionException{
+
+	if(kernel.getWidth()!=kernel.getHeight())
+		throw new OptionException("Kernel must be a square matrix.");
+	if(kernel.getWidth()%2 == 0)
+		throw new OptionException("Kernel width must be an odd number.");
+
+        double bias = 0.0; // Not used;
+        int h = image.getHeight(), w = image.getWidth();
         MagickImage convolve = image.createCompatible();
         BufferedImage conv = image.getImageToConvolve(kernel.getWidth());
-        ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_ZERO_FILL, null);
-        BufferedImage dst = op.createCompatibleDestImage(conv, conv.getColorModel());
-        
-        try{
-            op.filter(conv.getData(), dst.getRaster());
-        }catch (Exception ex){
-            throw new OptionException("Fail convolve operation: "+ex.toString());
+
+        int cw = conv.getWidth(), ch = conv.getHeight();
+        BufferedImage dst = new BufferedImage(w, h, image.getImage().getType());
+
+
+        /*
+         * Normalize kernel.
+         */
+
+        float[] normal = kernel.getKernelData(null);
+
+        float gamma = 0.0f;
+
+        for(int i = 0; i<normal.length; i++){
+            gamma += normal[i];
         }
 
-        convolve.setImageFromConvolve(dst, kernel.getWidth());
+        gamma = 1.0f/(abs(gamma) <= Constants.MagickEpsilon ? 1.0f : gamma);
+
+        for(int i = 0; i<normal.length; i++)
+            normal[i] *= gamma;
+
+        // Some things to do before actual convolving.
+
+        int kw = kernel.getWidth();
+        int halfWidth = kw/2;
+        int centralIndex = halfWidth +1;
+        double[][] p = new double[kw][cw*4];
+        double[] q;
+
+        WritableRaster d = dst.getRaster();
+        WritableRaster o = conv.getRaster();
+
+        // Convolve
+
+        for(int y=0; y<h; y++){
+
+            for(int j=0; j<kw; j++)
+                p[j] = o.getPixels(0, y+j, cw, 1, p[j]);
+
+            q = new double[w*4];
+            for(int x=0; x<w; x++){
+                
+                double[] pixel = new double[4];
+                pixel[0] = pixel[1] = pixel[2] = 0;
+                pixel[3] = Constants.OpaqueOpacity;
+
+                for(int v=0; v<kw; v++){
+                    for(int u=0; u<kw; u++){
+                        float e = normal[v*kw+u];
+                        
+                        pixel[0] += e*p[v][4*(x+u)+0];
+                        pixel[1] += e*p[v][4*(x+u)+1];
+                        pixel[2] += e*p[v][4*(x+u)+2];
+                       
+                    }
+                }
+
+                q[4*x+0] = roundToQuantum(pixel[0]+bias);
+                q[4*x+1] = roundToQuantum(pixel[1]+bias);
+                q[4*x+2] = roundToQuantum(pixel[2]+bias);
+                q[4*x+3] = 255.0;//1.0 - roundToQuantum(pixel[3]+bias)*Constants.QuantumScale;
+            }
+            d.setPixels(0, y, w, 1, q);
+        }
+
+        convolve.setImage(dst);
 
         return convolve;
     }
 
     protected static int getOptimalKernelWidth1D(double radius, double sigma){
-	    if(radius > 0.0)
-	        return (int) (2.0*ceil(radius)+1.0);
+	if(radius > 0.0)
+            return (int) (2.0*ceil(radius)+1.0);
     	if(abs(sigma) <= Constants.MagickEpsilon)
             return 1;
         int width, u;
@@ -66,5 +132,13 @@ public abstract class BasicEffect {
             width+=2;
         }
         return width-2;
-	}
+    }
+
+    protected static int roundToQuantum(double d){
+        if(d <= 0.0)
+            return 0;
+        if(d >= Constants.QuantumRange)
+            return (int) Constants.QuantumRange;
+        return (int) (d+0.5);
+    }
 }

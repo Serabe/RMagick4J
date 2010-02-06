@@ -355,13 +355,6 @@ public class MagickImage implements Cloneable {
         }
     }
 
-    public void setImageFromConvolve(BufferedImage convolved, int width) {
-        int halfWidth = width/2;
-        int w = convolved.getWidth() - 2*halfWidth;
-        int h = convolved.getHeight() - 2*halfWidth;
-        this.image = convolved.getSubimage(halfWidth, halfWidth, w, h);
-    }
-
     private Composite findComposite(CompositeOperator op) {
         switch (op) {
             case COPY_OPACITY:
@@ -480,6 +473,7 @@ public class MagickImage implements Cloneable {
         int newWidth = w + 2*halfWidth;
 
         BufferedImage conv = new BufferedImage(newWidth, newHeight, this.image.getType());
+
         WritableRaster orig = this.image.getRaster();
         WritableRaster dest = conv.getRaster();
 
@@ -674,7 +668,12 @@ public class MagickImage implements Cloneable {
                     try {
                         reader.setInput(stream);
                         format = reader.getFormatName().toUpperCase();
-                        image = reader.read(0);
+                        //image = reader.read(0);
+			BufferedImage pre = reader.read(0);
+			image = new BufferedImage(pre.getWidth(), pre.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			image.createGraphics().drawImage(pre, 0, 0, null);
+			image.createGraphics().dispose();
+			pre = null;
                         backgroundColor = ColorDatabase.lookUp("white");
                         // TODO Read multiple images if present? How to coordinate this and ImageList?
                         break;
@@ -729,6 +728,13 @@ public class MagickImage implements Cloneable {
 
     public void setImage(BufferedImage img){
         this.image = img;
+    }
+
+    public void setImageFromConvolve(BufferedImage convolved, int width) {
+        int halfWidth = width/2;
+        int w = convolved.getWidth() - 2*halfWidth;
+        int h = convolved.getHeight() - 2*halfWidth;
+        this.image = convolved.getSubimage(halfWidth, halfWidth, w, h);
     }
 
     public void setMatte(boolean matte) {
