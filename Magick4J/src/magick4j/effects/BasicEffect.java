@@ -1,18 +1,14 @@
-package magick4j;
+package magick4j.effects;
+
+import magick4j.Constants;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
 import static java.lang.Math.exp;
-/**
- *
- * @author serabe
- */
-public class Convolution {
-	/*
-	 * Ported from ImageMagick
-	 * 
-	 */
-	public static long getOptimalKernelWidth1D(double radius, double sigma){
+
+public abstract class BasicEffect {
+
+    public static long getOptimalKernelWidth1D(double radius, double sigma){
 		if(radius > 0.0)
 			return (long) (2.0*ceil(radius)+1.0);
 		if(abs(sigma) <= Constants.MagickEpsilon)
