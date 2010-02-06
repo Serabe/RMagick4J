@@ -25,12 +25,13 @@ public class PixelPacket {
         this(0, 0, 0, 0);
     }
 
+    
     public PixelPacket(double red, double green, double blue){
-        this(red,green,blue,0);
+        this(red,green,blue,Constants.OpaqueOpacity);
     }
 
     public PixelPacket(int red, int green, int blue) {
-        this(red, green, blue, 0);
+        this(red, green, blue, Constants.OpaqueOpacity);
     }
 
     public PixelPacket(double red, double green, double blue, double alpha){

@@ -96,7 +96,7 @@ public class MagickImage implements Cloneable {
         // TODO Deep clone and store the info??? How much redundancy? I really don't want to copy the fields into this image itself.
         // TODO Clone the background? Make things immutable?
         if (info.getBackgroundColor() != null) {
-            backgroundColor = info.getBackgroundColor();
+            backgroundColor = (PixelPacket) info.getBackgroundColor().clone();
         }else{
             backgroundColor = new PixelPacket(255,255,255,0);
         }
@@ -147,6 +147,7 @@ public class MagickImage implements Cloneable {
         this.matte = image.matte;
     }
 
+    @Override
     public MagickImage clone() {
         try {
             // TODO Copy individual vars or call super.clone()?
@@ -229,6 +230,12 @@ public class MagickImage implements Cloneable {
         return img;
     }
 
+    public MagickImage createTransparentCanvas(){
+        ImageInfo info = new ImageInfo();
+        info.setBackgroundColor(new PixelPacket(0,0,0,Constants.TransparentOpacity));
+        return new MagickImage(this.getWidth(), this.getHeight(), info);
+    }
+
     public MagickImage crop(Gravity gravity, int width, int height) {
         return crop(gravity.getX(this, width),gravity.getY(this, height),width,height);
     }
@@ -303,12 +310,25 @@ public class MagickImage implements Cloneable {
     }
 
     public void erase() {
-        Graphics2D graphics = (Graphics2D) image.getGraphics();
-        try {
-            graphics.setBackground(this.backgroundColor.toColor());
-            graphics.clearRect(0, 0, getWidth(), getHeight());
-        } finally {
-            graphics.dispose();
+        if(this.backgroundColor.getOpacity() == Constants.TransparentOpacity){
+            WritableRaster o = image.getRaster();
+            WritableRaster a = image.getAlphaRaster();
+            int h = this.getHeight(), w = this.getWidth();
+            double[] q = new double[w*4];
+
+            for(int y = 0; y < h; y++){
+                a.setPixels(0, y, w, 1, q);
+                o.setPixels(0, y, w, 1, q);
+            }
+
+        }else{
+            Graphics2D graphics = (Graphics2D) image.getGraphics();
+            try{
+                graphics.setBackground(this.backgroundColor.toColor());
+                graphics.clearRect(0, 0, getWidth(), getHeight());
+            } finally {
+                graphics.dispose();
+            }
         }
     }
 
@@ -442,6 +462,7 @@ public class MagickImage implements Cloneable {
                 return AlphaComposite.DstIn;
             case OVER:
                 return AlphaComposite.SrcOver;
+                //return AlphaComposite.Xor;
         }
         return null;
     }
