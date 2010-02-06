@@ -1,8 +1,6 @@
 package magick4j.effects;
 
 import java.awt.image.Kernel;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import magick4j.MagickImage;
 import magick4j.exceptions.OptionException;
 

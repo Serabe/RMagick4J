@@ -4,6 +4,6 @@ include Magick
 
 clown = Image.load("clown.jpg").first
 
-clown = clown.charcoal 5
+clown = clown.normalize
 
-clown.write "effect_charcoal.jpg"
+clown.write "effect_normalize.jpg"

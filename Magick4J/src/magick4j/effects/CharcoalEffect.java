@@ -26,7 +26,7 @@ public class CharcoalEffect extends BasicEffect{
 		g.drawImage(image.getImage(), 0, 0, null);
 		g.dispose();
 		MagickImage edge = (new EdgeEffect(this.radius)).effect(new MagickImage(gray));
-		return (new NegateEffect(false)).effect(edge.blurred(this.sigma, this.radius));
+		return (new NegateEffect(false)).effect((new NormalizeEffect()).effect(edge.blurred(this.sigma, this.radius)));
 	}
 
 }

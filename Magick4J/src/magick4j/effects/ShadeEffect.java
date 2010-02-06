@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import magick4j.Constants;
 import magick4j.MagickImage;
+import magick4j.PixelPacket;
 import magick4j.exceptions.OptionException;
 
 import static java.lang.Math.cos;
@@ -54,8 +55,8 @@ public class ShadeEffect extends BasicEffect{
 
 		for(int i = 0; i < cw; i++){
 			base = 4*i;
-			s[1][i] = 0.299*p[1][base+0]+0.587*p[1][base+1]+0.114*p[1][base+2];
-			s[2][i] = 0.299*p[2][base+0]+0.587*p[2][base+1]+0.114*p[2][base+2];
+			s[1][i] = PixelPacket.calculateIntensity(p[1], base);
+			s[2][i] = PixelPacket.calculateIntensity(p[2], base);
 		}
 
 		for(int y = 0; y < h; y++){
@@ -70,7 +71,7 @@ public class ShadeEffect extends BasicEffect{
 			System.arraycopy(s[2], 0, s[1], 0, cw);
 			for(int i = 0; i < cw; i++){
 				base = 4*i;
-				s[2][i] = 0.299*p[2][base+0]+0.587*p[2][base+1]+0.114*p[2][base+2];
+				s[2][i] = PixelPacket.calculateIntensity(p[2], base);
 			}
 
 			normal[2] = 2.0*Constants.QuantumRange;

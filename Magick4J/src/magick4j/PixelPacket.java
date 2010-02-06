@@ -47,6 +47,14 @@ public class PixelPacket {
         this.setOpacity(opacity);
     }
 
+	public static double calculateIntensity(double red, double green, double blue){
+		return 0.299*red+0.587*green+0.114*blue;
+	}
+
+	public static double calculateIntensity(double[] p, int ini){
+		return calculateIntensity(p[ini],p[ini+1],p[ini+2]);
+	}
+
     @Override
     public Object clone(){
         return new PixelPacket(
@@ -77,6 +85,10 @@ public class PixelPacket {
     public int getGreen() {
         return green;
     }
+
+	public int getIntensity(){
+		return (int) Math.round(calculateIntensity(this.red, this.green, this.blue));
+	}
 
     public int getOpacity() {
         return opacity;

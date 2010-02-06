@@ -7,3 +7,4 @@
 · ShadeImage effect.c:3576 [DONE]
 · SolarizeImage fx.c:4512 [DONE]
 · WaveImage fx.c:5373
+· BlurImage effect.c:770
