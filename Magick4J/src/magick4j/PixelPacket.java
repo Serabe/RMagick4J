@@ -25,8 +25,20 @@ public class PixelPacket {
         this(0, 0, 0, 0);
     }
 
+    
+    public PixelPacket(double red, double green, double blue){
+        this(red,green,blue,Constants.OpaqueOpacity);
+    }
+
     public PixelPacket(int red, int green, int blue) {
-        this(red, green, blue, 0);
+        this(red, green, blue, Constants.OpaqueOpacity);
+    }
+
+    public PixelPacket(double red, double green, double blue, double alpha){
+        this.setRed((int) Math.round(red*Constants.QuantumRange));
+        this.setGreen((int) Math.round(green*Constants.QuantumRange));
+        this.setBlue((int) Math.round(blue*Constants.QuantumRange));
+        this.setOpacity((int) Math.round(alpha*Constants.QuantumRange));
     }
 
     public PixelPacket(int red, int green, int blue, int opacity) {
@@ -34,6 +46,24 @@ public class PixelPacket {
         this.setGreen(green);
         this.setBlue(blue);
         this.setOpacity(opacity);
+    }
+
+	public static double calculateIntensity(double red, double green, double blue){
+		return 0.299*red+0.587*green+0.114*blue;
+	}
+
+	public static double calculateIntensity(double[] p, int ini){
+		return calculateIntensity(p[ini],p[ini+1],p[ini+2]);
+	}
+
+    @Override
+    public Object clone(){
+        return new PixelPacket(
+                                this.red,
+                                this.green,
+                                this.blue,
+                                this.opacity
+                                );
     }
     
     @Override
@@ -56,6 +86,10 @@ public class PixelPacket {
     public int getGreen() {
         return green;
     }
+
+	public int getIntensity(){
+		return (int) Math.round(calculateIntensity(this.red, this.green, this.blue));
+	}
 
     public int getOpacity() {
         return opacity;
@@ -98,7 +132,7 @@ public class PixelPacket {
         data[0] = this.getRed();
         data[1] = this.getGreen();
         data[2] = this.getBlue();
-        data[3] = 255-this.getOpacity(); // See warning above.
+        data[3] = Constants.QuantumRange-this.getOpacity(); // See warning above.
         return data;
     }
     

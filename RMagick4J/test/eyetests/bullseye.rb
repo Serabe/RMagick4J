@@ -101,11 +101,12 @@ module Bullseye
       @default_model = DefaultListModel.new
       super(@default_model)
       load_test_scripts
+
       self.setSelectedIndex(0)
     end
    
     def load_test_scripts
-      Dir[File.dirname(__FILE__) + '/tests/*.rb'].each do |script|
+      Dir[File.dirname(__FILE__) + '/tests/*.rb'].sort.each do |script|
         script = script.gsub(/(^.*tests\/|.rb$)/,'').split('_').map{|x| x.capitalize}.join(' ')
         @default_model.addElement(script) unless script == 'New Image'
       end

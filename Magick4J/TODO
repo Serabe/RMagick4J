@@ -1,0 +1,10 @@
+· CharcoalImage fx.c:504 [DONE]
+  - EdgeImage effect.c:1507 [DONE]
+    · GetOptimalKernelWidth1D gem.c: [DONE]
+    · ConvolveImage fx.c:754 [DONE]
+      - ConvolveImageChannels fx.c:765 [DONE]
+· EdgeImage effect.c:1507 [DONE]
+· ShadeImage effect.c:3576 [DONE]
+· SolarizeImage fx.c:4512 [DONE]
+· WaveImage fx.c:5373
+· BlurImage effect.c:770

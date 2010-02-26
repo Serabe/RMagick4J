@@ -1,8 +1,8 @@
 package magick4j;
 
 import static java.lang.Math.min;
+import static java.lang.Math.max;
 
-import com.jhlabs.image.GaussianFilter;
 
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
@@ -52,10 +52,25 @@ public class MagickImage implements Cloneable {
     private PixelPacket backgroundColor;
     private String format;
     private BufferedImage image;
-    private boolean matte;
+    private boolean matte = false;
+    private double blur=1.0;
 
     private MagickImage() {
     // Just for internal use.
+    }
+
+    public MagickImage(BufferedImage img){
+		BufferedImage n = null;
+		if(img.getType() == BufferedImage.TYPE_INT_ARGB)
+			n = img;
+		else{
+			n = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			n.createGraphics().drawImage(img,0,0,null);
+			n.createGraphics().dispose();
+		}
+        this.image = n;
+        this.format = "JPG";
+        this.backgroundColor = new PixelPacket(255,255,255,0);
     }
 
     public MagickImage(File file) {
@@ -81,9 +96,9 @@ public class MagickImage implements Cloneable {
         // TODO Deep clone and store the info??? How much redundancy? I really don't want to copy the fields into this image itself.
         // TODO Clone the background? Make things immutable?
         if (info.getBackgroundColor() != null) {
-            backgroundColor = info.getBackgroundColor();
+            backgroundColor = (PixelPacket) info.getBackgroundColor().clone();
         }else{
-            backgroundColor = new PixelPacket(255,255,255,255);
+            backgroundColor = new PixelPacket(255,255,255,0);
         }
         erase();
     }
@@ -124,61 +139,15 @@ public class MagickImage implements Cloneable {
         this.getImage().getGraphics().dispose();
         
     }
-    
-    public MagickImage blurred(double deviation, double radius) {
-        // -- Not knowing exactly what it did, I reviewed the ImageMagick source for this, but I didn't copy exactly verbatim. Might be why it still has quirks. --
-        // GetOptimalKernelWidth() computes the optimal kernel radius for a convolution
-        // filter. Start with the minimum value of 3 pixels and walk out until we drop
-        // below the threshold of one pixel numerical accuracy.
-        // TODO Remove default value.
-        // int size;
-        // TODO For nonmatching radius/deviation values, we may need to compute the kernel manually again. JHLabs only takes radius.
-        if (radius > 0.0) {
-        // size = max(3, 2 * (int)ceil(radius) + 1);
-        } else {
-            // "walk out until we drop/ below the threshold of one pixel numerical accuracy"
-            int QUANTUM_RANGE = 0xFF; // Should be based on color depth - Why isn't this working for getting good values? - I've hacked it here until I got okay results. Might also be an issue of
-            // that image edge thing. They at least make a larger kernel than I'm making right now.
-            for (int r = 2;; r++) {
-                // TODO This total seems too much to need to do every time.
-                double total = 0;
-                for (int r2 = -r; r2 <= r; r2++) {
-                    total += gaussian(deviation, r2);
-                }
-                double value = gaussian(deviation, r) / total;
-                if ((int) (QUANTUM_RANGE * value) == 0) {
-                    // If this is zero, we could have stopped at the previous point.
-                    // TODO Is this not always some simple function of deviation (so as to avoid the loop)?
-                    // size = 2 * (r - 1) + 1;
-                    radius = r;
-                    break;
-                }
-            }
-        }
-        // int mean = size / 2;
-        // float[] data = new float[size * size];
-        // double total = 0;
-        // for (int y = 0; y < size; y++) {
-        // for (int x = 0; x < size; x++) {
-        // double value = gaussian2d(deviation, x - mean, y - mean);
-        // total += value;
-        // data[size * y + x] = (float)value;
-        // }
-        // }
-        // // Normalize to total of 1.
-        // for (int d = 0; d < data.length; d++) {
-        // data[d] /= total;
-        // }
-        // Kernel kernel = new Kernel(size, size, data);
-        // ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-        GaussianFilter filter = new GaussianFilter((float) radius);
-        MagickImage result = new MagickImage();
-        result.format = format;
-        // result.image = op.filter(image, null);
-        result.image = filter.filter(image, null);
-        return result;
+
+    public void assimilate(MagickImage image){
+        this.backgroundColor = image.backgroundColor;
+        this.format = image.format;
+        this.image = image.image;
+        this.matte = image.matte;
     }
 
+    @Override
     public MagickImage clone() {
         try {
             // TODO Copy individual vars or call super.clone()?
@@ -186,7 +155,9 @@ public class MagickImage implements Cloneable {
             // TODO There has to be a better way to copy an image.
             MagickImage result = new MagickImage(getWidth(), getHeight());
             result.composite(this, 0, 0, CompositeOperator.OVER);
+            result.backgroundColor = (PixelPacket) backgroundColor.clone();
             result.format = format;
+            result.matte = matte;
             return result;
         } catch (Exception e) {
             throw Thrower.throwAny(e);
@@ -234,6 +205,7 @@ public class MagickImage implements Cloneable {
     }
 
     public MagickImage composited(MagickImage image, Gravity gravity, int x, int y, CompositeOperator op) {
+        //TODO
         return null;
     }
 
@@ -242,9 +214,26 @@ public class MagickImage implements Cloneable {
         result.composite(image, x, y, op);
         return result;
     }
-    
+
     public MagickImage createCanvas(){
         return new MagickImage(getWidth(), getHeight());
+    }
+
+    public MagickImage createCompatible(){
+        return this.createCompatible(getWidth(), getHeight());
+    }
+
+    public MagickImage createCompatible(int width, int height){
+        MagickImage img = new MagickImage(width, height);
+        img.format = format;
+        img.backgroundColor = (PixelPacket) backgroundColor.clone();
+        return img;
+    }
+
+    public MagickImage createTransparentCanvas(){
+        ImageInfo info = new ImageInfo();
+        info.setBackgroundColor(new PixelPacket(0,0,0,Constants.TransparentOpacity));
+        return new MagickImage(this.getWidth(), this.getHeight(), info);
     }
 
     public MagickImage crop(Gravity gravity, int width, int height) {
@@ -282,6 +271,7 @@ public class MagickImage implements Cloneable {
         }finally {
             graphics.dispose();
         }
+        result.setFormat(this.getFormat());
         return result;
     }
 
@@ -320,13 +310,149 @@ public class MagickImage implements Cloneable {
     }
 
     public void erase() {
-        Graphics2D graphics = (Graphics2D) image.getGraphics();
-        try {
-            graphics.setBackground(this.backgroundColor.toColor());
-            graphics.clearRect(0, 0, getWidth(), getHeight());
-        } finally {
-            graphics.dispose();
+        if(this.backgroundColor.getOpacity() == Constants.TransparentOpacity){
+            WritableRaster o = image.getRaster();
+            WritableRaster a = image.getAlphaRaster();
+            int h = this.getHeight(), w = this.getWidth();
+            double[] q = new double[w*4];
+
+            for(int y = 0; y < h; y++){
+                a.setPixels(0, y, w, 1, q);
+                o.setPixels(0, y, w, 1, q);
+            }
+
+        }else{
+            Graphics2D graphics = (Graphics2D) image.getGraphics();
+            try{
+                graphics.setBackground(this.backgroundColor.toColor());
+                graphics.clearRect(0, 0, getWidth(), getHeight());
+            } finally {
+                graphics.dispose();
+            }
         }
+    }
+
+    public BufferedImage expandBorders(int top, int right, int bottom, int left){
+        int i,j;
+        int w = this.getWidth(), h = this.getHeight();
+        int nw = w+right+left;
+        int nh = h+top+bottom;
+        WritableRaster o = this.image.getRaster();
+        BufferedImage dest = new BufferedImage(nw, nh, BufferedImage.TYPE_INT_ARGB);
+        WritableRaster d = dest.getRaster();
+        double[] tl = new double[4];
+        tl = o.getPixel(0, 0, tl);
+        double[] tr = new double[4];
+        tr = o.getPixel(w-1, 0, tr);
+        double[] br = new double[4];
+        br = o.getPixel(w-1, h-1, br);
+        double[] bl = new double[4];
+        bl = o.getPixel(0, h-1, bl);
+        double[] t  = new double[w*4];
+        t = o.getPixels(0, 0, w, 1, t);
+        double[] r  = new double[h*4];
+        r = o.getPixels(w-1, 0, 1, h, r);
+        double[] b  = new double[w*4];
+        b = o.getPixels(0, h-1, w, 1, b);
+        double[] l  = new double[h*4];
+        l = o.getPixels(0, 0, 1, h, l);
+
+        //Expand top left corner
+        int size = top*left;
+        double[] f;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i=0; i<size; i++)
+                System.arraycopy(tl, 0, f, 4*i, 4);
+
+            d.setPixels(0, 0, left, top, f);
+        }
+
+        // Expand top border.
+        size = top*w;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < top; i++)
+                System.arraycopy(t, 0, f, i*4*w, w*4);
+
+            d.setPixels(left, 0, w, top, f);
+        }
+
+        // Expand top right corner.
+        size = top*right;
+        if(size != 0){
+            f = new double[size*4];
+            for(i=0; i<size; i++)
+                System.arraycopy(tr, 0, f, 4*i, 4);
+
+            d.setPixels(nw-right, 0, right, top, f);
+        }
+
+        // Expand right border.
+        size = right*h;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < h; i++)
+                for(j = 0; j < right; j++)
+                    System.arraycopy(r, i*4, f, (i*right+j)*4, 4);
+
+            d.setPixels(nw-right, top, right, h, f);
+        }
+
+        // Expand bottom right corner.
+        size = bottom*right;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i=0; i<size; i++)
+                System.arraycopy(br, 0, f, 4*i, 4);
+
+            d.setPixels(nw-right, nh-bottom, right, bottom, f);
+        }
+        
+        // Expand bottom border.
+        size = bottom*w;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < bottom; i++)
+                System.arraycopy(b, 0, f, i*w*4, w*4);
+
+            d.setPixels(left, nh-bottom, w, bottom, f);
+        }
+
+        // Expand bottom left border.
+        size = bottom*left;
+
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < size; i++)
+                System.arraycopy(bl, 0, f, 4*i, 4);
+
+            d.setPixels(0, nh-bottom, left, bottom, f);
+        }
+
+        // Expand left border.
+        size = left*h;
+        
+        if(size != 0){
+            f = new double[size*4];
+            for(i = 0; i < h; i++)
+                for(j = 0; j < left; j++)
+                    System.arraycopy(l, i*4, f, (i*left+j)*4, 4);
+            
+            d.setPixels(0, top, left, h, f);
+        }
+
+        // Copy the image.
+        Graphics2D g = dest.createGraphics();
+        g.drawImage(this.image, left, top, w, h, null);
+        g.dispose();
+
+        return dest;
     }
 
     private Composite findComposite(CompositeOperator op) {
@@ -336,6 +462,7 @@ public class MagickImage implements Cloneable {
                 return AlphaComposite.DstIn;
             case OVER:
                 return AlphaComposite.SrcOver;
+                //return AlphaComposite.Xor;
         }
         return null;
     }
@@ -422,6 +549,10 @@ public class MagickImage implements Cloneable {
     public PixelPacket getBackgroundColor(){
         return this.backgroundColor;
     }
+
+    public double getBlur(){
+        return this.blur;
+    }
     
     public String getFormat() {
         return format;
@@ -433,6 +564,72 @@ public class MagickImage implements Cloneable {
 
     public BufferedImage getImage() {
         return image;
+    }
+
+    /***
+     * Prepare the image for convolving.
+     * @param width width of the Kernel.
+     * @return New Image prepared to be convolved.
+     */
+    public BufferedImage getImageToConvolve(int width){
+        int halfWidth = width/2;
+        return this.expandBorders(halfWidth, halfWidth, halfWidth, halfWidth);
+    }
+
+    public boolean getMatte(){
+        return this.matte;
+    }
+
+    /**
+     * Return the pixels in an area.
+     * @param x x-coordinate for the upper-left corner.
+     * @param y y-coordinate for the upper-left corner.
+     * @param width width of the region.
+     * @param height height of the region.
+     * @return A PixelPacket[width][height] containing the pixels in the region.
+     */
+    public PixelPacket[][] getPixels(int x, int y, int width, int height){
+        PixelPacket[][] pixels = new PixelPacket[width][height];
+        //TODO Implement VirtualPixelMethod stuff.
+
+        int imageWidth = this.getWidth();
+        int imageHeight = this.getHeight();
+
+        PixelPacket pixel = this.getBackgroundColor();
+
+        int i,j;
+
+
+        // Pixels out of image.
+
+        
+        for(i=0; i<width; i++)
+            for(j=0; j<height; j++)
+                pixels[i][j] = pixel;
+
+        if(x<=this.getWidth() && y<=this.getHeight() && (x+width)>=0 && (y+height)>=0){
+            int x1 = max(x,0), y1=max(y,0);
+            int offset_i = x1-x, offset_j= y1-y;
+            
+            int x2 = min(x+width,this.getWidth()), y2 = min(y+height,this.getHeight());
+            int new_width = x2-x1, new_height = y2 - y1;
+
+            double[] ps = new double[new_width*new_height*4];
+
+            this.getImage().getRaster().getPixels(x1, y1, new_width, new_height, ps);
+
+            int index = 0;
+
+            for(i=0; i<new_width; i++){
+                for(j=0; j<new_height; j++){
+                    pixels[i+offset_i][j+offset_j] = new PixelPacket(ps[index],ps[index+1],ps[index+2],ps[index+3]);
+                    index+=4;
+                }
+            }
+
+        }
+
+        return pixels;
     }
 
     public int getWidth() {
@@ -491,6 +688,7 @@ public class MagickImage implements Cloneable {
             // Um, obviously wrong here.
             result.composite(this, 0, 0, CompositeOperator.OVER);
         }
+        result.setFormat(this.getFormat());
         return result;
     }
 
@@ -534,7 +732,13 @@ public class MagickImage implements Cloneable {
                     try {
                         reader.setInput(stream);
                         format = reader.getFormatName().toUpperCase();
-                        image = reader.read(0);
+                        //image = reader.read(0);
+			BufferedImage pre = reader.read(0);
+			image = new BufferedImage(pre.getWidth(), pre.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			image.createGraphics().drawImage(pre, 0, 0, null);
+			image.createGraphics().dispose();
+			pre = null;
+                        backgroundColor = ColorDatabase.lookUp("white");
                         // TODO Read multiple images if present? How to coordinate this and ImageList?
                         break;
                     } finally {
@@ -565,7 +769,8 @@ public class MagickImage implements Cloneable {
         graphics.drawRenderedImage(this.getImage(), AffineTransform.getScaleInstance(widthRatio, heightRatio));
         
         graphics.dispose();
-        
+
+        result.setFormat(this.getFormat());
         return result;
     }
     
@@ -580,9 +785,24 @@ public class MagickImage implements Cloneable {
     public void setBackgroundColor(PixelPacket bg){
         this.backgroundColor = bg;
     }
+
+    public void setBlur(double blur){
+        this.blur = blur;
+    }
     
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public void setImage(BufferedImage img){
+        this.image = img;
+    }
+
+    public void setImageFromConvolve(BufferedImage convolved, int width) {
+        int halfWidth = width/2;
+        int w = convolved.getWidth() - 2*halfWidth;
+        int h = convolved.getHeight() - 2*halfWidth;
+        this.image = convolved.getSubimage(halfWidth, halfWidth, w, h);
     }
 
     public void setMatte(boolean matte) {

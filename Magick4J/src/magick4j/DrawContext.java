@@ -108,7 +108,7 @@ public class DrawContext {
         } else if(this.composingClipPath != null){
             imagesStack.add(this.clipPathHash.get(this.composingClipPath).getImage());
         } else{
-            imagesStack.add(getImage().createCanvas());
+            imagesStack.add(getImage().createTransparentCanvas());
         }
         infoStack.add(getInfo().clone());
     }
