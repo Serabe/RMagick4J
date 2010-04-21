@@ -186,8 +186,8 @@ module Magick
     end
 
     def initialize(columns, rows, fill=nil, &info_block)
-      info = Info.new(&info_block)
-      @image = Magick4J.MagickImage.new(columns, rows, info._info)
+      @info = Info.new(&info_block)
+      @image = Magick4J.MagickImage.new(columns, rows, @info._info)
       fill.fill(self) if fill.respond_to? :fill
     end
 
@@ -311,8 +311,6 @@ module Magick
       def background_color= background_color
         @info.setBackgroundColor(Magick4J.ColorDatabase.queryDefault(background_color))
       end
-
-      attr_accessor :format
 
       def _info
         @info

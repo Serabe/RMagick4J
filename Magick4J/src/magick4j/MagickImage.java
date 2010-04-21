@@ -147,6 +147,11 @@ public class MagickImage implements Cloneable {
         this.matte = image.matte;
     }
 
+    public void assimilate(ImageInfo info) {
+        this.backgroundColor = info.getBackgroundColor();
+        this.format = info.getFormat();
+    }
+
     @Override
     public MagickImage clone() {
         try {
