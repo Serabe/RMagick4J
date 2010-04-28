@@ -247,7 +247,16 @@ public class CommandParser {
                 double y1 = Double.parseDouble(args0[1]);
                 double x2 = Double.parseDouble(args1[0]);
                 double y2 = Double.parseDouble(args1[1]);
-                return CommandParser.getCurrentBuilder().shape(new Rectangle2D.Double(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)));
+
+                // replicate existing RMagic behavior with "narrow" rectangles
+                if ((x1 == x2) || (y1 == y2))
+                {
+	                  return CommandParser.getCurrentBuilder().shape(new Line2D.Double(x1, y1, x2, y2));
+                }
+                else
+                {
+                    return CommandParser.getCurrentBuilder().shape(new Rectangle2D.Double(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)));
+                }
             }
         });
         

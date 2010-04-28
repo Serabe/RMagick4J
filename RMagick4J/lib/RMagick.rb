@@ -498,14 +498,9 @@ class Draw
     end
 
     # Draw a rectangle
-    # Draw a rectangle
     def rectangle(upper_left_x, upper_left_y, lower_right_x, lower_right_y)
-      coords = sprintf("%g,%g %g,%g", upper_left_x, upper_left_y, lower_right_x, lower_right_y)
-      if upper_left_x == lower_right_x || upper_left_y == lower_right_y
-        primitive "line " + coords
-      else
-        primitive "rectangle " + coords
-      end
+        primitive "rectangle " + sprintf("%g,%g %g,%g",
+                upper_left_x, upper_left_y, lower_right_x, lower_right_y)
     end
 
     # Specify coordinate space rotation. "angle" is measured in degrees
