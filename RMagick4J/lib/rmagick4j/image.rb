@@ -312,6 +312,10 @@ module Magick
         @info.setBackgroundColor(Magick4J.ColorDatabase.queryDefault(background_color))
       end
 
+      def format=(fmt)
+        @info.setFormat(fmt.to_java)
+      end
+
       def _info
         @info
       end

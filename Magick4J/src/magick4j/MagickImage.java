@@ -49,9 +49,8 @@ public class MagickImage implements Cloneable {
         return (1.0 / Math.sqrt(2.0 * Math.PI)) * Math.exp(-0.5 * (x * x + y * y) / (deviation * deviation)) / deviation;
     }
     
-    private PixelPacket backgroundColor;
-    private String format;
     private BufferedImage image;
+    private ImageInfo info;
     private boolean matte = false;
     private double blur=1.0;
 
@@ -69,11 +68,13 @@ public class MagickImage implements Cloneable {
 			n.createGraphics().dispose();
 		}
         this.image = n;
-        this.format = "JPG";
-        this.backgroundColor = new PixelPacket(255,255,255,0);
+        this.info = new ImageInfo();
+        this.setFormat("JPG");
+        this.setBackgroundColor(new PixelPacket(255,255,255,0));
     }
 
     public MagickImage(File file) {
+        this.info = new ImageInfo();
         try {
             readImage(file);
         // TODO Remember file for future reference and naming.
@@ -83,6 +84,7 @@ public class MagickImage implements Cloneable {
     }
 
     public MagickImage(InputStream stream) {
+        this.info = new ImageInfo();
         readImage(stream);
     }
 
@@ -92,18 +94,18 @@ public class MagickImage implements Cloneable {
 
     public MagickImage(int width, int height, ImageInfo info) {
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        this.info = info;
         
         // TODO Deep clone and store the info??? How much redundancy? I really don't want to copy the fields into this image itself.
         // TODO Clone the background? Make things immutable?
-        if (info.getBackgroundColor() != null) {
-            backgroundColor = (PixelPacket) info.getBackgroundColor().clone();
-        }else{
-            backgroundColor = new PixelPacket(255,255,255,0);
+        if (info.getBackgroundColor() == null) {
+            this.setBackgroundColor(new PixelPacket(255,255,255,0));
         }
         erase();
     }
 
     public MagickImage(URL url) {
+        this.info = new ImageInfo();
         try {
             readImage(url);
         } catch (Exception e) {
@@ -141,15 +143,15 @@ public class MagickImage implements Cloneable {
     }
 
     public void assimilate(MagickImage image){
-        this.backgroundColor = image.backgroundColor;
-        this.format = image.format;
+        this.setBackgroundColor(image.getBackgroundColor());
+        this.setFormat(image.getFormat());
         this.image = image.image;
         this.matte = image.matte;
     }
 
     public void assimilate(ImageInfo info) {
-        this.backgroundColor = info.getBackgroundColor();
-        this.format = info.getFormat();
+        this.setBackgroundColor(info.getBackgroundColor());
+        this.setFormat(info.getFormat());
     }
 
     @Override
@@ -160,8 +162,8 @@ public class MagickImage implements Cloneable {
             // TODO There has to be a better way to copy an image.
             MagickImage result = new MagickImage(getWidth(), getHeight());
             result.composite(this, 0, 0, CompositeOperator.OVER);
-            result.backgroundColor = (PixelPacket) backgroundColor.clone();
-            result.format = format;
+            result.setBackgroundColor((PixelPacket) getBackgroundColor().clone());
+            result.setFormat(this.getFormat());
             result.matte = matte;
             return result;
         } catch (Exception e) {
@@ -230,8 +232,8 @@ public class MagickImage implements Cloneable {
 
     public MagickImage createCompatible(int width, int height){
         MagickImage img = new MagickImage(width, height);
-        img.format = format;
-        img.backgroundColor = (PixelPacket) backgroundColor.clone();
+        img.setFormat(this.getFormat());
+        img.setBackgroundColor((PixelPacket) this.getBackgroundColor().clone());
         return img;
     }
 
@@ -315,7 +317,7 @@ public class MagickImage implements Cloneable {
     }
 
     public void erase() {
-        if(this.backgroundColor.getOpacity() == Constants.TransparentOpacity){
+        if(this.getBackgroundColor().getOpacity() == Constants.TransparentOpacity){
             WritableRaster o = image.getRaster();
             WritableRaster a = image.getAlphaRaster();
             int h = this.getHeight(), w = this.getWidth();
@@ -329,7 +331,7 @@ public class MagickImage implements Cloneable {
         }else{
             Graphics2D graphics = (Graphics2D) image.getGraphics();
             try{
-                graphics.setBackground(this.backgroundColor.toColor());
+                graphics.setBackground(this.getBackgroundColor().toColor());
                 graphics.clearRect(0, 0, getWidth(), getHeight());
             } finally {
                 graphics.dispose();
@@ -552,7 +554,7 @@ public class MagickImage implements Cloneable {
     }
 
     public PixelPacket getBackgroundColor(){
-        return this.backgroundColor;
+        return this.info.getBackgroundColor();
     }
 
     public double getBlur(){
@@ -560,7 +562,7 @@ public class MagickImage implements Cloneable {
     }
     
     public String getFormat() {
-        return format;
+        return this.info.getFormat();
     }
 
     public int getHeight() {
@@ -736,14 +738,14 @@ public class MagickImage implements Cloneable {
                     ImageReader reader = readers.next();
                     try {
                         reader.setInput(stream);
-                        format = reader.getFormatName().toUpperCase();
+                        this.setFormat(reader.getFormatName().toUpperCase());
                         //image = reader.read(0);
-			BufferedImage pre = reader.read(0);
-			image = new BufferedImage(pre.getWidth(), pre.getHeight(), BufferedImage.TYPE_INT_ARGB);
-			image.createGraphics().drawImage(pre, 0, 0, null);
-			image.createGraphics().dispose();
-			pre = null;
-                        backgroundColor = ColorDatabase.lookUp("white");
+                        BufferedImage pre = reader.read(0);
+                        image = new BufferedImage(pre.getWidth(), pre.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                        image.createGraphics().drawImage(pre, 0, 0, null);
+                        image.createGraphics().dispose();
+                        pre = null;
+                        this.setBackgroundColor(ColorDatabase.lookUp("white"));
                         // TODO Read multiple images if present? How to coordinate this and ImageList?
                         break;
                     } finally {
@@ -788,7 +790,7 @@ public class MagickImage implements Cloneable {
     }
 
     public void setBackgroundColor(PixelPacket bg){
-        this.backgroundColor = bg;
+        this.info.setBackgroundColor(bg);
     }
 
     public void setBlur(double blur){
@@ -796,7 +798,7 @@ public class MagickImage implements Cloneable {
     }
     
     public void setFormat(String format) {
-        this.format = format;
+        this.info.setFormat(format);
     }
 
     public void setImage(BufferedImage img){
@@ -833,7 +835,7 @@ public class MagickImage implements Cloneable {
     
     public byte[] toBlob() {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        writeImage(format, stream);
+        writeImage(this.getFormat(), stream);
         return stream.toByteArray();
     }
 
