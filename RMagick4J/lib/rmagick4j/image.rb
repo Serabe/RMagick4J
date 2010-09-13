@@ -73,8 +73,14 @@ module Magick
               else
                 geometry.flag._val
               end
-      geometry = JGeometries[index].new( geometry.width, geometry.height,
-                                         geometry.x, geometry.y)
+      width_distance = geometry.width.nil? ? 
+        JRelativeWidthDistance.new : 
+        JWidthDistances[index].new(geometry.width)
+      height_distance = geometry.height.nil? ? 
+        JRelativeHeightDistance.new : 
+        JHeightDistances[index].new(geometry.height)
+      geometry = JGeometry.new(width_distance, height_distance, 
+                               geometry.x, geometry.y)      
       yield geometry.calculate_width(self._image),
             geometry.calculate_height(self._image),
             self

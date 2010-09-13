@@ -35,7 +35,7 @@ public class ImageDatabase {
             return null;
         }
         
-        MagickImage image = new MagickImage((int) info.getSize().getWidth(), (int) info.getSize().getHeight());
+        MagickImage image = new MagickImage((int) info.getSize().getWidth().getValue(), (int) info.getSize().getHeight().getValue());
         image.setFormat("PATTERN");
         if (name.equals("pattern:checkerboard")) {
             paintCheckerboard(image);
