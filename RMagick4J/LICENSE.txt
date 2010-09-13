@@ -6,7 +6,7 @@ See these respective projects for the licenses and ownership of these files.
 
 Other files lies under MIT license.
 
-Copyright (c) 2010 Tom Palmer, Sergio Arbeo, Karl Palmskog
+Copyright (c) 2010 Tom Palmer, Sergio Arbeo, Patrick Hurley, Karl Palmskog
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
