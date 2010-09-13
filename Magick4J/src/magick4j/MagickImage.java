@@ -970,14 +970,37 @@ public class MagickImage implements Cloneable {
         return result;
     }
 
-    public void write(String fileName) {
+    public String fileType(String file) {
+	String type;
+	int split = file.indexOf(':');
+	if (split == -1) {
+	    type = file.replaceFirst("^.*[.]([^.]+)", "$1").toUpperCase();
+	} else {
+	    type = file.substring(0, split).toUpperCase();
+	}
+	if (type.equals("JPG")) {
+	    type = "JPEG";
+	}
+	return type;
+    }
+
+    public String filePath(String file) {
+	String path;
+	int split = file.indexOf(':');
+	if (split == -1) {
+	    path = file;
+	} else {
+	    path = file.substring(split + 1);
+	}
+	return path;
+    }
+
+    public void write(String file) {
+        String type = fileType(file);
+	String path = filePath(file);
         try {
             // TODO More robust type handling.
-            String type = fileName.replaceFirst("^.*[.]([^.]+)", "$1").toUpperCase();
-            if (type.equals("JPG")) {
-                type = "JPEG";
-            }
-            FileOutputStream stream = new FileOutputStream(fileName);
+            FileOutputStream stream = new FileOutputStream(path);
             try {
                 writeImage(type, stream);
             } finally {
@@ -986,7 +1009,7 @@ public class MagickImage implements Cloneable {
         } catch (Exception e) {
             Thrower.throwAny(e);
         }
-    }    
+    }
 
     private void writeImage(String type, OutputStream stream) {
         try {

@@ -311,6 +311,14 @@ module Magick
       self
     end
 
+    def file_type(file)
+      @image.file_type(file)
+    end
+
+    def file_path(file)
+      @image.file_path(file)
+    end
+
     class Info
 
       # TODO Replace with call to Java, or is this the better way? Should it be converted to the Java version only later?
