@@ -39,4 +39,45 @@ describe Image do
   it "should return a one-item array after reading an image" do
     @image.should have(1).images
   end
+
+  it "should have type for file with extension jpeg" do
+    @image = @image.first
+    @image.file_type('img.jpeg').should == 'JPEG'
+  end
+
+  it "should have type for file with extension jpg" do
+    @image = @image.first
+    @image.file_type('img.jpg').should == 'JPEG'
+  end
+
+  it "should have type for file with prefix jpeg" do
+    @image = @image.first
+    @image.file_type('jpeg:img').should == 'JPEG'
+  end
+
+  it "should have type for file with prefix jpg" do
+    @image = @image.first
+    @image.file_type('jpg:img').should == 'JPEG'
+  end
+
+  it "should have path for file with extension jpeg" do
+    @image = @image.first
+    @image.file_path('img.jpeg').should == 'img.jpeg'
+  end
+
+  it "should have type for file with extension jpg" do
+    @image = @image.first
+    @image.file_path('img.jpg').should == 'img.jpg'
+  end
+
+  it "should have type for file with prefix jpeg" do
+    @image = @image.first
+    @image.file_path('jpeg:img').should == 'img'
+  end
+
+  it "should have type for file with prefix jpg" do
+    @image = @image.first
+    @image.file_path('jpg:img').should == 'img'
+  end
+  
 end
