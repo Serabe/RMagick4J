@@ -1,4 +1,4 @@
-Story: filling a background
+Feature: filling a background
   As a developer
   I want to fill an empty image with a GradientFill
   So that I can have a beautiful gradient in it.
