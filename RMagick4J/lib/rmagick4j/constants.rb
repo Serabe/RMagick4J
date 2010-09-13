@@ -10,13 +10,25 @@ module Magick
   
   # Geometries
   JGeometry        = Magick4J::Geometry
+
+  JRelativeHeightDistance = Magick4J::RelativeHeightDistance
+  JRelativeWidthDistance = Magick4J::RelativeWidthDistance
   
-  JGeometries = [
-                  JGeometry,
-                  Magick4J::PercentGeometry,
-                  Magick4J::AspectGeometry,
-                  Magick4J::LessGeometry,
-                  Magick4J::GreaterGeometry,
-                  Magick4J::AreaGeometry
-                ]
+  JHeightDistances = [
+                      Magick4J::SimpleValueHeightDistance,
+                      Magick4J::PercentValueHeightDistance,
+                      Magick4J::AspectValueHeightDistance,
+                      Magick4J::LessValueHeightDistance,
+                      Magick4J::GreaterValueHeightDistance,
+                      Magick4J::AreaValueHeightDistance
+                     ]
+
+  JWidthDistances = [
+                      Magick4J::SimpleValueWidthDistance,
+                      Magick4J::PercentValueWidthDistance,
+                      Magick4J::AspectValueWidthDistance,
+                      Magick4J::LessValueWidthDistance,
+                      Magick4J::GreaterValueWidthDistance,
+                      Magick4J::AreaValueWidthDistance
+                     ]
 end

@@ -1,30 +1,29 @@
 package magick4j;
 
 public class Geometry {
-    private double height=0;
-    private double width=0;
-    private double x=0;
-    private double y=0;
     
-    public Geometry(double width, double height){
+    private HeightDistance height;
+    private WidthDistance width;
+    private double x;
+    private double y;
+
+    public Geometry(WidthDistance width, HeightDistance height) {
         this(width, height, 0, 0);
     }
     
-    public Geometry(double width, double height, double x, double y){
+    public Geometry(WidthDistance width, HeightDistance height, double x, double y) {
         this.setWidth(width);
         this.setHeight(height);
         this.setX(x);
         this.setY(y);
-    }
+    }       
 
     public double calculateHeight(MagickImage image){
-        double newHeight = Math.round(this.getWidth()*image.getHeight()/image.getWidth());
-        return Math.min(newHeight, this.getHeight());
+        return width.getMagnitude(height, image);
     }
 
     public double calculateWidth(MagickImage image){
-        double newWidth = Math.round(this.getHeight()*image.getWidth()/image.getHeight());
-        return Math.min(newWidth, this.getWidth());
+        return height.getMagnitude(width, image);
     }
     
     public double calculateX(MagickImage image){
@@ -36,11 +35,11 @@ public class Geometry {
         return this.y;
     }
 
-    public double getHeight(){
+    public HeightDistance getHeight() {
         return this.height;
     }
 
-    public double getWidth(){
+    public WidthDistance getWidth() {
         return this.width;
     }
     
@@ -50,14 +49,14 @@ public class Geometry {
     
     public double getY(){
         return this.y;
+    }    
+
+    public void setHeight(HeightDistance height) {
+	this.height = height;
     }
 
-    public void setHeight(double height) {
-        this.height = Math.abs(height);
-    }
-
-    public void setWidth(double width) {
-        this.width = Math.abs(width);
+    public void setWidth(WidthDistance width) {
+        this.width = width;
     }
     
     public void setX(double x){

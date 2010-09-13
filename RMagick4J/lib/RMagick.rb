@@ -58,19 +58,16 @@ class Geometry
 
         # Support floating-point width and height arguments so Geometry
         # objects can be used to specify Image#density= arguments.
-        if width == nil
-            @width = 0
-        elsif width.to_f >= 0.0
-            @width = width.to_f
-        else
-            Kernel.raise ArgumentError, "width must be >= 0: #{width}"
+        if width && width.to_f >= 0.0
+          @width = width.to_f
+        elsif width
+          Kernel.raise ArgumentError, "width must be >= 0: #{width}"
         end
-        if height == nil
-            @height = 0
-        elsif height.to_f >= 0.0
-            @height = height.to_f
-        else
-            Kernel.raise ArgumentError, "height must be >= 0: #{height}"
+
+        if height && height.to_f >= 0.0
+          @height = height.to_f
+        elsif height
+          Kernel.raise ArgumentError, "height must be >= 0: #{height}"
         end
 
         @x    = x.to_i
@@ -87,11 +84,10 @@ class Geometry
     RE = /\A#{W}x?#{H}#{X}#{Y}([!<>@\^]?)\Z/
 
     def Geometry.from_s(str)
-
         m = RE.match(str)
         if m
-            width  = (m[1] || m[2]).to_f
-            height = (m[3] || m[4]).to_f
+            width  = m[1].nil? && m[2].empty? ? nil : (m[1] || m[2]).to_f
+            height = m[3].nil? && m[4].empty? ? nil : (m[3] || m[4]).to_f
             x      = m[5].to_i
             y      = m[6].to_i
             flag   = RFLAGS[m[7]]
@@ -107,17 +103,17 @@ class Geometry
     # Convert object to a geometry string
     def to_s
         str = ''
-        if @width > 0
+        if @width && @width > 0
           fmt = @width.truncate == @width ? "%d" : "%.2f"
           str << sprintf(fmt, @width)
           str << '%' if @flag == PercentGeometry
         end
 
-        if (@width > 0 && @flag != PercentGeometry) || (@height > 0)
+        if (@width && @width > 0 && @flag != PercentGeometry) || (@height && @height > 0)
           str << 'x'
         end
 
-        if @height > 0
+        if @height && @height > 0
           fmt = @height.truncate == @height ? "%d" : "%.2f"
           str << sprintf(fmt, @height)
           str << '%' if @flag == PercentGeometry
