@@ -387,6 +387,19 @@ public class CommandParser {
                return CommandParser.getCurrentBuilder().translate(Double.parseDouble(point[0]), Double.parseDouble(point[1]));
            } 
         });
+
+        builders.put("text", new ParserBuilder() {
+            public Command build(String... parts) {
+                String text = "";
+                String[] point = parts[1].split(",");
+                if (parts[2].length() >= 2) {
+                    text = parts[2].substring(1, parts[2].length() -1);
+                }
+                return CommandParser.getCurrentBuilder().text(
+                		Double.parseDouble(point[0]), Double.parseDouble(point[1]), text);
+            }
+         });
+
         
         return builders;
     }

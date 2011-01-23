@@ -293,4 +293,12 @@ public abstract class CommandBuilder {
             }
         };
     }
+    
+    public Command text(final double x, final double y, final String text) {
+        return new Command() {
+            public void perform(DrawContext context) {
+                context.getInfo().setText(context.getImage(), x, y, text);
+            }
+        };
+    }
 }

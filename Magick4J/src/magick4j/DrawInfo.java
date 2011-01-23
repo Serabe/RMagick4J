@@ -332,7 +332,83 @@ public class DrawInfo implements Cloneable {
         this.spaceTransformation.concatenate(AffineTransform.getTranslateInstance(x, y));
     }
 
-    private void updateFont(Graphics2D graphics) {
+    public void setText(MagickImage image, double iniX, double iniY, String text) {
+	    // TODO: It is a limited implements for use redmine.
+    	// For full support, need to implement these methods.
+    	// setTextAlign
+    	// setTextAnchor
+    	// setTextAntialias
+    	// setTextUndercolor
+    	text = new TextFormatter(image).format(text);
+	        
+    	int width = image.getWidth();
+    	int height = image.getHeight();
+	        
+    	TypeMetrics mlm = this.getMultilineTypeMetrics(text, image);
+	        
+    	Graphics2D graphics = createGraphics(image);
+    	try {
+    		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    		updateFont(graphics);
+    		
+    		String[] strings = text.split("\n");
+	            
+    		double y = iniY;
+	            	            
+    		switch (gravity) {
+    		    case CENTER:
+    		    case EAST:
+    		    case WEST:
+    		    	y += 0.5 * (height - mlm.getHeight());
+    		    	break;
+	//          case NORTH:
+	//          case NORTH_EAST:
+	//          case NORTH_WEST:
+	//              DO NOTHING
+	//                    break;
+    		    case SOUTH:
+    		    case SOUTH_EAST:
+    		    case SOUTH_WEST:
+    		    	y += height - mlm.getHeight();
+    		    	break;
+    		}
+	            
+    		for(int i = 0; i<strings.length; i++){
+	                
+    			TypeMetrics slm = this.getTypeMetrics(strings[i], image);
+	                
+    			double x = iniX;
+	                
+    			// x gravity
+    			switch (gravity) {
+    			    case CENTER:
+    			    case NORTH:
+    			    case SOUTH:
+    			    	//x += 0.5 * (width - metrics.stringWidth(text));
+    			    	x += 0.5 * (width - slm.getWidth());
+    			    	break;
+    			    case EAST:
+    			    case NORTH_EAST:
+    			    case SOUTH_EAST:
+    			    	//x = width - metrics.stringWidth(text) - x;
+    			    	x += width - slm.getWidth();
+    			    	break;
+    			}
+	                
+    			// TODO If we have a fill and a stroke, we may need to make a path
+    			graphics.setColor(fill.toColor());
+	                
+    			graphics.drawString(strings[i], (float) x, (float) y);
+	                
+    			y += slm.getHeight();
+    		}
+	                
+    	} finally {
+    		graphics.dispose();
+    	}
+    }
+
+	private void updateFont(Graphics2D graphics) {
         Font font = new Font(fontFamily, fontWeight >= 700 ? Font.BOLD : Font.PLAIN,
                 (int) pointSize).deriveFont((float) pointSize);
         
