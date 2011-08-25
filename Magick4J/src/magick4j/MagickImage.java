@@ -1016,8 +1016,6 @@ public class MagickImage implements Cloneable {
             BufferedImage image = this.image;
             if (type.equals("JPEG")) {
                 // JPEGs apparently need alpha-less images, or else ImageIO generates bad images.
-                ImageInfo info = new ImageInfo();
-                info.setBackgroundColor(new PixelPacket(255, 255, 255, 0));
                 image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 Graphics2D graphics = (Graphics2D) image.createGraphics();
                 graphics.setBackground(Color.WHITE);
