@@ -83,7 +83,7 @@ begin
   Hoe.new("rmagick4j", RMagick4J::Version::VERSION) do |p|
     p.rubyforge_name = "jruby-extras"
     p.url = "http://jruby-extras.rubyforge.org/rmagick4j"
-    p.author = "Thomas Palmer, Sergio Rodríguez Arbeo and Thomas Enebo"
+    p.author = "Thomas Palmer, Sergio Arbeo and Thomas Enebo"
     p.email = "serabe@gmail.com, tom.enebo@gmail.com"
     p.summary = "RMagick for Java"
     p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
