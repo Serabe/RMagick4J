@@ -30,7 +30,7 @@ public class DrawInfo implements Cloneable {
     private double strokeWidth = 1.0;
 
     public void annotate(MagickImage image, double width, double height, double iniX, double iniY, String text) {
-        
+
         text = new TextFormatter(image).format(text);
         
         if (width == 0 && height == 0) {
@@ -48,8 +48,8 @@ public class DrawInfo implements Cloneable {
             String[] strings = text.split("\n");
             
             double y = iniY;
-            
-            
+
+
             switch (gravity) {
                 case CENTER:
                 case EAST:
@@ -69,9 +69,9 @@ public class DrawInfo implements Cloneable {
             }
             
             y += mlm.getAscent();
-            
+
             for(int i = 0; i<strings.length; i++){
-                
+
                 TypeMetrics slm = this.getTypeMetrics(strings[i], image);
                 
                 double x = iniX;
@@ -94,9 +94,10 @@ public class DrawInfo implements Cloneable {
                 
                 // TODO If we have a fill and a stroke, we may need to make a path
                 graphics.setColor(fill.toColor());
-                
+
+                graphics.rotate(this.currentRotation, iniX + width / 2, iniY + height / 2);
                 graphics.drawString(strings[i], (float) x, (float) y);
-                
+
                 y += slm.getHeight();
             }
                 
@@ -234,8 +235,10 @@ public class DrawInfo implements Cloneable {
         return strokeAntialias;
     }
 
+    private double currentRotation;
     public void rotate(double rotation) {
         this.spaceTransformation.concatenate(AffineTransform.getRotateInstance(Math.toRadians(rotation)));
+        this.currentRotation += Math.toRadians(rotation);
     }
 
     public void scale(double scaleX, double scaleY) {
