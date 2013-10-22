@@ -1,29 +1,18 @@
-#TODO Remove all unnecessary code.
-
 require 'rake'
 require 'rake/testtask'
+require 'bundler/gem_tasks'
 
-task :default => [:compile]
+task :default => [:test, :gruff_test, :gem]
+task :gem => :build
 
 jar_file = File.join(%w(lib magick4j.jar))
-src_files = FileList['ext/rmagick4j/src/**/*.java'].join(' ')
-classes_dir = File.join(%w(pkg classes))
 
-desc "Compile the native Java code."
-task :compile do
-#  mkdir_p classes_dir
-#  sh "javac -target 1.5 -source 1.5 -d #{classes_dir} #{classpath} #{src_files}"
-#  sh "jar cf #{jar_file} -C #{classes_dir} ."
-end
-file jar_file => :compile
-
-desc "Clean up any generated file."
+desc 'Clean up any generated file.'
 task :clean do
   rm_rf 'pkg'
-  #rm_rf jar_file
 end
 
-desc "Run gruff unit tests."
+desc 'Run gruff unit tests.'
 task :gruff_test do
   FileList['test/gruff_tests/test/test_*.rb'].each do |file|
     puts `ruby #{file}`
@@ -31,20 +20,15 @@ task :gruff_test do
   end
 end
 
-desc "Run a live sample using RMagick4j."
+desc 'Run a live sample using RMagick4j.'
 task :sample do
   load_paths = '-Ijruby -Ilib -Ipkg'
   sh "java #{classpath(jar_file)} org.jruby.Main #{load_paths} test/RMagickTestSuite.rb addWatermark"
 end
 
-# MANIFEST does not see this file, so touch it so it always appears
-# to be there (this is a hack and someone more knowledgable can hopefully
-# figure this out.
-#File.open('lib/magick4j.jar', 'a') {}
-
 task :spec do
   require 'spec/rake/spectask'
-  desc "Runs Java Integration Specs"
+  desc 'Runs Java Integration Specs'
   
   Spec::Rake::SpecTask.new do |t|
     t.spec_opts ||= []
@@ -67,35 +51,7 @@ task :stories do
   end
 end
 
-MANIFEST = FileList["History.txt", "Manifest.txt", "README.txt", 
-  "Rakefile", "LICENSE.txt", "lib/**/*.rb", "lib/**/*.jar",
-  "test/**/*.rb", "test/**/execute_test", "test/images/*.jpg", "ext/rmagick4j/src/**/*.java"]
-
-file "Manifest.txt" => :manifest
-task :manifest do
-  File.open("Manifest.txt", "w") {|f| MANIFEST.each {|n| f << "#{n}\n"} }
-end
-Rake::Task['manifest'].invoke # Always regen manifest, so Hoe has up-to-date list of files
-
-require File.dirname(__FILE__) + "/lib/rmagick4j/version"
-begin
-  require 'hoe'
-  Hoe.new("rmagick4j", RMagick4J::Version::VERSION) do |p|
-    p.rubyforge_name = "jruby-extras"
-    p.url = "http://jruby-extras.rubyforge.org/rmagick4j"
-    p.author = "Thomas Palmer, Sergio Arbeo and Thomas Enebo"
-    p.email = "serabe@gmail.com, tom.enebo@gmail.com"
-    p.summary = "RMagick for Java"
-    p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
-    p.description = p.paragraphs_of('README.txt', 0...1).join("\n\n")
-  end.spec.dependencies.delete_if { |dep| dep.name == "hoe" }
-rescue LoadError
-  puts "You really need Hoe installed to be able to package this gem"
-rescue => e
-  puts "ignoring error while loading hoe: #{e.to_s}"
-end
-
-%w(package install_gem debug_gem gem).each { |t| task t => :compile }
+%w(package install_gem debug_gem).each { |t| task t => :compile }
 
 # helper methods below
 

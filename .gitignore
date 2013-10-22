@@ -1,4 +1,6 @@
+*~
 .DS_Store
+/.idea
 Magick4J/nbproject/private/private.xml
 RMagick4J/Manifest.txt
 RMagick4J/lib/magick4j.jar
