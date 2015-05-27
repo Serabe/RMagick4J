@@ -5,8 +5,10 @@ require 'test/unit'
 require 'gruff'
 require 'fileutils'
 # require 'test_timer'
+require 'rmagick'
 
-TEST_OUTPUT_DIR = File.dirname(__FILE__) + "/output"
+TEST_ASSETS_DIR = File.expand_path('../assets', File.dirname(__FILE__))
+TEST_OUTPUT_DIR = File.expand_path('../output', File.dirname(__FILE__))
 FileUtils.mkdir_p(TEST_OUTPUT_DIR)
 
 class GruffTestCase < Test::Unit::TestCase
@@ -22,15 +24,15 @@ class GruffTestCase < Test::Unit::TestCase
       ]
 
     @labels = {
-        0 => '5/6', 
-        1 => '5/15', 
-        2 => '5/24', 
-        3 => '5/30', 
-        4 => '6/4', 
-        5 => '6/12', 
-        6 => '6/21', 
-        7 => '6/28', 
-      }      
+        0 => '5/6',
+        1 => '5/15',
+        2 => '5/24',
+        3 => '5/30',
+        4 => '6/4',
+        5 => '6/12',
+        6 => '6/21',
+        7 => '6/28',
+      }
   end
 
   def setup_single_dataset
@@ -39,10 +41,10 @@ class GruffTestCase < Test::Unit::TestCase
       ]
 
     @labels = {
-        0 => 'You', 
-        1 => 'Average', 
-        2 => 'Lifetime' 
-      }      
+        0 => 'You',
+        1 => 'Average',
+        2 => 'Lifetime'
+      }
   end
 
   def setup_wide_dataset
@@ -74,7 +76,7 @@ protected
     Array(sizes).each do |size|
       g = instance_eval("Gruff::#{class_name}.new #{size}")
       g.title = "#{class_name} Graph"
-      yield g      
+      yield g
       write_test_file g, "#{filename}_#{size}.png"
     end
   end
@@ -98,17 +100,17 @@ protected
       case args[0]
       when Fixnum
         size = args[0]
-        klass = eval("Gruff::#{self.class.name.gsub(/^TestGruff/, '')}") 
+        klass = eval("Gruff::#{self.class.name.gsub(/^TestGruff/, '')}")
       when String
         size = args[0]
-        klass = eval("Gruff::#{self.class.name.gsub(/^TestGruff/, '')}") 
+        klass = eval("Gruff::#{self.class.name.gsub(/^TestGruff/, '')}")
       else
         klass = args[0]
       end
     when 2
       klass, size = args[0], args[1]
     end
-    
+
     g = klass.new(size)
     g.title = "My Bar Graph"
     g.labels = @labels
@@ -120,4 +122,25 @@ protected
     g
   end
 
+end
+
+class Magick::Image
+  class << self
+    alias_method :old_read, :read
+
+    def read(filename, *args)
+      old_read(filename.sub(/^assets/, TEST_ASSETS_DIR), *args)
+    end
+  end
+
+  alias_method :old_write, :write
+
+  def write(filename)
+    engine = (PLATFORM == 'java' ? 'jruby' : 'mri')
+    new_filename = filename.sub(/(\.[^\.]*)$/, '.' + engine + '\1')
+    # change_geometry('300x300') do |columns, rows, image|
+    #   image.resize!(columns, rows)
+    # end
+    old_write(new_filename.sub(/^test\/output/, TEST_OUTPUT_DIR))
+  end
 end

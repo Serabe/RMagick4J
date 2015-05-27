@@ -11,10 +11,10 @@ Gem::Specification.new do |s|
   s.authors = ['Thomas Palmer', 'Sergio Arbeo', 'Thomas Enebo', 'Uwe Kubosch']
   s.email = %w(serabe@gmail.com tom.enebo@gmail.com)
   s.summary = 'RMagick for Java'
-  s.description = File.read('README.txt').split("\n\n")[0]
+  s.description = File.read('README.md').split("\n\n")[1]
   s.homepage = 'https://github.com/Serabe/RMagick4J'
   s.rubyforge_project = %q{jruby-extras}
-  s.files = %w(History.txt README.txt Rakefile LICENSE.txt) +
+  s.files = %w(History.txt README.md Rakefile LICENSE.txt) +
       Dir['lib/**/*.{rb,jar}'] + Dir['test/**/*.rb'] +
       Dir['test/**/execute_test'] + Dir['test/images/*.jpg'] +
       Dir['ext/rmagick4j/src/**/*.java']
@@ -24,5 +24,8 @@ Gem::Specification.new do |s|
   s.specification_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
   s.platform = 'java'
   s.add_development_dependency('rake')
+  s.add_development_dependency('profligacy')
+  s.add_development_dependency('ftools')
+  s.add_development_dependency('gruff')
   s.license = 'MIT'
 end

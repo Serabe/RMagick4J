@@ -6,11 +6,11 @@ if ARGV.size == 0
   exit
 end
 
-File.makedirs ARGV[0] unless File.exists?(ARGV[0]) && File.directory?(ARGV[0])
+FileUtils.makedirs(ARGV[0]) unless File.exists?(ARGV[0]) && File.directory?(ARGV[0])
 
 IMAGE_DIR = File.join(ARGV[0], 'img')
 
-File.makedirs IMAGE_DIR unless File.exists?(IMAGE_DIR) && File.directory?(IMAGE_DIR)
+FileUtils.makedirs IMAGE_DIR unless File.exists?(IMAGE_DIR) && File.directory?(IMAGE_DIR)
 
 TESTS= Dir[File.join(File.dirname(__FILE__),'tests','*.rb')].reject{|x| x=~ /new_image.rb$/ }
 

@@ -1,0 +1,9 @@
+language: ruby
+sudo: false
+rvm:
+  - jruby-18mode
+  - jruby-19mode
+  - jruby-head
+notifications:
+  email:
+    - uwe@kubosch.no
