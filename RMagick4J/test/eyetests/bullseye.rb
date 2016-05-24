@@ -3,7 +3,7 @@ TEST_ROOT = File.expand_path(File.dirname(__FILE__))
 require 'java'
 require 'rubygems'
 
-#require 'RMagick'
+#require 'rmagick'
 require 'profligacy/swing'
 require 'profligacy/lel'
 require  TEST_ROOT + '/tests/new_image.rb'

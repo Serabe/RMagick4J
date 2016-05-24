@@ -6,7 +6,7 @@ rescue Exception
   puts "No gems! #{$!}"
 end
 puts Time.new
-require 'RMagick'
+require 'rmagick'
 puts Time.new
 
 # TODO I know this isn't a real test, but it's what I've got for now.

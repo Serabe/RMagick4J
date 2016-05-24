@@ -1,0 +1,12 @@
+language: ruby
+sudo: false
+rvm:
+  - jruby-1.7.25
+  - jruby-9.0.5.0
+  - jruby-9.1.1.0
+  - jruby-head
+before_install:
+  - gem query -i -n '^bundler$' >/dev/null || gem install --no-ri --no-rdoc bundler
+notifications:
+  email:
+    - uwe@kubosch.no

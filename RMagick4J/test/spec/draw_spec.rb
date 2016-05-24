@@ -1,8 +1,8 @@
 if PLATFORM == 'java'
-  require File.join(File.dirname(__FILE__),'..','..','lib','RMagick')
+  require File.join(File.dirname(__FILE__),'..','..','lib','rmagick')
 else
   require 'rubygems'
-  require 'RMagick'
+  require 'rmagick'
 end
 
 include Magick

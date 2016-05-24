@@ -282,6 +282,10 @@ module Magick
       @image.storePixels(x,y,columns,rows,pixels.to_java)
     end
 
+    def thumbnail(scale)
+      resize(scale)
+    end
+
     def to_blob(&add)
       info = Info.new(&add)
       @image.setFormat(info.format) if info.format
