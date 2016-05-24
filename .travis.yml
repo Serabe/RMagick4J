@@ -1,8 +1,9 @@
 language: ruby
 sudo: false
 rvm:
-  - jruby-18mode
-  - jruby-19mode
+  - jruby-1.7.25
+  - jruby-9.0.5.0
+  - jruby-9.1.1.0
   - jruby-head
 notifications:
   email:

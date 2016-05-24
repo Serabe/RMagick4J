@@ -1,10 +1,4 @@
 source 'http://rubygems.org'
 
-# Specify your gem's dependencies in gruff.gemspec
+# Specify your gem's dependencies in rmagick4j.gemspec
 gemspec :path => 'RMagick4J'
-
-group :test do
-  if RUBY_VERSION =~ /^1\.9\./ || RUBY_VERSION =~ /^2\./
-    gem 'minitest-reporters', '<1.0.0'
-  end
-end

@@ -1,7 +1,7 @@
 $:.unshift(File.dirname(__FILE__) + "/../lib/")
 require 'rubygems'
 
-require 'test/unit'
+require 'minitest/autorun'
 require 'gruff'
 require 'fileutils'
 # require 'test_timer'
@@ -11,7 +11,7 @@ TEST_ASSETS_DIR = File.expand_path('../assets', File.dirname(__FILE__))
 TEST_OUTPUT_DIR = File.expand_path('../output', File.dirname(__FILE__))
 FileUtils.mkdir_p(TEST_OUTPUT_DIR)
 
-class GruffTestCase < Test::Unit::TestCase
+class GruffTestCase < Minitest::Test
 
   def setup
     @datasets = [
