@@ -1,5 +1,6 @@
 language: ruby
 sudo: false
+jdk: oraclejdk8
 rvm:
   - jruby-1.7.25
   - jruby-9.0.5.0
