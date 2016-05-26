@@ -2,6 +2,8 @@ $:.unshift(File.dirname(__FILE__) + "/../lib/")
 require 'rubygems'
 
 require 'minitest/autorun'
+require 'minitest/reporters'
+Minitest::Reporters.use!
 require 'gruff'
 require 'fileutils'
 # require 'test_timer'

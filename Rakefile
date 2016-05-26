@@ -1,5 +1,4 @@
 require 'rake'
-require 'bundler/setup'
 
 BUILD_FILE = File.join(File.dirname(__FILE__), 'Magick4J', 'build.xml')
 JAR_SRC_FILE = File.join(File.dirname(__FILE__), 'Magick4J', 'dist', 'Magick4J.jar')
