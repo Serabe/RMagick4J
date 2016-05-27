@@ -193,7 +193,7 @@ module Magick
 
     def initialize(columns, rows, fill=nil, &info_block)
       info = Info.new(&info_block)
-      @image = Magick4J.MagickImage.new(columns, rows, info._info)
+      @image = Magick4J.MagickImage.new(Integer(columns), Integer(rows), info._info)
       fill.fill(self) if fill.respond_to? :fill
     end
 
