@@ -3,7 +3,7 @@ module Magick
   class Draw
 
     def annotate(img, width, height, x, y, text, &add)
-      instance_eval &add if add
+      instance_eval(&add) if add
       text = parse_string(text)
       @draw.annotate(img._image, width, height, x, y, text)
       self
