@@ -10,8 +10,8 @@ C portions of RMagick for use with JRuby.
 
 ## Authors
 
-This project was written by Thomas Palmer, Sergio Rodríguez Arbeo, Thomas
-Enebo, and Uwe Kubosch with lots of help from the JRuby community.
+This project was written by Thomas Palmer, Sergio Arbeo, Thomas Enebo, and
+Uwe Kubosch with lots of help from the JRuby community.
 
 ## API docs
 
