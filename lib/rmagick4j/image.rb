@@ -338,7 +338,7 @@ module Magick
 
       def initialize(&add)
         @info = Magick4J.ImageInfo.new
-        instance_eval &add if add
+        instance_eval(&add) if add
       end
 
       def size= size

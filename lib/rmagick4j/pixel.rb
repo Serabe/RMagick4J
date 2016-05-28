@@ -131,7 +131,7 @@ module Magick
         hue, saturation = 0.0, 0.0
       else
         saturation =  if lightness <0.5
-                        delta /(min+max)
+                        delta / (min+max)
                       else
                         delta / (2.0-(min+max))
                       end
