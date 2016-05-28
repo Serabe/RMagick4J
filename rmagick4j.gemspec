@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.authors = ['Thomas Palmer', 'Sergio Arbeo', 'Thomas Enebo', 'Uwe Kubosch']
   s.email = %w(serabe@gmail.com tom.enebo@gmail.com)
   s.summary = 'RMagick for Java'
-  s.description = File.read('README.md').split("\n\n")[1]
+  s.description = File.read('README.md').split("\n\n")[2]
   s.homepage = 'https://github.com/Serabe/RMagick4J'
   s.rubyforge_project = %q{jruby-extras}
   s.files = %w(History.txt README.md Rakefile LICENSE.md) +
