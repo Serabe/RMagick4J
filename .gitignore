@@ -2,9 +2,12 @@
 .DS_Store
 /.idea
 /Gemfile.lock
-Magick4J/nbproject/private/private.xml
-RMagick4J/Manifest.txt
-RMagick4J/lib/magick4j.jar
-RMagick4J/pkg
+lib/magick4j.jar
 Magick4J/build
 Magick4J/dist
+Magick4J/nbproject/private/private.xml
+Manifest.txt
+pkg
+/Gemfile.lock
+/test/eyetests/examples
+/test/gruff_tests/output
