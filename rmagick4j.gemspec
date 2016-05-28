@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.description = File.read('README.md').split("\n\n")[1]
   s.homepage = 'https://github.com/Serabe/RMagick4J'
   s.rubyforge_project = %q{jruby-extras}
-  s.files = %w(History.txt README.md Rakefile LICENSE.txt) +
+  s.files = %w(History.txt README.md Rakefile LICENSE.md) +
       Dir['lib/**/*.{rb,jar}'] + Dir['test/**/*.rb'] +
       Dir['test/**/execute_test'] + Dir['test/images/*.jpg'] +
       Dir['ext/rmagick4j/src/**/*.java']
