@@ -30,7 +30,7 @@ See [LICENSE.md](LICENSE.md)
 To create a gem you should run rake.
 The useful targets are
 
-    :clean, :compile, :gem, :release, :test (hoe has more -- see hoe docs).
+    :clean, :compile, :gem, :release, :test
 
 To create a new release, you should:
 
