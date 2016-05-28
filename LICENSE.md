@@ -1,12 +1,7 @@
-The file observer.rb comes from JRuby's distribution of standard Ruby libraries. The file jruby.jar also comes from the JRuby project.
+## The MIT license
 
-RMagick.rb, clown.jpg, most of rmagick.gemspec, and the contents of rvg come from the RMagick project. Much of the content of the test demos (currently in "RMagickTestSuite.rb") come from the RMagick web site.
-
-See these respective projects for the licenses and ownership of these files.
-
-Other files lies under MIT license.
-
-Copyright (c) 2010 Tom Palmer, Sergio Arbeo, Patrick Hurley, Karl Palmskog
+Copyright (c) 2010 Tom Palmer, Sergio Arbeo, Patrick Hurley, Karl Palmskog,
+Uwe Kubosch
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -29,3 +24,16 @@ OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## 3rd party files
+
+The file observer.rb comes from JRuby's distribution of standard Ruby libraries.
+The file jruby.jar also comes from the JRuby project.
+
+RMagick.rb, clown.jpg, and the contents of rvg come from the RMagick project.
+Much of the content of the test demos (currently in "RMagickTestSuite.rb") come
+from the RMagick web site.
+
+See these respective projects for the licenses and ownership of these files.
+
+Other files lie under the MIT license.
