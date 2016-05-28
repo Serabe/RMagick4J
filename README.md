@@ -1,4 +1,4 @@
-[![Gem Version](https://badge.fury.io/rb/rmagick4j.svg)](https://badge.fury.io/rb/rmagick4j)
+[![Gem Version](https://badge.fury.io/gh/serabe%2Frmagick4j.svg)](https://badge.fury.io/rb/rmagick4j)
 [![Build Status](https://travis-ci.org/Serabe/RMagick4J.svg?branch=master)](https://travis-ci.org/Serabe/RMagick4J)
 
 RMagick4J
