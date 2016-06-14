@@ -15,6 +15,14 @@ You can find the generated API documentation here:
 
 http://www.rubydoc.info/gems/rmagick4j
 
+## Installation
+
+With `Bundler`
+
+```ruby
+# Gemfile
+gem 'rmagick4j', require: 'RMagick'
+```
 
 ## Authors
 
