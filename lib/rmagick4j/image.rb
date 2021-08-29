@@ -171,6 +171,10 @@ module Magick
       self
     end
 
+    def get_pixels(x, y, width, height)
+      @image.getPixels(x, y, width, height)
+    end
+
     def _image
       @image
     end
