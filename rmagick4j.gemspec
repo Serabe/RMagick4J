@@ -25,7 +25,8 @@ Gem::Specification.new do |s|
   s.platform = 'java'
   s.required_ruby_version = ['>=2.6.0', '<4.0.0']
   s.add_development_dependency('ftools')
-  s.add_development_dependency('gruff')
+  # 0.16.0 removes `Gruff::Scene` - https://github.com/topfunky/gruff/blob/master/CHANGELOG.md#0160
+  s.add_development_dependency('gruff', '0.15.0')
   s.add_development_dependency('minitest-reporters')
   s.add_development_dependency('profligacy')
   s.add_development_dependency('rake')
