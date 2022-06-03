@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.executables = s.files.grep(%r{^bin/}).map { |f| File.basename(f) }
   s.specification_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
   s.platform = 'java'
-  s.required_ruby_version = ['>=1.9.3', '<3.0.0']
+  s.required_ruby_version = ['>=2.6.0', '<4.0.0']
   s.add_development_dependency('ftools')
   s.add_development_dependency('gruff')
   s.add_development_dependency('minitest-reporters')
