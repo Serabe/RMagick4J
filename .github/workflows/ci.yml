@@ -1,0 +1,23 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [jruby, jruby-head]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'zulu'
+        java-version: 8
+    - name: Install dependencies
+      run: bundle install
+    - name: Run tests
+      run: bundle exec rake
