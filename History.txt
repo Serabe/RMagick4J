@@ -1,3 +1,7 @@
+== 0.4.1 2021-08-29
+
+- Implemented get_pixels?
+
 == 0.4.0 2016-05-28
 
 - Added support for Ruby 2.3.1 through JRuby 9.1.x
