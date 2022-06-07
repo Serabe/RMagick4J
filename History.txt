@@ -1,6 +1,8 @@
-== 0.4.1 2021-08-29
+== 0.5.0 2022-06-07
 
-- Implemented get_pixels?
+- Implemented get_pixels
+- Drop support for Ruby <2.6
+- Add support for Ruby 3.x
 
 == 0.4.0 2016-05-28
 
